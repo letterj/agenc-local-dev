@@ -11,6 +11,7 @@ services:
       - agenc-data:/root/.agenc
     environment:
       - GROK_API_KEY=${GROK_API_KEY}
+      - AGENT_NAME=${AGENT_NAME:-letterj-operator}
     stdin_open: true
     tty: true
 

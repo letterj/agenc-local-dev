@@ -1,14 +1,11 @@
 FROM --platform=linux/amd64 node:20-slim
 
-# Install system dependencies
 RUN apt-get update -qq && \
     apt-get install -y vim curl socat python3 make g++ iproute2 -qq && \
     rm -rf /var/lib/apt/lists/*
 
-# Install agenc globally
 RUN npm install -g @tetsuo-ai/agenc
 
-# Create entrypoint script
 RUN cat > /usr/local/bin/agenc-start.sh << 'SCRIPT'
 #!/bin/bash
 set -e
@@ -17,6 +14,20 @@ set -e
 if [ ! -f /root/.agenc/config.json ]; then
   echo "Running first-time onboard..."
   agenc onboard || true
+fi
+
+# Inject LLM config from environment if API key is set
+if [ -n "$GROK_API_KEY" ]; then
+  node -e "
+    const fs = require('fs');
+    const cfg = JSON.parse(fs.readFileSync('/root/.agenc/config.json'));
+    cfg.gateway = { ...cfg.gateway, host: '0.0.0.0' };
+    cfg.llm = { provider: 'grok', apiKey: process.env.GROK_API_KEY, model: 'grok-3' };
+    cfg.memory = { backend: 'sqlite', dbPath: '/root/.agenc/memory.db' };
+    cfg.agent = { name: process.env.AGENT_NAME || 'letterj-operator' };
+    fs.writeFileSync('/root/.agenc/config.json', JSON.stringify(cfg, null, 2));
+  "
+  echo "✅ Config updated from environment"
 fi
 
 # Rebuild better-sqlite3 if runtime is installed
@@ -34,14 +45,10 @@ agenc start
 socat TCP-LISTEN:3101,fork,reuseaddr TCP:127.0.0.1:3100 &
 
 echo "✅ AgenC running — UI at http://localhost:3100/ui/"
-echo "   (mapped via socat on port 3101 inside container)"
-
-# Keep container alive
 tail -f /root/.agenc/daemon.log
 SCRIPT
 
 RUN chmod +x /usr/local/bin/agenc-start.sh
 
 EXPOSE 3101
-
 CMD ["bash"]
