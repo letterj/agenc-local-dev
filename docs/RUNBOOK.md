@@ -1,7 +1,7 @@
 # AgenC Local Dev Environment Runbook
 
 > **Status:** Active  
-> **Last updated:** 2026-03-20  
+> **Last updated:** 2026-03-21  
 > **Author:** letterj  
 > **Purpose:** Reproducible setup for a contributor-ready local AgenC development environment
 
@@ -14,6 +14,7 @@ On 2026-03-18 the team adopted ADR-003, making `agenc-core` and `agenc-prover`
 public and reframing AgenC as a public framework product.
 
 On 2026-03-20 the first working operator instance was confirmed running in Docker.
+On 2026-03-21 the `gateway.bind` root cause was identified and the socat workaround removed.
 
 ### Architecture Decision Records
 
@@ -22,7 +23,7 @@ On 2026-03-20 the first working operator instance was confirmed running in Docke
 | ADR-002 | **Superseded** | Public contracts + private kernel boundary |
 | ADR-003 | **Current** | AgenC is a public framework product |
 
-### Repository Topology (as of 2026-03-20)
+### Repository Topology (as of 2026-03-21)
 
 | Repo | Visibility | Role |
 |---|---|---|
@@ -33,7 +34,7 @@ On 2026-03-20 the first working operator instance was confirmed running in Docke
 | `agenc-core` | Public | Runtime engine, daemon, MCP, web, mobile, desktop |
 | `agenc-prover` | Public | ZK prover service, admin tools |
 
-### Published Package Versions (2026-03-20)
+### Published Package Versions (2026-03-21)
 
 | Package | Version |
 |---|---|
@@ -89,7 +90,7 @@ The happy path works. Edge case error names differ from SDK expectations:
 ├── agenc-plugin-kit/    ← tetsuo-ai reference (read only)
 ├── agenc-core/          ← tetsuo-ai reference (read only)
 ├── agenc-prover/        ← tetsuo-ai reference (read only)
-├── Dockerfile.agenc     ← operator Docker image
+├── agenc-local-dev/     ← this repo
 ├── CLAUDE.md            ← workspace quick reference
 └── forks/
     ├── AgenC/           ← letterj fork (work here)
@@ -125,32 +126,19 @@ git clone https://github.com/tetsuo-ai/agenc-prover.git
 ### Step 3 — Clone forks using SSH
 
 ```bash
-AGENC_GIT_BASE=https://github.com/letterj \
-  ./AgenC/scripts/bootstrap-agenc-repos.sh --root ~/workshop/agencproj/forks
-
-cd ~/workshop/agencproj/forks
-git clone git@github.com:letterj/agenc-core.git
-```
-
-### Step 4 — Set SSH remotes and add upstream
-
-```bash
-for repo in AgenC agenc-sdk agenc-protocol agenc-plugin-kit; do
-  git -C ~/workshop/agencproj/forks/$repo remote set-url origin \
-    git@github.com:letterj/$repo.git
+for repo in AgenC agenc-sdk agenc-protocol agenc-plugin-kit agenc-core; do
+  git clone git@github.com:letterj/$repo.git ~/workshop/agencproj/forks/$repo
   git -C ~/workshop/agencproj/forks/$repo remote add upstream \
     https://github.com/tetsuo-ai/$repo.git
 done
-git -C ~/workshop/agencproj/forks/agenc-core remote add upstream \
-  https://github.com/tetsuo-ai/agenc-core.git
 ```
 
-### Step 5 — Fix agenc-protocol default branch
+### Step 4 — Fix agenc-protocol default branch
 
 The fork defaults to `feature/bootstrap-wave1`. Fix in GitHub:
 Settings → Default branch → switch to `main`.
 
-### Step 6 — Create working branches
+### Step 5 — Create working branches
 
 ```bash
 for repo in AgenC agenc-sdk agenc-protocol agenc-plugin-kit agenc-core; do
@@ -212,22 +200,35 @@ The `agenc` CLI only supports **Linux x64**. On macOS, run it in Docker.
 
 ### Dockerfile
 
-Located at `~/workshop/agencproj/Dockerfile.agenc`:
+Current Dockerfile in `~/workshop/agencproj/agenc-local-dev/`:
 
 ```dockerfile
 FROM --platform=linux/amd64 node:20-slim
 
 RUN apt-get update -qq && \
-    apt-get install -y vim curl socat python3 make g++ iproute2 -qq && \
+    apt-get install -y vim curl python3 make g++ iproute2 -qq && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @tetsuo-ai/agenc
 
+# agenc-start.sh: onboard, inject config from env, rebuild sqlite, start daemon
 RUN cat > /usr/local/bin/agenc-start.sh << 'SCRIPT'
 #!/bin/bash
 set -e
 if [ ! -f /root/.agenc/config.json ]; then
   agenc onboard || true
+fi
+if [ -n "$GROK_API_KEY" ]; then
+  node -e "
+    const fs = require('fs');
+    const cfg = JSON.parse(fs.readFileSync('/root/.agenc/config.json'));
+    cfg.gateway = { ...cfg.gateway, bind: '0.0.0.0' };
+    if (process.env.AUTH_SECRET) cfg.auth = { secret: process.env.AUTH_SECRET };
+    cfg.llm = { provider: 'grok', apiKey: process.env.GROK_API_KEY, model: 'grok-3' };
+    cfg.memory = { backend: 'sqlite', dbPath: '/root/.agenc/memory.db' };
+    cfg.agent = { name: process.env.AGENT_NAME || 'letterj-operator' };
+    fs.writeFileSync('/root/.agenc/config.json', JSON.stringify(cfg, null, 2));
+  "
 fi
 SQLITE_PATH=$(find /root/.agenc/runtime -name "better_sqlite3.node" 2>/dev/null | head -1)
 if [ -n "$SQLITE_PATH" ]; then
@@ -235,78 +236,51 @@ if [ -n "$SQLITE_PATH" ]; then
   cd $SQLITE_DIR && npm rebuild 2>/dev/null || true
 fi
 agenc start
-socat TCP-LISTEN:3101,fork,reuseaddr TCP:127.0.0.1:3100 &
-echo "✅ AgenC running — UI at http://localhost:3100/ui/"
 tail -f /root/.agenc/daemon.log
 SCRIPT
 
 RUN chmod +x /usr/local/bin/agenc-start.sh
-EXPOSE 3101
-CMD ["bash"]
+EXPOSE 3100
+CMD ["/usr/local/bin/agenc-start.sh"]
 ```
+
+### Environment variables (.env)
+
+```
+GROK_API_KEY=your-grok-api-key-here
+AGENT_NAME=letterj-operator
+AUTH_SECRET=your-auth-secret-here
+```
+
+Generate `AUTH_SECRET` with: `openssl rand -hex 32`
+
+`AUTH_SECRET` is **required** — the runtime enforces `auth.secret` when
+`gateway.bind` is set to a non-loopback address.
 
 ### Build the image
 
 ```bash
-docker build --platform linux/amd64 \
-  -t agenc-operator \
-  -f ~/workshop/agencproj/Dockerfile.agenc \
-  ~/workshop/agencproj/
+cd ~/workshop/agencproj/agenc-local-dev
+docker compose build
 ```
 
-### Run the container
+### Start the container
 
 ```bash
-docker run -it --platform linux/amd64 \
-  --name agenc-operator \
-  -p 3100:3101 \
-  agenc-operator
+docker compose up -d
 ```
 
-### First-time setup inside container
+The container auto-starts the daemon. No manual steps needed.
+
+### Daily operations (from Mac)
 
 ```bash
-# 1. Generate default config
-agenc onboard
-
-# 2. Edit config — add LLM provider and fix host binding
-vim /root/.agenc/config.json
-```
-
-Required config additions:
-
-```json
-{
-  "gateway": {
-    "port": 3100,
-    "host": "0.0.0.0"
-  },
-  "agent": {
-    "name": "letterj-operator"
-  },
-  "llm": {
-    "provider": "grok",
-    "apiKey": "YOUR_GROK_KEY",
-    "model": "grok-3"
-  },
-  "memory": {
-    "backend": "sqlite",
-    "dbPath": "/root/.agenc/memory.db"
-  }
-}
-```
-
-```bash
-# 3. Start daemon, rebuild sqlite, start socat
-agenc-start.sh
-```
-
-### Subsequent starts (container already configured)
-
-```bash
-docker start -ai agenc-operator
-# Inside container:
-agenc-start.sh
+docker compose up -d                    # start
+docker compose down                     # stop
+docker exec -it agenc-operator bash    # open shell
+docker exec agenc-operator agenc status # check status
+docker logs -f agenc-operator          # view logs
+docker exec agenc-operator agenc stop  # stop daemon only
 ```
 
 ### Access the UI
@@ -317,40 +291,41 @@ Open in browser: **http://localhost:3100/ui/**
 
 ## Known Issues
 
-### 1. `gateway.host` config field is ignored (hardcoded to 127.0.0.1)
+### 1. `gateway.bind` undocumented in public docs *(upstream)*
 
 **Repo:** `agenc-core`  
-**Symptom:** The daemon always binds to `127.0.0.1:3100` regardless of
-`gateway.host` setting in config. Makes the daemon unreachable from outside
-the container even with port mapping.  
-**Workaround:** Use `socat TCP-LISTEN:3101,fork,reuseaddr TCP:127.0.0.1:3100 &`
-inside the container, then map port 3101.  
-**Status:** Not yet filed — candidate for issue + PR against `agenc-core`.
+**Symptom:** `gateway.bind` is the correct config field to control the daemon
+bind address, but it was not documented anywhere. Users naturally try
+`gateway.host` which is silently ignored.  
+**Status:** Filed Issue #26, PR #27 merged — `RUNTIME_API.md` now documents
+`gateway.bind`, the `auth.secret` requirement, and the `gateway.host` gotcha.
 
 ### 2. `better-sqlite3` native addon must be rebuilt in Docker
 
 **Symptom:** `Module did not self-register: better_sqlite3.node` on first start.  
-**Fix:** 
+**Fix:** The `agenc-start.sh` script handles this automatically.  
+If it fails manually:
 ```bash
-cd /root/.agenc/runtime/releases/0.1.0/linux-x64/node_modules/better-sqlite3
-npm rebuild
+docker exec agenc-operator bash -c "
+  cd \$(find /root/.agenc/runtime -name better-sqlite3 -type d | head -1)
+  npm rebuild
+"
 ```
-The `agenc-start.sh` script handles this automatically.
 
 ### 3. `agenc onboard` is non-interactive and does not prompt for LLM config
 
 **Symptom:** Onboard generates a minimal config with no `llm` block.  
-**Fix:** Manually add the `llm` section to `/root/.agenc/config.json` after onboarding.
+**Fix:** The `agenc-start.sh` script injects the full config from environment variables automatically.
 
 ### 4. `agenc` CLI only supports Linux x64
 
 **Symptom:** `unsupported platform darwin-arm64` on macOS Apple Silicon.  
-**Workaround:** Run in Docker with `--platform linux/amd64`.  
+**Workaround:** Run in Docker with `--platform linux/amd64` as described above.  
 **Status:** No macOS issue filed upstream yet.
 
 ---
 
-## Confirmed Working (2026-03-20)
+## Confirmed Working (2026-03-21)
 
 - ✅ Agent registered on devnet: `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs`
 - ✅ Daemon running in Docker: `agenc-operator` container
@@ -358,6 +333,8 @@ The `agenc-start.sh` script handles this automatically.
 - ✅ Grok LLM connected: `grok-3`
 - ✅ Agent queried live devnet tasks via on-chain tools
 - ✅ 4 open tasks visible on devnet with real SOL rewards
+- ✅ Daemon binds directly to `0.0.0.0:3100` — no socat workaround needed
+- ✅ `docker compose up -d` is fully automated — zero manual steps
 
 ---
 
@@ -365,8 +342,10 @@ The `agenc-start.sh` script handles this automatically.
 
 | Repo | PR | Description | Status |
 |---|---|---|---|
-| `agenc-sdk` | #9 | fix(build): externalize @coral-xyz/anchor, namespace import for BN interop | Merged |
-| `agenc-sdk` | Issue #8 | anchor.BN undefined in CJS and ESM contexts | Closed |
+| `agenc-sdk` | Issue #8 | anchor.BN undefined — diagnosed | Closed |
+| `agenc-sdk` | PR #9 | fix(build): namespace import + externalize anchor | Merged |
+| `agenc-core` | Issue #26 | gateway.bind undocumented | Open |
+| `agenc-core` | PR #27 | docs(gateway): document gateway.bind config field | Open |
 
 ---
 
@@ -379,6 +358,6 @@ The `agenc-start.sh` script handles this automatically.
 | agenc-sdk | https://github.com/tetsuo-ai/agenc-sdk |
 | agenc-protocol | https://github.com/tetsuo-ai/agenc-protocol |
 | agenc-plugin-kit | https://github.com/tetsuo-ai/agenc-plugin-kit |
+| agenc-local-dev | https://github.com/letterj/agenc-local-dev |
 | Devnet program (Solscan) | https://solscan.io/account/6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab?cluster=devnet |
 | ADR-003 | `forks/agenc-core/docs/architecture/adr/adr-003-public-framework-product.md` |
-| Devnet compatibility report | `forks/agenc-sdk/docs/devnet-compatibility.md` |

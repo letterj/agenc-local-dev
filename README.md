@@ -12,7 +12,7 @@ for native arm64 support.
 
 | File | Purpose |
 |---|---|
-| `Dockerfile` | Linux x64 image with agenc, build tools, socat |
+| `Dockerfile` | Linux x64 image with agenc and build tools |
 | `docker-compose.yml` | Container orchestration with volume persistence |
 | `.env.example` | Environment variable template |
 | `CLAUDE.md` | AI assistant context for this workspace |
@@ -59,6 +59,12 @@ vim .env
 ```
 GROK_API_KEY=your-grok-api-key-here
 AGENT_NAME=your-agent-name
+AUTH_SECRET=your-auth-secret-here
+```
+
+`AUTH_SECRET` is required when binding to `0.0.0.0`. Generate one with:
+```bash
+openssl rand -hex 32
 ```
 
 ### 3. Build the Docker image
@@ -77,10 +83,10 @@ docker compose up -d
 
 This starts the container in the background. It will:
 - Run `agenc onboard` if no config exists
-- Inject your API key and agent name from `.env`
+- Inject your API key, agent name, and auth secret from `.env`
+- Set `gateway.bind: "0.0.0.0"` so the daemon is reachable from your Mac
 - Rebuild `better-sqlite3` for the current Node ABI
 - Start the AgenC daemon
-- Start a socat bridge so the UI is reachable from your Mac
 
 ### 5. Open the UI
 
@@ -107,9 +113,6 @@ docker compose down
 ```bash
 docker exec -it agenc-operator bash
 ```
-
-Use this to run `vim`, inspect files directly, or run any agenc commands
-interactively inside the container.
 
 ### Check daemon status
 
@@ -162,18 +165,31 @@ docker compose down -v
 
 ### UI not loading at localhost:3100
 
-The daemon binds to `127.0.0.1` internally — socat forwards it to
-`0.0.0.0:3101` which Docker maps to your Mac's port 3100. Check socat:
+Check that the daemon is running and bound to `0.0.0.0`:
 
 ```bash
-docker exec agenc-operator ps aux | grep socat
+docker exec agenc-operator agenc status
+docker exec agenc-operator ss -tlnp | grep 3100
 ```
 
-If socat is not running, restart it:
+The second command should show `0.0.0.0:3100`. If the daemon isn't running:
 
 ```bash
-docker exec agenc-operator bash -c \
-  "socat TCP-LISTEN:3101,fork,reuseaddr TCP:127.0.0.1:3100 &"
+docker logs agenc-operator --tail 30
+```
+
+### Daemon fails with auth.secret error
+
+```
+auth.secret is required when gateway.bind is non-local
+```
+
+Your `AUTH_SECRET` env var is missing or empty. Check your `.env` file and
+rebuild:
+
+```bash
+docker compose down -v
+docker compose up -d
 ```
 
 ### Daemon fails with better-sqlite3 error
@@ -197,10 +213,13 @@ docker exec agenc-operator bash -c \
 
 ## Known Issues
 
-### gateway.host is hardcoded to 127.0.0.1
+### gateway.bind undocumented (upstream)
 
-The daemon ignores `gateway.host` in config. The startup script works
-around this with socat. Upstream issue pending: `tetsuo-ai/agenc-core`.
+`gateway.bind` is the correct field to control the daemon bind address, but
+it was not documented in any public-facing docs. `gateway.host` (the intuitive
+alternative) is silently ignored by the runtime.
+
+Filed: `tetsuo-ai/agenc-core` Issue #26, PR #27 (documentation fix).
 
 ### agenc CLI unsupported on darwin-arm64
 
