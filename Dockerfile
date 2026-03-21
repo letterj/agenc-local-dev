@@ -22,7 +22,7 @@ if [ -n "$GROK_API_KEY" ]; then
     const fs = require('fs');
     const cfg = JSON.parse(fs.readFileSync('/root/.agenc/config.json'));
     cfg.gateway = { ...cfg.gateway, bind: '0.0.0.0' };
-    if (process.env.AUTH_SECRET) cfg.auth = { secret: process.env.AUTH_SECRET };
+    if (process.env.AUTH_SECRET) cfg.auth = { secret: process.env.AUTH_SECRET, localBypass: true };
     cfg.llm = { provider: 'grok', apiKey: process.env.GROK_API_KEY, model: 'grok-3' };
     cfg.memory = { backend: 'sqlite', dbPath: '/root/.agenc/memory.db' };
     cfg.agent = { name: process.env.AGENT_NAME || 'letterj-operator' };
