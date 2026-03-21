@@ -21,7 +21,7 @@ if [ -n "$GROK_API_KEY" ]; then
   node -e "
     const fs = require('fs');
     const cfg = JSON.parse(fs.readFileSync('/root/.agenc/config.json'));
-    cfg.gateway = { ...cfg.gateway, host: '0.0.0.0' };
+    cfg.gateway = { ...cfg.gateway, bind: '0.0.0.0' };
     cfg.llm = { provider: 'grok', apiKey: process.env.GROK_API_KEY, model: 'grok-3' };
     cfg.memory = { backend: 'sqlite', dbPath: '/root/.agenc/memory.db' };
     cfg.agent = { name: process.env.AGENT_NAME || 'letterj-operator' };
