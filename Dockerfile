@@ -45,10 +45,16 @@ agenc start
 socat TCP-LISTEN:3101,fork,reuseaddr TCP:127.0.0.1:3100 &
 
 echo "✅ AgenC running — UI at http://localhost:3100/ui/"
+echo "   To open a shell: docker exec -it agenc-operator bash"
+echo "   To check status: docker exec agenc-operator agenc status"
+
+# Keep container alive by tailing the log
 tail -f /root/.agenc/daemon.log
 SCRIPT
 
 RUN chmod +x /usr/local/bin/agenc-start.sh
 
 EXPOSE 3101
-CMD ["bash"]
+
+# Default: start the daemon automatically
+CMD ["/usr/local/bin/agenc-start.sh"]

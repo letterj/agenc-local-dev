@@ -16,7 +16,8 @@ for native arm64 support.
 | `docker-compose.yml` | Container orchestration with volume persistence |
 | `.env.example` | Environment variable template |
 | `CLAUDE.md` | AI assistant context for this workspace |
-| `RUNBOOK.md` | Full setup and troubleshooting reference |
+| `docs/RUNBOOK.md` | Full setup and troubleshooting reference |
+| `skills/` | Claude skills for this workspace |
 
 ---
 
@@ -50,7 +51,7 @@ cd agenc-local-dev
 
 ```bash
 cp .env.example .env
-vim .env  # add your Grok API key
+vim .env
 ```
 
 `.env` contents:
@@ -66,78 +67,131 @@ AGENT_NAME=your-agent-name
 docker compose build
 ```
 
-This takes ~60 seconds on first build. It installs system dependencies and
-`@tetsuo-ai/agenc` inside the Linux x64 image.
+Takes ~60 seconds on first build.
 
 ### 4. Start the container
 
 ```bash
-docker compose run --service-ports agenc-operator
+docker compose up -d
 ```
 
-### 5. Inside the container — first time only
+This starts the container in the background. It will:
+- Run `agenc onboard` if no config exists
+- Inject your API key and agent name from `.env`
+- Rebuild `better-sqlite3` for the current Node ABI
+- Start the AgenC daemon
+- Start a socat bridge so the UI is reachable from your Mac
 
-```bash
-# Generate default config
-agenc onboard
+### 5. Open the UI
 
-# Start the daemon (auto-configures from env, rebuilds sqlite, starts socat)
-agenc-start.sh
-```
-
-The startup script:
-- Injects your Grok API key and agent name from environment variables
-- Sets `gateway.host: 0.0.0.0` so Docker port mapping works
-- Rebuilds `better-sqlite3` native addon for the current Node ABI
-- Starts the daemon
-- Starts a socat bridge (`0.0.0.0:3101 → 127.0.0.1:3100`)
-- Tails the daemon log
-
-### 6. Open the UI
-
-In your Mac browser: **http://localhost:3100/ui/**
+**http://localhost:3100/ui/**
 
 ---
 
-## Subsequent Starts
+## Daily Operations
 
-Your config, memory, and logs persist in the `agenc-data` Docker volume.
-On subsequent starts you only need:
+### Start the container
 
 ```bash
-docker compose run --service-ports agenc-operator
-# Inside container:
-agenc-start.sh
+docker compose up -d
+```
+
+### Stop the container
+
+```bash
+docker compose down
+```
+
+### Open a bash shell inside the running container
+
+```bash
+docker exec -it agenc-operator bash
+```
+
+Use this to run `vim`, inspect files directly, or run any agenc commands
+interactively inside the container.
+
+### Check daemon status
+
+```bash
+docker exec agenc-operator agenc status
+```
+
+### View live logs
+
+```bash
+docker logs -f agenc-operator
+```
+
+### Stop the daemon (without stopping the container)
+
+```bash
+docker exec agenc-operator agenc stop
+```
+
+### Restart the daemon
+
+```bash
+docker exec agenc-operator agenc stop
+docker exec agenc-operator agenc-start.sh
+```
+
+### Rebuild after Dockerfile changes
+
+```bash
+docker compose down
+docker compose build
+docker compose up -d
 ```
 
 ---
 
-## Stopping the Daemon
+## Data Persistence
 
-From inside the container:
-
-```bash
-# Ctrl+C to stop the log tail, then:
-agenc stop
-```
-
-Or from your Mac:
+Config, memory, and logs are stored in the `agenc-local-dev_agenc-data`
+Docker volume. It survives container restarts and rebuilds.
 
 ```bash
-docker stop agenc-operator
+# Remove all data and start fresh (destructive)
+docker compose down -v
 ```
 
 ---
 
-## Checking Status
+## Troubleshooting
 
-From inside the container:
+### UI not loading at localhost:3100
+
+The daemon binds to `127.0.0.1` internally — socat forwards it to
+`0.0.0.0:3101` which Docker maps to your Mac's port 3100. Check socat:
 
 ```bash
-agenc status
+docker exec agenc-operator ps aux | grep socat
 ```
 
-From your Mac browser: http://localhost:3100/ui/ → DASH tab
+If socat is not running, restart it:
+
+```bash
+docker exec agenc-operator bash -c \
+  "socat TCP-LISTEN:3101,fork,reuseaddr TCP:127.0.0.1:3100 &"
+```
+
+### Daemon fails with better-sqlite3 error
+
+```bash
+docker exec agenc-operator bash -c "
+  cd \$(find /root/.agenc/runtime -name better-sqlite3 -type d | head -1)
+  npm rebuild
+"
+docker exec agenc-operator agenc start
+```
+
+### Check API key is configured
+
+```bash
+docker exec agenc-operator bash -c \
+  "grep apiKey /root/.agenc/config.json"
+```
 
 ---
 
@@ -145,35 +199,20 @@ From your Mac browser: http://localhost:3100/ui/ → DASH tab
 
 ### gateway.host is hardcoded to 127.0.0.1
 
-The AgenC daemon ignores `gateway.host` in config and always binds to
-`127.0.0.1`. This prevents Docker port mapping from reaching the daemon
-directly. The `agenc-start.sh` script works around this with socat.
-
-Upstream issue pending: `tetsuo-ai/agenc-core`
-
-### better-sqlite3 native addon compatibility
-
-The runtime artifact ships a pre-compiled `better-sqlite3` binary. Under
-Docker's Rosetta emulation it fails to load. The `agenc-start.sh` script
-automatically rebuilds it using the container's build toolchain.
+The daemon ignores `gateway.host` in config. The startup script works
+around this with socat. Upstream issue pending: `tetsuo-ai/agenc-core`.
 
 ### agenc CLI unsupported on darwin-arm64
 
-The `@tetsuo-ai/agenc` package checks the platform at startup and exits
-with `unsupported platform darwin-arm64` on Apple Silicon Macs.
-No upstream macOS release artifact exists yet.
+No macOS release artifact exists yet. Use Docker as described above.
 
 ### agenc onboard does not prompt for LLM config
 
-The onboarding wizard generates a minimal config with no `llm` block.
-The `agenc-start.sh` script injects the full LLM config from environment
-variables automatically.
+The startup script injects LLM config from environment variables automatically.
 
 ---
 
 ## AgenC Ecosystem
-
-This repo works alongside the AgenC public repositories:
 
 | Repo | Role |
 |---|---|
@@ -183,4 +222,4 @@ This repo works alongside the AgenC public repositories:
 | `tetsuo-ai/agenc-protocol` | Anchor program, IDL, artifacts |
 | `tetsuo-ai/agenc-plugin-kit` | Plugin/adapter ABI |
 
-See `RUNBOOK.md` for the full contributor workspace setup.
+See `docs/RUNBOOK.md` for the full contributor workspace setup.
