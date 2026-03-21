@@ -1,0 +1,19 @@
+services:
+  agenc-operator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    container_name: agenc-operator
+    ports:
+      - "3100:3101"
+    volumes:
+      - agenc-data:/root/.agenc
+    environment:
+      - GROK_API_KEY=${GROK_API_KEY}
+    stdin_open: true
+    tty: true
+
+volumes:
+  agenc-data:
+    driver: local
