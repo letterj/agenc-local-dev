@@ -14,7 +14,10 @@ On 2026-03-18 the team adopted ADR-003, making `agenc-core` and `agenc-prover`
 public and reframing AgenC as a public framework product.
 
 On 2026-03-20 the first working operator instance was confirmed running in Docker.
-On 2026-03-21 the `gateway.bind` root cause was identified and the socat workaround removed.
+On 2026-03-21 the `gateway.bind` root cause was identified. Subsequent investigation
+revealed that `auth.secret` + `localBypass: true` cannot authenticate browser
+connections through Docker port mapping on macOS (Docker bridge IP is not loopback).
+Final working state: socat bridge restored, no `auth.secret` required.
 
 ### Architecture Decision Records
 
@@ -206,7 +209,7 @@ Current Dockerfile in `~/workshop/agencproj/agenc-local-dev/`:
 FROM --platform=linux/amd64 node:20-slim
 
 RUN apt-get update -qq && \
-    apt-get install -y vim curl python3 make g++ iproute2 -qq && \
+    apt-get install -y vim curl python3 make g++ iproute2 socat -qq && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @tetsuo-ai/agenc
@@ -222,8 +225,8 @@ if [ -n "$GROK_API_KEY" ]; then
   node -e "
     const fs = require('fs');
     const cfg = JSON.parse(fs.readFileSync('/root/.agenc/config.json'));
-    cfg.gateway = { ...cfg.gateway, bind: '0.0.0.0' };
-    if (process.env.AUTH_SECRET) cfg.auth = { secret: process.env.AUTH_SECRET };
+    cfg.gateway = { port: cfg.gateway?.port ?? 3100 };
+    delete cfg.auth;
     cfg.llm = { provider: 'grok', apiKey: process.env.GROK_API_KEY, model: 'grok-3' };
     cfg.memory = { backend: 'sqlite', dbPath: '/root/.agenc/memory.db' };
     cfg.agent = { name: process.env.AGENT_NAME || 'letterj-operator' };
@@ -235,6 +238,9 @@ if [ -n "$SQLITE_PATH" ]; then
   SQLITE_DIR=$(dirname $(dirname $SQLITE_PATH))
   cd $SQLITE_DIR && npm rebuild 2>/dev/null || true
 fi
+# Bridge external port 3101 → daemon loopback 3100 for Docker port mapping
+# (daemon binds 127.0.0.1 so no auth.secret is required; socat exposes it externally)
+socat TCP-LISTEN:3101,bind=0.0.0.0,fork,reuseaddr TCP:127.0.0.1:3100 &
 agenc start
 tail -f /root/.agenc/daemon.log
 SCRIPT
@@ -244,18 +250,27 @@ EXPOSE 3100
 CMD ["/usr/local/bin/agenc-start.sh"]
 ```
 
+**Architecture note:** The daemon binds to `127.0.0.1:3100` (no `auth.secret`
+required). socat bridges `0.0.0.0:3101 → 127.0.0.1:3100`. docker-compose maps
+`host:3100 → container:3101`. This makes the browser UI fully functional
+including the TRACE tab.
+
+**Why not `gateway.bind: "0.0.0.0"`?** When the daemon binds to a non-loopback
+address, the runtime requires `auth.secret`. But `auth.secret` breaks browser
+UI via Docker port mapping on macOS — Docker delivers connections from the
+bridge gateway IP (e.g. `192.168.97.1`), not `127.0.0.1`, so `localBypass: true`
+never fires. The socat bridge avoids this entirely.
+
 ### Environment variables (.env)
 
 ```
 GROK_API_KEY=your-grok-api-key-here
 AGENT_NAME=letterj-operator
-AUTH_SECRET=your-auth-secret-here
 ```
 
-Generate `AUTH_SECRET` with: `openssl rand -hex 32`
-
-`AUTH_SECRET` is **required** — the runtime enforces `auth.secret` when
-`gateway.bind` is set to a non-loopback address.
+`GROK_API_KEY` is required. `AGENT_NAME` defaults to `letterj-operator`.
+`AUTH_SECRET` is no longer used — the socat bridge architecture does not
+require `auth.secret` (daemon binds to loopback only).
 
 ### Build the image
 
@@ -293,12 +308,14 @@ Open in browser: **http://localhost:3100/ui/**
 
 ### 1. `gateway.bind` undocumented in public docs *(upstream)*
 
-**Repo:** `agenc-core`  
+**Repo:** `agenc-core`
 **Symptom:** `gateway.bind` is the correct config field to control the daemon
 bind address, but it was not documented anywhere. Users naturally try
-`gateway.host` which is silently ignored.  
-**Status:** Filed Issue #26, PR #27 merged — `RUNTIME_API.md` now documents
-`gateway.bind`, the `auth.secret` requirement, and the `gateway.host` gotcha.
+`gateway.host` which is silently ignored.
+**Status:** Filed Issue #26, PR #27 — `RUNTIME_API.md` documents `gateway.bind`,
+the `auth.secret` requirement, the `gateway.host` gotcha, and two Docker
+scenarios (browser UI vs CLI-only) with explicit documentation of the Docker
+bridge IP limitation for `localBypass: true`.
 
 ### 2. `better-sqlite3` native addon must be rebuilt in Docker
 
@@ -333,7 +350,7 @@ docker exec agenc-operator bash -c "
 - ✅ Grok LLM connected: `grok-3`
 - ✅ Agent queried live devnet tasks via on-chain tools
 - ✅ 4 open tasks visible on devnet with real SOL rewards
-- ✅ Daemon binds directly to `0.0.0.0:3100` — no socat workaround needed
+- ✅ socat bridge: daemon on `127.0.0.1:3100`, socat on `0.0.0.0:3101`, host maps `3100→3101`
 - ✅ `docker compose up -d` is fully automated — zero manual steps
 
 ---

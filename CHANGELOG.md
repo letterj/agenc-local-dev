@@ -8,6 +8,56 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-03-21
+
+### Investigation: gateway.bind + Docker bridge IP
+
+The initial `[0.1.0]` setup used `gateway.bind: "0.0.0.0"` (daemon binds all
+interfaces) with `AUTH_SECRET` (required by the runtime for non-loopback binding).
+This session investigated the TRACE tab returning `Authentication required` and
+arrived at a different architecture.
+
+**Root cause discovered:** `auth.localBypass: true` only fires when the
+connection `remoteAddress` is exactly `127.0.0.1`, `::1`, or
+`::ffff:127.0.0.1`. When a browser connects to `localhost:3100` on the Mac
+host, Docker translates via the bridge network and the daemon sees the
+connection from the bridge gateway IP (e.g. `192.168.97.1`), not loopback.
+This means `localBypass: true` cannot authenticate browser connections through
+Docker port mapping on macOS — regardless of the config.
+
+**Structural constraint:** The runtime enforces `auth.secret is required when
+gateway.bind is non-local`. This creates an unavoidable incompatibility:
+`bind: "0.0.0.0"` requires `auth.secret`; `auth.secret` breaks browser UI via
+Docker port mapping on macOS; `bind: "127.0.0.1"` makes the daemon unreachable
+through Docker port mapping without an additional bridge.
+
+### Fixed
+
+- Restored socat bridge: daemon binds to `127.0.0.1:3100` (no `auth.secret`
+  required); socat listens on `0.0.0.0:3101` and forwards to `127.0.0.1:3100`;
+  docker-compose maps `host:3100 → container:3101`
+- Removed `auth.secret` and `AUTH_SECRET` from config injection entirely —
+  the socat architecture makes auth.secret unnecessary for local dev
+- Docker port mapping corrected: `3100:3101` (container socat port, not daemon port)
+- TRACE tab (`observability.traces`) now works in browser without authentication errors
+- `socat` added back to apt-get install in Dockerfile
+
+### Changed
+
+- Config injection: `cfg.gateway = { port: ... }` (no bind, no auth) +
+  `delete cfg.auth` to clear any residual auth config from the volume
+- `AUTH_SECRET` env var removed from docker-compose.yml and .env.example
+  (still present in compose environment block but unused; can be removed)
+
+### Documentation
+
+- PR #27 on `tetsuo-ai/agenc-core` updated with two-scenario Gateway Config
+  documentation: Scenario 1 (browser UI via Docker, no auth.secret) and
+  Scenario 2 (CLI-only via docker exec, with auth.secret + localBypass) —
+  includes explicit note about Docker bridge IP limitation
+
+---
+
 ## [0.1.0] — 2026-03-21
 
 ### Added

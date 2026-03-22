@@ -59,13 +59,9 @@ vim .env
 ```
 GROK_API_KEY=your-grok-api-key-here
 AGENT_NAME=your-agent-name
-AUTH_SECRET=your-auth-secret-here
 ```
 
-`AUTH_SECRET` is required when binding to `0.0.0.0`. Generate one with:
-```bash
-openssl rand -hex 32
-```
+`GROK_API_KEY` is required. `AGENT_NAME` defaults to `letterj-operator`.
 
 ### 3. Build the Docker image
 
@@ -83,8 +79,8 @@ docker compose up -d
 
 This starts the container in the background. It will:
 - Run `agenc onboard` if no config exists
-- Inject your API key, agent name, and auth secret from `.env`
-- Set `gateway.bind: "0.0.0.0"` so the daemon is reachable from your Mac
+- Inject your API key and agent name from `.env`
+- Start a socat bridge (`0.0.0.0:3101 → 127.0.0.1:3100`) for Docker port mapping
 - Rebuild `better-sqlite3` for the current Node ABI
 - Start the AgenC daemon
 
@@ -165,31 +161,18 @@ docker compose down -v
 
 ### UI not loading at localhost:3100
 
-Check that the daemon is running and bound to `0.0.0.0`:
+Check daemon status and that socat is bridging:
 
 ```bash
 docker exec agenc-operator agenc status
-docker exec agenc-operator ss -tlnp | grep 3100
+docker exec agenc-operator ss -tlnp | grep -E '3100|3101'
 ```
 
-The second command should show `0.0.0.0:3100`. If the daemon isn't running:
+Expected: daemon on `127.0.0.1:3100`, socat on `0.0.0.0:3101`. If the daemon
+isn't running:
 
 ```bash
 docker logs agenc-operator --tail 30
-```
-
-### Daemon fails with auth.secret error
-
-```
-auth.secret is required when gateway.bind is non-local
-```
-
-Your `AUTH_SECRET` env var is missing or empty. Check your `.env` file and
-rebuild:
-
-```bash
-docker compose down -v
-docker compose up -d
 ```
 
 ### Daemon fails with better-sqlite3 error
@@ -219,7 +202,8 @@ docker exec agenc-operator bash -c \
 it was not documented in any public-facing docs. `gateway.host` (the intuitive
 alternative) is silently ignored by the runtime.
 
-Filed: `tetsuo-ai/agenc-core` Issue #26, PR #27 (documentation fix).
+Filed: `tetsuo-ai/agenc-core` Issue #26, PR #27 — now documents both Docker
+scenarios and the `localBypass: true` / Docker bridge IP limitation.
 
 ### agenc CLI unsupported on darwin-arm64
 
