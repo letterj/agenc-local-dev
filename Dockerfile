@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 node:20-slim
 
 RUN apt-get update -qq && \
-    apt-get install -y vim curl python3 make g++ iproute2 -qq && \
+    apt-get install -y vim curl python3 make g++ iproute2 socat -qq && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @tetsuo-ai/agenc
@@ -21,8 +21,8 @@ if [ -n "$GROK_API_KEY" ]; then
   node -e "
     const fs = require('fs');
     const cfg = JSON.parse(fs.readFileSync('/root/.agenc/config.json'));
-    cfg.gateway = { ...cfg.gateway, bind: '0.0.0.0' };
-    if (process.env.AUTH_SECRET) cfg.auth = { secret: process.env.AUTH_SECRET, localBypass: true };
+    cfg.gateway = { port: cfg.gateway?.port ?? 3100 };
+    delete cfg.auth;
     cfg.llm = { provider: 'grok', apiKey: process.env.GROK_API_KEY, model: 'grok-3' };
     cfg.memory = { backend: 'sqlite', dbPath: '/root/.agenc/memory.db' };
     cfg.agent = { name: process.env.AGENT_NAME || 'letterj-operator' };
@@ -38,6 +38,10 @@ if [ -n "$SQLITE_PATH" ]; then
   echo "Rebuilding better-sqlite3..."
   cd $SQLITE_DIR && npm rebuild 2>/dev/null || true
 fi
+
+# Bridge external port 3101 → daemon loopback 3100 for Docker port mapping
+# (daemon binds 127.0.0.1 so no auth.secret is required; socat exposes it externally)
+socat TCP-LISTEN:3101,bind=0.0.0.0,fork,reuseaddr TCP:127.0.0.1:3100 &
 
 # Start daemon
 agenc start
