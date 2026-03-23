@@ -8,6 +8,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- `agenc-morning-sync` skill — codifies the session-start workflow as a reusable Claude skill:
+  fetches upstream changes across all AgenC repos, syncs forks that have new commits,
+  checks PR status, and starts the Docker operator container
+
 ## [0.2.0] — 2026-03-21
 
 ### Investigation: gateway.bind + Docker bridge IP

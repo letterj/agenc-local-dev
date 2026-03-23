@@ -1,7 +1,7 @@
 # AgenC Local Dev Environment Runbook
 
 > **Status:** Active  
-> **Last updated:** 2026-03-21  
+> **Last updated:** 2026-03-23
 > **Author:** letterj  
 > **Purpose:** Reproducible setup for a contributor-ready local AgenC development environment
 
@@ -154,6 +154,10 @@ done
 ---
 
 ## Daily Sync
+
+The `agenc-morning-sync` Claude skill (`skills/agenc-morning-sync/SKILL.md`) automates
+this entire section. Invoke it at session start with any phrase like "morning sync",
+"let's get started", or "sync the repos". Manual steps below for reference.
 
 Run at the start of each session:
 
