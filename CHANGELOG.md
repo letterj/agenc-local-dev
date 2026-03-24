@@ -12,6 +12,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `agenc-morning-sync` skill — codifies the session-start workflow as a reusable Claude skill:
   fetches upstream changes across all AgenC repos, syncs forks that have new commits,
   checks PR status, and starts the Docker operator container
+- `agenc-morning-sync` skill now checks the tetsuo-ai GitHub org for new repositories
+  created since the previous session; flags anything matching `agenc-marketplace` or other
+  extracted-component naming patterns against the known six-repo list
 
 ## [0.2.0] — 2026-03-21
 

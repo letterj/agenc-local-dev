@@ -17,7 +17,7 @@ for native arm64 support.
 | `.env.example` | Environment variable template |
 | `CLAUDE.md` | AI assistant context for this workspace |
 | `docs/RUNBOOK.md` | Full setup and troubleshooting reference |
-| `skills/agenc-morning-sync/` | Session-start skill: sync repos, check PRs, start Docker |
+| `skills/agenc-morning-sync/` | Session-start skill: sync repos, check org for new repos, check PRs, start Docker |
 | `skills/agenc-changelog-docs-update/` | Skill: update changelog and docs from git commits |
 
 ---
