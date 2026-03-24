@@ -221,7 +221,7 @@ private tasks a ZK proof via `completeTaskPrivate` would be required instead.
 Each transaction signature can be viewed at:
 
 ```
-https://solscan.io/tx/[TX_SIGNATURE]?cluster=devnet
+https://solscan.io/tx/<TX_SIGNATURE>?cluster=devnet
 ```
 
 The script prints direct Solscan links for each step.
@@ -233,6 +233,20 @@ The script prints direct Solscan links for each step.
 | create | Account Changes | New Task + Escrow accounts created; wallet debited |
 | claim | Account Changes | New TaskClaim account created; Task state updated |
 | complete | Account Changes | Escrow closed; reward transferred back to wallet; TaskClaim closed |
+
+---
+
+## Verified on Solscan — 2026-03-24
+
+First confirmed run. Reward: 0.01 SOL. Protocol fee: 2.5% (250 bps). Worker received ~0.00975 SOL.
+
+| Step | Transaction |
+|---|---|
+| `createTask` | [4q2d3zLN…WGk1fg](https://solscan.io/tx/4q2d3zLNFxh1MuP5ina8tEeVSoKutS2wGuwLtVMrZrtdjbJpg6Czkz3J55zjUvraPP7YT4EutNB1Cm254mWGk1fg?cluster=devnet) |
+| `claimTask` | [3RwRUqCZ…rJR](https://solscan.io/tx/3RwRUqCZexGJfuu5wWn9zPLyYDrmuGfSPC5raDMZoSN7KX2wQzXnsaXqenu1d34qDziBWHr9Pswnou47LrXbjrJR?cluster=devnet) |
+| `completeTask` | [3FCrfT8c…zT7](https://solscan.io/tx/3FCrfT8c2RwyiYHrh4dwyrAjykyucbXUkuFSbz4TEQLxYMmYjw9kS6KfQFjB1YJCaMQ9B8vWXRXjqM31P2jgFzT7?cluster=devnet) |
+
+Completed at: `2026-03-24T13:56:08Z`
 
 ---
 
@@ -303,6 +317,22 @@ escrow is reclaimed. The lifecycle still succeeded.
 
 ---
 
+## SDK Dist Note
+
+Before running scripts from `agenc-local-dev`, ensure the SDK dist is current.
+If upstream SDK changes have landed since your last build, rebuild first:
+
+```bash
+cd ~/workshop/agencproj/forks/agenc-sdk
+npm run build
+```
+
+The `dist/` directory is gitignored in the SDK fork, so it is not updated by
+`git pull`. The `agenc-local-dev` package resolves the SDK via a symlink to
+`forks/agenc-sdk`, so a rebuild there is picked up immediately.
+
+---
+
 ## Devnet Compatibility Notes
 
 The AgenC devnet program may return different error names than the SDK
@@ -315,7 +345,6 @@ reward) is confirmed working. See
 ## Next Steps
 
 After running the lifecycle successfully:
-- Update this doc with real transaction signatures from your run
 - Try with a non-zero `minReputation` to test reputation gating
 - Try with a different `requiredCapabilities` bitmask
 - Try claiming an existing open task from another creator using
