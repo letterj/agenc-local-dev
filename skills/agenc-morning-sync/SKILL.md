@@ -5,8 +5,10 @@ description: >
   Triggers on phrases like "good morning", "let's get started", "morning sync",
   "sync the repos", "check for upstream changes", or any session opener.
   Fetches upstream changes across all AgenC repos, syncs forks that have new
-  commits, checks PR status, starts the Docker operator container, and reports
-  a clean session-start summary. Always run this before doing any other work.
+  commits, checks the tetsuo-ai GitHub org for new repositories (flags anything
+  that looks like an extracted component), checks PR status, starts the Docker
+  operator container, and reports a clean session-start summary.
+  Always run this before doing any other work.
 ---
 
 # AgenC Morning Sync Skill
@@ -77,7 +79,45 @@ Report: merged, open with new activity, or no change since last session.
 
 ---
 
-## Step 5 — Start the Docker operator container
+## Step 5 — Check tetsuo-ai org for new repositories
+
+```bash
+gh repo list tetsuo-ai --limit 50 --json name,createdAt,description \
+  --jq 'sort_by(.createdAt) | reverse | .[] | [.createdAt, .name, .description] | @tsv' \
+  2>/dev/null || echo "gh CLI not available — check https://github.com/tetsuo-ai manually"
+```
+
+If `gh` is not available, fetch the public API directly:
+
+```bash
+curl -s "https://api.github.com/orgs/tetsuo-ai/repos?sort=created&direction=desc&per_page=20" \
+  | python3 -c "
+import json,sys
+repos = json.load(sys.stdin)
+for r in repos:
+    print(r['created_at'][:10], r['name'], '-', r.get('description',''))
+"
+```
+
+Compare against the known repo list:
+```
+AgenC, agenc-sdk, agenc-core, agenc-protocol, agenc-plugin-kit, agenc-prover
+```
+
+Flag any repo **not** in that list, especially names matching these patterns:
+- `agenc-marketplace` or `marketplace-*`
+- `agenc-*` (any new AgenC component)
+- Names suggesting an extracted service: `agenc-engine`, `agenc-scoring`,
+  `agenc-bidder`, `agenc-settlement`, etc.
+
+For each flagged repo, report:
+- Repo name and creation date
+- Description (if any)
+- Whether it looks like an extracted component from agenc-core
+
+---
+
+## Step 6 — Start the Docker operator container
 
 ```bash
 cd ~/workshop/agencproj/agenc-local-dev
@@ -95,7 +135,7 @@ fi
 
 ---
 
-## Step 6 — Report session summary
+## Step 7 — Report session summary
 
 Print a clean summary:
 
@@ -106,6 +146,10 @@ Repos synced:
   - agenc-core: N new commits
   - agenc-sdk: no changes
   ...
+
+New tetsuo-ai repos:
+  - agenc-marketplace (created 2026-03-24) — ⚠️ extracted component?
+  or: none since last session
 
 PRs:
   - agenc-core #27: [open/merged/new comments]
