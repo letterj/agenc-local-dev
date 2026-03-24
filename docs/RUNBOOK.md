@@ -316,7 +316,7 @@ Open in browser: **http://localhost:3100/ui/**
 **Symptom:** `gateway.bind` is the correct config field to control the daemon
 bind address, but it was not documented anywhere. Users naturally try
 `gateway.host` which is silently ignored.
-**Status:** Filed Issue #26, PR #27 — `RUNTIME_API.md` documents `gateway.bind`,
+**Status:** Issue #26 closed, PR #27 merged (`c99049d`) — `RUNTIME_API.md` documents `gateway.bind`,
 the `auth.secret` requirement, the `gateway.host` gotcha, and two Docker
 scenarios (browser UI vs CLI-only) with explicit documentation of the Docker
 bridge IP limitation for `localBypass: true`.
@@ -366,7 +366,7 @@ docker exec agenc-operator bash -c "
 | `agenc-sdk` | Issue #8 | anchor.BN undefined — diagnosed | Closed |
 | `agenc-sdk` | PR #9 | fix(build): namespace import + externalize anchor | Merged |
 | `agenc-core` | Issue #26 | gateway.bind undocumented | Open |
-| `agenc-core` | PR #27 | docs(gateway): document gateway.bind config field | Open |
+| `agenc-core` | PR #27 | docs(gateway): document gateway.bind config field | Merged (`c99049d`) |
 
 ---
 

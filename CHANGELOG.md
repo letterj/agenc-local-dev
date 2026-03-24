@@ -99,4 +99,4 @@ through Docker port mapping without an additional bridge.
 | Repo | Issue/PR | Description |
 |---|---|---|
 | `agenc-sdk` | Issue #8, PR #9 | `anchor.BN` undefined in CJS/ESM — fixed with namespace import |
-| `agenc-core` | Issue #26, PR #27 | `gateway.bind` undocumented — added Gateway Config section to `RUNTIME_API.md` |
+| `agenc-core` | Issue #26, PR #27 | `gateway.bind` undocumented — added Gateway Config section to `RUNTIME_API.md` — **Merged** (`c99049d`) |

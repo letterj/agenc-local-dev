@@ -177,4 +177,4 @@ call it out clearly and stop so the user can decide how to proceed.
 | Working branch | `experiment/local-dev-setup` on all forks |
 | Docker project | `~/workshop/agencproj/agenc-local-dev/` |
 | Container UI | `http://localhost:3100/ui/` |
-| Open PRs | `tetsuo-ai/agenc-core` #27 |
+| Open PRs | none |
