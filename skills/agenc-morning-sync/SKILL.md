@@ -117,6 +117,23 @@ For each flagged repo, report:
 
 ---
 
+## Step 5b — Check SDK dist is current
+
+If any `agenc-sdk` commits landed in Step 1, rebuild the SDK dist:
+
+```bash
+cd ~/workshop/agencproj/forks/agenc-sdk
+npm run build
+```
+
+The `dist/` directory is gitignored. Scripts in `agenc-local-dev/scripts/`
+import from `forks/agenc-sdk/dist/` — if the dist is stale they will fail
+with BN-related or import errors.
+
+If no `agenc-sdk` commits landed, skip silently.
+
+---
+
 ## Step 6 — Start the Docker operator container
 
 ```bash
