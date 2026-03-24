@@ -28,6 +28,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   pre-flight checklist, cost breakdown, recovery paths, and verified Solscan links
 - `README.md` — added Skills and Scripts sections, scripts/ to Contents table,
   and Prerequisites — Devnet Wallets table to Requirements
+- `docs/PROJECT-PLAN.md` — 10-task contributor roadmap across 4 tracks:
+  Infrastructure, Upstream Contributions, Protocol (on-chain work), and
+  Observability; includes dependency graph and suggested execution order
 
 ## [0.2.0] — 2026-03-21
 
