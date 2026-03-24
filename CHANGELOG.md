@@ -15,6 +15,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `agenc-morning-sync` skill now checks the tetsuo-ai GitHub org for new repositories
   created since the previous session; flags anything matching `agenc-marketplace` or other
   extracted-component naming patterns against the known six-repo list
+- `agenc-morning-sync` skill now includes Step 5b: rebuild `forks/agenc-sdk` dist if
+  any agenc-sdk commits landed during sync (dist/ is gitignored; stale dist causes BN
+  errors in devnet scripts)
+- `scripts/devnet-task-lifecycle.mjs` — full create→claim→complete task lifecycle on
+  devnet using separate creator (`id.json`) and worker (`worker.json`) wallets; confirmed
+  working 2026-03-24 (create `4q2d3zL…`, claim `3RwRUqC…`, complete `3FCrfT8…`)
+- `package.json` — declares `@tetsuo-ai/sdk` (file path), `@coral-xyz/anchor`, and
+  `@solana/web3.js` as explicit deps to ensure a single hoisted anchor instance and
+  avoid the BN dual-instance error
+- `docs/HOW-TO-TASK-LIFECYCLE.md` — full walkthrough for devnet task lifecycle including
+  pre-flight checklist, cost breakdown, recovery paths, and verified Solscan links
+- `README.md` — added Skills and Scripts sections, scripts/ to Contents table,
+  and Prerequisites — Devnet Wallets table to Requirements
 
 ## [0.2.0] — 2026-03-21
 

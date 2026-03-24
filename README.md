@@ -19,6 +19,49 @@ for native arm64 support.
 | `docs/RUNBOOK.md` | Full setup and troubleshooting reference |
 | `skills/agenc-morning-sync/` | Session-start skill: sync repos, check org for new repos, check PRs, start Docker |
 | `skills/agenc-changelog-docs-update/` | Skill: update changelog and docs from git commits |
+| `scripts/` | Devnet utility scripts — task lifecycle, agent management |
+
+---
+
+## Skills
+
+Claude skills that automate common workflows. Invoke from the Claude Code
+session by saying "morning sync", "run the changelog skill", etc.
+
+| Skill | Trigger | What it does |
+|---|---|---|
+| `agenc-morning-sync` | "morning sync", "let's get started" | Fetch upstream changes, sync forks, rebuild SDK dist if needed, check org for new repos, check PR status, start Docker |
+| `agenc-changelog-docs-update` | "run the changelog skill" | Update CHANGELOG.md and docs from recent git commits |
+
+---
+
+## Scripts
+
+Devnet utility scripts. Run from the `agenc-local-dev/` directory after
+`npm install`.
+
+> **⚠️ Before running any script, ensure the SDK dist is current:**
+> ```bash
+> cd ~/workshop/agencproj/forks/agenc-sdk && npm run build
+> ```
+> Scripts import from `forks/agenc-sdk/dist/` — a stale dist will fail
+> with BN or import errors.
+
+### `devnet-task-lifecycle.mjs`
+
+Runs the full AgenC task lifecycle on devnet: create task → claim task →
+complete task. Uses separate creator and worker wallets. Prints Solscan
+links for all three transactions.
+
+```bash
+CREATOR_WALLET=~/.config/solana/id.json \
+WORKER_WALLET=~/.config/solana/worker.json \
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json \
+node scripts/devnet-task-lifecycle.mjs
+```
+
+Requires two funded wallets with registered agents on devnet.
+See `docs/HOW-TO-TASK-LIFECYCLE.md` for the full walkthrough.
 
 ---
 
@@ -33,6 +76,16 @@ for native arm64 support.
 | Anchor CLI | 0.32.1 | For program work |
 | Git | any | |
 | xAI API key | — | Grok-3 model access |
+
+### Prerequisites — Devnet Wallets
+
+| Role | Keypair file | Pubkey | Min balance |
+|---|---|---|---|
+| Creator | `~/.config/solana/id.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | reward + 0.02 SOL |
+| Worker | `~/.config/solana/worker.json` | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | 0.005 SOL |
+
+Both wallets must have registered agents on devnet before running lifecycle
+scripts. See `docs/HOW-TO-TASK-LIFECYCLE.md` for setup steps.
 
 macOS Apple Silicon (M1/M2/M3) is the primary target.
 Docker's Rosetta emulation handles the linux/amd64 translation.
