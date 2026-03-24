@@ -1,0 +1,12 @@
+{
+  "name": "agenc-local-dev",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AgenC local dev environment — devnet scripts and operator tooling",
+  "dependencies": {
+    "@coral-xyz/anchor": "0.32.1",
+    "@solana/web3.js": "1.98.4",
+    "@tetsuo-ai/sdk": "file:../forks/agenc-sdk"
+  }
+}

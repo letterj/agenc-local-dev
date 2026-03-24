@@ -8,8 +8,8 @@
 
 | Role | Wallet file | Pubkey | Agent PDA |
 |---|---|---|---|
-| Creator | `~/.config/solana/id.json` | [YOUR_WALLET_PUBKEY] | [YOUR_AGENT_PDA] |
-| Worker | `~/.config/solana/worker.json` | [WORKER_WALLET_PUBKEY] | [WORKER_AGENT_PDA] |
+| Creator | `~/.config/solana/id.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs` |
+| Worker | `~/.config/solana/worker.json` | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V` |
 
 ---
 
@@ -40,13 +40,13 @@ for claim and complete transaction fees.
 
 Check balances:
 ```bash
-solana balance [YOUR_WALLET_PUBKEY] --url devnet
-solana balance [WORKER_WALLET_PUBKEY] --url devnet
+solana balance BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT --url devnet
+solana balance 26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q --url devnet
 ```
 
 Transfer SOL between wallets if needed (devnet airdrop is rate-limited):
 ```bash
-solana transfer [WORKER_WALLET_PUBKEY] 5 \
+solana transfer 26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q 5 \
   --from ~/.config/solana/id.json \
   --url devnet \
   --allow-unfunded-recipient
@@ -58,13 +58,13 @@ The script fetches both agent IDs from their on-chain PDAs.
 
 | Role | Agent PDA |
 |---|---|
-| Creator | [YOUR_AGENT_PDA] |
-| Worker | [WORKER_AGENT_PDA] |
+| Creator | `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs` |
+| Worker | `CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V` |
 
 Verify they exist:
 ```bash
-solana account [YOUR_AGENT_PDA] --url devnet
-solana account [WORKER_AGENT_PDA] --url devnet
+solana account GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs --url devnet
+solana account CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V --url devnet
 ```
 
 ### 3. IDL file
@@ -154,8 +154,8 @@ solana balance ~/.config/solana/id.json --url devnet
 solana balance ~/.config/solana/worker.json --url devnet
 
 # Confirm both agents are registered
-solana account [YOUR_AGENT_PDA] --url devnet
-solana account [WORKER_AGENT_PDA] --url devnet
+solana account GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs --url devnet
+solana account CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V --url devnet
 ```
 
 ---
@@ -241,42 +241,44 @@ The script prints direct Solscan links for each step.
 ```
 === AgenC Task Lifecycle — devnet ===
 
-[config] wallet:   [YOUR_WALLET_PUBKEY]
-[config] agent:    [YOUR_AGENT_PDA]
-[config] program:  [DEVNET_PROGRAM_ID]
-[config] reward:   0.01 SOL
-[config] balance:  X.XX SOL
+[config] creator wallet:  BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT
+[config] creator agent:   GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs
+[config] worker wallet:   26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q
+[config] worker agent:    CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V
+[config] reward:          0.01 SOL
+[config] creator balance: 33.39515976 SOL
+[config] worker balance:  4.89516476 SOL
 
-[step 0] fetching agent registration...
-[step 0] agent found — id: ...
-[step 0] capabilities: 1 | reputation: XXXX
+[step 0] fetching agent registrations...
+[step 0] creator agent — capabilities: 15 | reputation: 5000
+[step 0] worker agent  — capabilities: 1  | reputation: 5000
 
 [step 1] creating task...
 [step 1] ✅ task created
-         taskPda:   <task pda>
-         deadline:  <iso timestamp>
-         tx:        [TX_SIGNATURE]
-         solscan:   https://solscan.io/tx/[TX_SIGNATURE]?cluster=devnet
+         taskPda:  6beatSc8WKFpKWyMJgDK3z3CbjdRoPdgJ86kh1iBzUM3
+         deadline: 2026-03-24T14:56:02.000Z
+         tx:       4q2d3zLNFxh1MuP5ina8tEeVSoKutS2wGuwLtVMrZrtdjbJpg6Czkz3J55zjUvraPP7YT4EutNB1Cm254mWGk1fg
+         solscan:  https://solscan.io/tx/4q2d3zLNFxh1MuP5ina8tEeVSoKutS2wGuwLtVMrZrtdjbJpg6Czkz3J55zjUvraPP7YT4EutNB1Cm254mWGk1fg?cluster=devnet
 
 [step 2] claiming task...
 [step 2] ✅ task claimed
-         tx:        [TX_SIGNATURE]
-         solscan:   https://solscan.io/tx/[TX_SIGNATURE]?cluster=devnet
-[step 2] state:     In Progress (expected: In Progress)
+         tx:       3RwRUqCZexGJfuu5wWn9zPLyYDrmuGfSPC5raDMZoSN7KX2wQzXnsaXqenu1d34qDziBWHr9Pswnou47LrXbjrJR
+         solscan:  https://solscan.io/tx/3RwRUqCZexGJfuu5wWn9zPLyYDrmuGfSPC5raDMZoSN7KX2wQzXnsaXqenu1d34qDziBWHr9Pswnou47LrXbjrJR?cluster=devnet
+[step 2] state:    In Progress (expected: In Progress)
 
 [step 3] completing task...
 [step 3] ✅ task completed
-         tx:        [TX_SIGNATURE]
-         solscan:   https://solscan.io/tx/[TX_SIGNATURE]?cluster=devnet
+         tx:       3FCrfT8c2RwyiYHrh4dwyrAjykyucbXUkuFSbz4TEQLxYMmYjw9kS6KfQFjB1YJCaMQ9B8vWXRXjqM31P2jgFzT7
+         solscan:  https://solscan.io/tx/3FCrfT8c2RwyiYHrh4dwyrAjykyucbXUkuFSbz4TEQLxYMmYjw9kS6KfQFjB1YJCaMQ9B8vWXRXjqM31P2jgFzT7?cluster=devnet
 
 [verify] fetching final task state...
 [verify] state:       Completed
-[verify] completedAt: <iso timestamp>
+[verify] completedAt: 2026-03-24T13:56:08.000Z
 
 === lifecycle complete ===
-  create:   https://solscan.io/tx/[TX_SIGNATURE]?cluster=devnet
-  claim:    https://solscan.io/tx/[TX_SIGNATURE]?cluster=devnet
-  complete: https://solscan.io/tx/[TX_SIGNATURE]?cluster=devnet
+  create:   https://solscan.io/tx/4q2d3zLNFxh1MuP5ina8tEeVSoKutS2wGuwLtVMrZrtdjbJpg6Czkz3J55zjUvraPP7YT4EutNB1Cm254mWGk1fg?cluster=devnet
+  claim:    https://solscan.io/tx/3RwRUqCZexGJfuu5wWn9zPLyYDrmuGfSPC5raDMZoSN7KX2wQzXnsaXqenu1d34qDziBWHr9Pswnou47LrXbjrJR?cluster=devnet
+  complete: https://solscan.io/tx/3FCrfT8c2RwyiYHrh4dwyrAjykyucbXUkuFSbz4TEQLxYMmYjw9kS6KfQFjB1YJCaMQ9B8vWXRXjqM31P2jgFzT7?cluster=devnet
 ```
 
 ---
@@ -284,11 +286,11 @@ The script prints direct Solscan links for each step.
 ## Troubleshooting
 
 ### `insufficient balance`
-Airdrop more devnet SOL: `solana airdrop 1 [YOUR_WALLET_PUBKEY] --url devnet`
+Airdrop more devnet SOL: `solana airdrop 1 BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT --url devnet`
 
 ### `agent not found`
-Your agent PDA `[YOUR_AGENT_PDA]` is not registered on devnet. Re-run the
-agent registration script.
+The agent PDA printed in the error is not registered on devnet. Re-run the
+agent registration script (`scripts/register-agent.mjs` or `register-worker.mjs`).
 
 ### `Transaction simulation failed`
 - Check the error message for the specific program error
