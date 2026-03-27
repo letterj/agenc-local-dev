@@ -69,15 +69,31 @@ force the rebase. Let the user decide.
 ## Step 4 — Check open PRs status
 
 ```bash
-gh pr view 27 --repo tetsuo-ai/agenc-core \
-  --json state,title,reviewDecision,comments \
-  2>/dev/null || echo "gh CLI not available — check manually"
+# All open PRs from letterj against tetsuo-ai repos
+gh search prs --author letterj \
+  --repo tetsuo-ai/agenc-core \
+  --repo tetsuo-ai/agenc-sdk \
+  --repo tetsuo-ai/agenc-protocol \
+  --repo tetsuo-ai/AgenC \
+  --state open \
+  --json number,title,state,reviewDecision,updatedAt,comments \
+  --jq '.[] | "#\(.number) \(.state) | reviews:\(.reviewDecision // "none") | comments:\(.comments | length) | updated:\(.updatedAt[:10]) | \(.title)"'
+
+# For any known in-flight PRs, get full detail
+# Format: "owner/repo:pr_number"
+# e.g. for pr_spec in "tetsuo-ai/agenc-core:28"; do
+for pr_spec in; do  # empty — add entries here as PRs are filed
+  repo="${pr_spec%%:*}"
+  num="${pr_spec##*:}"
+  gh pr view "$num" --repo "$repo" \
+    --json number,title,state,reviewDecision,comments,updatedAt \
+    --jq '"#\(.number) \(.state) | reviews:\(.reviewDecision // "none") | comments:\(.comments | length) | updated:\(.updatedAt[:10]) | \(.title)"' \
+    2>/dev/null || echo "  PR $repo#$num — not found"
+done
 ```
 
-If `gh` is not available, note the URL:
-- https://github.com/tetsuo-ai/agenc-core/pull/27
-
-Report: merged, open with new activity, or no change since last session.
+Report: any open PRs with review state, comment count, and last-updated date.
+If the search returns nothing, report "no open PRs".
 
 ---
 
@@ -171,7 +187,8 @@ New tetsuo-ai repos:
   or: none since last session
 
 PRs:
-  - agenc-core #27: [open/merged/new comments]
+  - tetsuo-ai/agenc-core #NN: open | reviews: REVIEW_DECISION | comments: N | updated: YYYY-MM-DD | title
+  or: no open PRs
 
 Container:
   - agenc-operator: running | pid NNN | port 3100
@@ -196,5 +213,5 @@ call it out clearly and stop so the user can decide how to proceed.
 | Working branch | `experiment/local-dev-setup` on all forks |
 | Docker project | `~/workshop/agencproj/agenc-local-dev/` |
 | Container UI | `http://localhost:3100/ui/` |
-| Open PRs | none |
+| Tracked PRs | none currently — add to Step 4 tracked loop as PRs are filed |
 | agenc-protocol default branch | `feature/bootstrap-wave1` — skill checks out `main` before pulling |
