@@ -22,9 +22,11 @@ Run at the start of every session to get the workspace fully up to date.
 ```bash
 for repo in AgenC agenc-sdk agenc-core agenc-protocol agenc-plugin-kit; do
   echo "=== $repo ==="
+  git -C ~/workshop/agencproj/$repo checkout main --quiet 2>/dev/null || true
   git -C ~/workshop/agencproj/$repo fetch origin --quiet
-  git -C ~/workshop/agencproj/$repo log --oneline --since="yesterday" origin/main \
-    2>/dev/null || echo "no new commits"
+  git -C ~/workshop/agencproj/$repo merge --ff-only origin/main 2>/dev/null \
+    && git -C ~/workshop/agencproj/$repo log --oneline --since="yesterday" origin/main \
+    || echo "⚠️  could not fast-forward — check $repo manually"
 done
 ```
 
@@ -195,3 +197,4 @@ call it out clearly and stop so the user can decide how to proceed.
 | Docker project | `~/workshop/agencproj/agenc-local-dev/` |
 | Container UI | `http://localhost:3100/ui/` |
 | Open PRs | none |
+| agenc-protocol default branch | `feature/bootstrap-wave1` — skill checks out `main` before pulling |

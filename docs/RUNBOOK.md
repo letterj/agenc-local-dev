@@ -308,6 +308,51 @@ Open in browser: **http://localhost:3100/ui/**
 
 ---
 
+## Web UI Development (Hot Reload)
+
+To run the `agenc-core/web` dev server (Vite HMR) against the live container:
+
+### Prerequisites — build runtime first
+
+The web package imports `@tetsuo-ai/runtime/browser`. Build it before starting
+the dev server (only needed once, or after runtime source changes):
+
+```bash
+cd ~/workshop/agencproj/forks/agenc-core
+
+# Step 1 — contracts (runtime dependency)
+npm run build --workspace=@tetsuo-ai/desktop-tool-contracts
+
+# Step 2 — runtime (produces dist/browser.mjs)
+npm run build --workspace=@tetsuo-ai/runtime
+```
+
+### Start the dev server
+
+```bash
+cd ~/workshop/agencproj/forks/agenc-core/web
+npm run dev
+```
+
+Vite starts on port `5173`. Open with the `ws=` query param to point socket
+traffic at the live container:
+
+```
+http://localhost:5173/?ws=ws://localhost:3100
+```
+
+**How it works:** `useWebSocket` checks `window.location.search` for a `ws`
+query param before falling back to `window.location.host`. No proxy
+configuration is needed — the WebSocket connects directly to the container.
+
+### Stop the dev server
+
+```bash
+kill $(lsof -ti:5173)
+```
+
+---
+
 ## Known Issues
 
 ### 1. `gateway.bind` undocumented in public docs *(upstream)*
@@ -365,8 +410,9 @@ docker exec agenc-operator bash -c "
 |---|---|---|---|
 | `agenc-sdk` | Issue #8 | anchor.BN undefined — diagnosed | Closed |
 | `agenc-sdk` | PR #9 | fix(build): namespace import + externalize anchor | Merged |
-| `agenc-core` | Issue #26 | gateway.bind undocumented | Open |
+| `agenc-core` | Issue #26 | gateway.bind undocumented | Closed (PR #27) |
 | `agenc-core` | PR #27 | docs(gateway): document gateway.bind config field | Merged (`c99049d`) |
+| `agenc-core` | PR (closes #32) | fix(ui): scope CANCEL/CLAIM task buttons to wallet ownership | Open — `fix/task-ownership-ui` |
 
 ---
 

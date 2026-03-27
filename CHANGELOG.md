@@ -31,6 +31,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `docs/PROJECT-PLAN.md` — 10-task contributor roadmap across 4 tracks:
   Infrastructure, Upstream Contributions, Protocol (on-chain work), and
   Observability; includes dependency graph and suggested execution order
+- `forks/agenc-core` branch `fix/task-ownership-ui` pushed — scopes `[CANCEL TASK]`
+  and `[CLAIM TASK]` buttons to wallet ownership: cancel only shows for task creator,
+  claim only shows for non-creator; `agentWallet` prop threaded from
+  `walletInfo.wallet?.address` through `MarketplaceView → TasksPane → TasksView → TaskCard`;
+  safe default (neither button renders) when wallet not yet loaded — closes tetsuo-ai/agenc-core#32
+- `agenc-core/web` dev server setup documented: build `@tetsuo-ai/desktop-tool-contracts`
+  then `@tetsuo-ai/runtime` to produce `dist/browser.mjs`; start with
+  `npm run dev` in `web/`; point at live container via `?ws=ws://localhost:3100`
+  query param (no proxy config needed — `useWebSocket` reads `ws` from query string)
 
 ## [0.2.0] — 2026-03-21
 
