@@ -78,9 +78,31 @@ Depends on: Task 1
 Token usage tracking and benchmarking.
 
 **Task 9 — Token usage monitoring — file upstream issue first**
-File issue against agenc-core requesting LLM usage logging (input/output
+File issue against agenc-core requesting LLM usage logging (input + output
 tokens per call). Build lightweight proxy script while waiting for upstream.
 Submit benchmark data to the team.
+
+Feature request text (for Telegram + GitHub issue):
+
+  Would love to see per-call token usage (input + output) surfaced in the
+  runtime logs. Right now there's no way to see what a task lifecycle
+  actually costs in tokens — makes it hard to benchmark, optimize prompts,
+  or give the team real usage data.
+
+  Ideal would be a log line per LLM call with at minimum:
+  - input tokens
+  - output tokens
+  - model/provider
+  - call context (e.g. task ID or tool name if available)
+
+  Even just passing through whatever the provider returns in the response
+  metadata would be enough to build on. Happy to wire up a lightweight
+  proxy script in the meantime — but wanted to check if this is already
+  planned or if a logging hook exists somewhere I'm missing.
+
+Telegram message sent 2026-03-25. Waiting for dev team response.
+GitHub issue will be filed only if team approves.
+
 Depends on: nothing (file issue first before building)
 
 **Task 10 — Benchmark report — task lifecycle token costs**
