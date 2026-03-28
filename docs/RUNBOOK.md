@@ -308,6 +308,96 @@ Open in browser: **http://localhost:3100/ui/**
 
 ---
 
+## Dual Container Operations (Creator + Worker)
+
+Two agenc-operator containers sharing the same image: one creator (host port 3100)
+and one worker (host port 3101). Config and wallet are bind-mounted per container;
+data persists in separate named volumes.
+
+### Layout
+
+```
+agenc-local-dev/
+├── Dockerfile                  ← shared image
+└── docker/
+    ├── docker-compose.yml
+    ├── creator/config.json     ← gateway.port 3100, creator wallet, agent name "creator-operator"
+    └── worker/config.json      ← gateway.port 3100, worker wallet, agent name "worker-operator"
+```
+
+Port chain per container (same socat pattern as the single-container setup):
+
+```
+host:3100 → container agenc-creator:3101 → socat → 127.0.0.1:3100 (daemon)
+host:3101 → container agenc-worker:3101  → socat → 127.0.0.1:3100 (daemon)
+```
+
+### Start both
+
+```bash
+cd ~/workshop/agencproj/agenc-local-dev/docker
+docker compose up -d
+```
+
+### Stop both
+
+```bash
+cd ~/workshop/agencproj/agenc-local-dev/docker
+docker compose down
+```
+
+### Restart one service
+
+```bash
+docker compose -f ~/workshop/agencproj/agenc-local-dev/docker/docker-compose.yml \
+  restart agenc-creator
+```
+
+### View logs per container
+
+```bash
+docker logs -f agenc-creator
+docker logs -f agenc-worker
+```
+
+### Check daemon status per container
+
+```bash
+docker exec agenc-creator agenc status
+docker exec agenc-worker  agenc status
+```
+
+### Open a shell in a specific container
+
+```bash
+docker exec -it agenc-creator bash
+docker exec -it agenc-worker  bash
+```
+
+### Wipe data volumes (destructive)
+
+```bash
+cd ~/workshop/agencproj/agenc-local-dev/docker
+docker compose down -v
+```
+
+This removes `docker_agenc-creator-data` and `docker_agenc-worker-data`.
+Config files in `docker/creator/` and `docker/worker/` are unaffected.
+
+### Conflict with the single-container setup
+
+The original `docker-compose.yml` at the repo root uses port 3100. Stop it
+before starting the dual setup:
+
+```bash
+cd ~/workshop/agencproj/agenc-local-dev && docker compose down
+cd docker && docker compose up -d
+```
+
+For the full from-scratch walkthrough, see `docs/HOW-TO/HOW-TO-DUAL-DOCKER.md`.
+
+---
+
 ## Web UI Development (Hot Reload)
 
 To run the `agenc-core/web` dev server (Vite HMR) against the live container:

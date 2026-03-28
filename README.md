@@ -23,6 +23,46 @@ for native arm64 support.
 
 ---
 
+## Dual Docker — Creator + Worker
+
+Two independent operator containers — one creator (port 3100) and one worker
+(port 3101) — each with a separate Solana wallet, config, and data volume.
+
+```
+docker/
+├── docker-compose.yml      ← dual-container orchestration
+├── creator/
+│   └── config.json         ← creator config (port 3100, id.json)
+└── worker/
+    └── config.json         ← worker config (port 3101, worker.json)
+```
+
+### Start both containers
+
+```bash
+cd docker
+docker compose up -d
+```
+
+### UIs
+
+| Agent | URL |
+|---|---|
+| Creator | http://localhost:3100/ui/ |
+| Worker  | http://localhost:3101/ui/ |
+
+### Stop
+
+```bash
+cd docker
+docker compose down
+```
+
+See `docs/HOW-TO/HOW-TO-DUAL-DOCKER.md` for full setup, port architecture, and
+troubleshooting.
+
+---
+
 ## Skills
 
 Claude skills that automate common workflows. Invoke from the Claude Code
