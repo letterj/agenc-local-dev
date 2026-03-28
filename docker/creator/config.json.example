@@ -1,0 +1,44 @@
+{
+  "gateway": {
+    "port": 3100
+  },
+  "agent": {
+    "name": "creator-operator"
+  },
+  "connection": {
+    "rpcUrl": "https://api.devnet.solana.com",
+    "keypairPath": "~/.config/solana/id.json"
+  },
+  "llm": {
+    "provider": "grok",
+    "apiKey": "YOUR_XAI_API_KEY_HERE",
+    "model": "grok-3",
+    "timeoutMs": 60000,
+    "toolCallTimeoutMs": 180000,
+    "requestTimeoutMs": 600000,
+    "toolFailureCircuitBreaker": {
+      "enabled": true,
+      "threshold": 5,
+      "windowMs": 300000,
+      "cooldownMs": 120000
+    },
+    "retryPolicy": {
+      "timeout": { "maxRetries": 1 }
+    }
+  },
+  "memory": {
+    "backend": "sqlite",
+    "dbPath": "/root/.agenc/memory.db"
+  },
+  "logging": {
+    "level": "debug",
+    "trace": {
+      "enabled": true,
+      "includeHistory": true,
+      "includeSystemPrompt": true,
+      "includeToolArgs": true,
+      "includeToolResults": true,
+      "maxChars": 20000
+    }
+  }
+}

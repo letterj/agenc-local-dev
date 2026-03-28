@@ -3,3 +3,5 @@
 node_modules/
 
 # Skills are tracked
+docker/creator/config.json
+docker/worker/config.json

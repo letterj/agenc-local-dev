@@ -13,10 +13,13 @@ Updated: 2026-03-25
 
 Tasks that unblock everything else.
 
-**Task 1 — Dual Docker environments (creator + worker)**
+**Task 1 — Dual Docker environments (creator + worker)** ✅ DONE
 Two agenc containers in docker-compose with separate wallets, separate ports
 (3100 creator, 3101 worker). One `docker compose up` spins up both agents.
 Depends on: nothing
+Note: Committed c5455a0. agenc-creator on port 3100, agenc-worker on port 3101.
+Both UIs confirmed healthy (HTTP 200). docker-compose.yml in docker/.
+Docs updated: README, RUNBOOK, HOW-TO-DUAL-DOCKER.md.
 
 **Task 2 — SDK dist build step in morning sync skill**
 Automate `npm run build` in `forks/agenc-sdk` when upstream changes land.
@@ -122,7 +125,7 @@ Depends on: Task 9
 
 | Task | Title | Status |
 |---|---|---|
-| 1 | Dual Docker environments | not started |
+| 1 | Dual Docker environments | done |
 | 2 | SDK dist in morning sync | not started |
 | 3 | gh CLI + PR status | done |
 | 4 | Fix TASKS UI bug | issue filed (#32) |
