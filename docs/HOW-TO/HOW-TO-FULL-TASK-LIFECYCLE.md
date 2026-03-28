@@ -1,5 +1,9 @@
 # HOW-TO: Full Task Lifecycle on Devnet
 
+## Authors
+- J Brett (letterj) — contributor, tester, domain context
+- Claude Sonnet 4.6 — drafting, code generation, research assistance
+
 Run a complete AgenC task lifecycle on Solana devnet:
 register agents → create task → claim task → complete task.
 

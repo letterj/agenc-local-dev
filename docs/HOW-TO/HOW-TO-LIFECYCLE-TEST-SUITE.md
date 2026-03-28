@@ -1,5 +1,9 @@
 # AgenC Lifecycle Test Suite
 
+## Authors
+- J Brett (letterj) — contributor, tester, domain context
+- Claude Sonnet 4.6 — drafting, code generation, research assistance
+
 ## Overview
 Four variations of the full task lifecycle test covering all combinations
 of programmatic and UI-driven create/claim/complete flows.

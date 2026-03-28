@@ -1,5 +1,9 @@
 # AgenC Local Dev Environment Runbook
 
+## Authors
+- J Brett (letterj) — contributor, tester, domain context
+- Claude Sonnet 4.6 — drafting, code generation, research assistance
+
 > **Status:** Active  
 > **Last updated:** 2026-03-23
 > **Author:** letterj  

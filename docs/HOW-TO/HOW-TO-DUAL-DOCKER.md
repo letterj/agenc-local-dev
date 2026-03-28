@@ -1,5 +1,9 @@
 # HOW-TO: Dual Docker Setup (Creator + Worker)
 
+## Authors
+- J Brett (letterj) — contributor, tester, domain context
+- Claude Sonnet 4.6 — drafting, code generation, research assistance
+
 Run two independent `agenc-operator` containers on a single Mac — one acting
 as the task creator (port 3100) and one as the task worker (port 3101) — each
 with its own Solana wallet, config, and persistent data volume.
