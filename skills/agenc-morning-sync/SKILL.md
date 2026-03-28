@@ -82,7 +82,7 @@ gh search prs --author letterj \
 # For any known in-flight PRs, get full detail
 # Format: "owner/repo:pr_number"
 # e.g. for pr_spec in "tetsuo-ai/agenc-core:28"; do
-for pr_spec in; do  # empty — add entries here as PRs are filed
+for pr_spec in "tetsuo-ai/agenc-core:43"; do  # add entries as PRs are filed
   repo="${pr_spec%%:*}"
   num="${pr_spec##*:}"
   gh pr view "$num" --repo "$repo" \
