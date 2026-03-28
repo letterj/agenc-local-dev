@@ -64,10 +64,12 @@ Hands-on work with the AgenC protocol.
 Re-run `devnet-task-lifecycle.mjs` with creator and worker running as
 separate agenc containers. Verify end-to-end with two live daemons.
 Depends on: Task 1
-Note: Task Validation V2 landed upstream 2026-03-25 but devnet program
-not yet redeployed. Stick to pre-V2 task lifecycle (register → create →
-claim → complete) until tetsuo-ai redeploys. V2 instructions will fail
-on-chain.
+Note: Devnet program redeployed 2026-03-27 to new program ID GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+with Task Validation V2. Old program 6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab still has registered agents
+but is superseded. Task 7 requires fresh agent registration against the
+new program using the current IDL.
+Completed 2026-03-28. Fresh agents registered (creator: HmZqAsDz..., worker: DQ1drYVZ...).
+SHA-256 hash verification task completed on-chain. See docs/HOW-TO/HOW-TO-FULL-TASK-LIFECYCLE.md.
 
 **Task 8 — Telegram channel connector**
 Wire Telegram bot token into agenc config. Test agent receiving and
@@ -131,7 +133,7 @@ Depends on: Task 9
 | 4 | Fix TASKS UI bug | issue filed (#32) |
 | 5 | Fix GETTING_STARTED.md | n/a |
 | 6 | Follow up PR #27 | done |
-| 7 | Dual-agent lifecycle test | not started |
+| 7 | Dual-agent lifecycle test | done |
 | 8 | Telegram connector | not started |
 | 9 | Token usage monitoring | not started |
 | 10 | Benchmark report | not started |
