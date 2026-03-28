@@ -64,11 +64,26 @@ ollama    0.17.7 (optional)
 
 ## Devnet Setup
 
-**Wallet:** `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT`  
-**Balance:** ~18.5 SOL  
-**Program ID (devnet):** `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`
+**Wallet:** `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT`
+**Balance:** ~33 SOL
+**Program ID (devnet, current):** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2, deployed 2026-03-27)
+**Program ID (devnet, superseded):** `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`
 
 > ⚠️ Mainnet program ID (`5j9ZbT3...`) is different. Never use mainnet for experiments.
+
+### Active Devnet Agents (V2 Program)
+
+Registered 2026-03-28 against the current program. Use these PDAs in lifecycle scripts.
+
+| Role | Wallet | Agent PDA |
+|---|---|---|
+| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` |
+| Worker  | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` |
+
+Program: `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2, deployed 2026-03-27)
+
+> If the devnet program is redeployed, run `scripts/devnet-register-agents.mjs` to get fresh PDAs
+> and update `scripts/devnet-task-lifecycle-test.mjs`. See `docs/HOW-TO/HOW-TO-FULL-TASK-LIFECYCLE.md`.
 
 ### Known Devnet Drift (as of 2026-03-18)
 
@@ -516,5 +531,5 @@ docker exec agenc-operator bash -c "
 | agenc-protocol | https://github.com/tetsuo-ai/agenc-protocol |
 | agenc-plugin-kit | https://github.com/tetsuo-ai/agenc-plugin-kit |
 | agenc-local-dev | https://github.com/letterj/agenc-local-dev |
-| Devnet program (Solscan) | https://solscan.io/account/6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab?cluster=devnet |
+| Devnet program (Solscan) | https://solscan.io/account/GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3?cluster=devnet |
 | ADR-003 | `forks/agenc-core/docs/architecture/adr/adr-003-public-framework-product.md` |
