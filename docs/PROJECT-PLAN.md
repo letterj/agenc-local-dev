@@ -70,6 +70,8 @@ but is superseded. Task 7 requires fresh agent registration against the
 new program using the current IDL.
 Completed 2026-03-28. Fresh agents registered (creator: HmZqAsDz..., worker: DQ1drYVZ...).
 SHA-256 hash verification task completed on-chain. See docs/HOW-TO/HOW-TO-FULL-TASK-LIFECYCLE.md.
+Lifecycle test suite defined in HOW-TO-LIFECYCLE-TEST-SUITE.md.
+Test 1 (fully programmatic) complete. Tests 2-4 pending.
 
 **Task 8 — Telegram channel connector**
 Wire Telegram bot token into agenc config. Test agent receiving and
