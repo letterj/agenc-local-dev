@@ -73,10 +73,14 @@ SHA-256 hash verification task completed on-chain. See docs/HOW-TO/HOW-TO-FULL-T
 Lifecycle test suite defined in HOW-TO-LIFECYCLE-TEST-SUITE.md.
 Test 1 (fully programmatic) complete. Tests 2-4 pending.
 
-**Task 8 — Telegram channel connector**
+**Task 8 — Telegram channel connector** ✅ DONE
 Wire Telegram bot token into agenc config. Test agent receiving and
 responding to messages. Documents the connector lifecycle.
 Depends on: Task 1
+Both bots live and responding. Bug filed as agenc-core #73.
+Fix branch fix/channels-double-registration ready for PR.
+Dockerfile patch workaround in place (agenc-start.sh sed on daemon.js).
+Docs: HOW-TO-TELEGRAM-CONNECTOR.md
 
 ---
 
@@ -136,6 +140,6 @@ Depends on: Task 9
 | 5 | Fix GETTING_STARTED.md | n/a |
 | 6 | Follow up PR #27 | done |
 | 7 | Dual-agent lifecycle test | done |
-| 8 | Telegram connector | not started |
+| 8 | Telegram connector | done |
 | 9 | Token usage monitoring | not started |
 | 10 | Benchmark report | not started |
