@@ -159,13 +159,29 @@ If there is no response within 10 seconds:
 
 ## Security
 
-- `docker/creator/config.json` and `docker/worker/config.json` are both
-  listed explicitly in `.gitignore` — verify with:
-  ```bash
-  grep "config.json" ~/workshop/agencproj/agenc-local-dev/.gitignore
-  ```
-- Never commit bot tokens. Never pass them via environment variables in
-  `docker-compose.yml` (that file IS committed).
+**Never commit bot tokens.** Both `docker/creator/config.json` and
+`docker/worker/config.json` are gitignored. Verify before any commit:
+
+```bash
+grep "config.json" ~/workshop/agencproj/agenc-local-dev/.gitignore
+```
+
+**Secrets scan pattern** — use this before committing any file that
+could contain credentials:
+
+```bash
+grep -rn \
+  -e "xai-" \
+  -e "Bearer " \
+  -e "[0-9]\{8,10\}:AA[A-Za-z0-9_-]\{33\}" \
+  -e "\[0-9,\s\]\{100,\}" \
+  <files to scan>
+```
+
+The third pattern detects Telegram bot tokens (numeric ID : AA + 33 chars).
+
+- Never pass tokens via environment variables in `docker-compose.yml`
+  (that file IS committed).
 - If a token is accidentally exposed: revoke it immediately via BotFather
   (`/revoke`) and generate a new one.
 

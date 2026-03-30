@@ -97,6 +97,23 @@ If the search returns nothing, report "no open PRs".
 
 ---
 
+## Step 5b — Secrets audit (run before any commit this session)
+
+Use this pattern for all secrets scans:
+
+```bash
+grep -rn \
+  -e "xai-" \
+  -e "Bearer " \
+  -e "[0-9]\{8,10\}:AA[A-Za-z0-9_-]\{33\}" \
+  -e "\[0-9,\s\]\{100,\}" \
+  <files to scan>
+```
+
+Covers: xAI API keys, Bearer tokens, Telegram bot tokens, Solana keypair arrays.
+
+---
+
 ## Step 5 — Check tetsuo-ai org for new repositories
 
 ```bash
