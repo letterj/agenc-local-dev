@@ -26,6 +26,8 @@ Both bots respond in Telegram with the agent welcome message on `/start`.
 3. Repeat for the second bot
 4. Recommended names: `agenc-creator` and `agenc-worker` (or similar)
 
+Note: Telegram requires bot usernames to end in `bot` (e.g. `agenc_creator_bot`).
+
 ---
 
 ## Known Issue: Double-Registration Bug (agenc-core)
@@ -115,8 +117,8 @@ docker compose -f docker/docker-compose.yml up -d
 ## Verify the Connector Started
 
 ```bash
-docker logs agenc-creator 2>&1 | grep -iE "telegram|patch|channel" | tail -10
-docker logs agenc-worker  2>&1 | grep -iE "telegram|patch|channel" | tail -10
+docker logs agenc-creator 2>&1 | grep -i telegram | tail -10
+docker logs agenc-worker  2>&1 | grep -i telegram | tail -10
 ```
 
 Expected output (healthy):
