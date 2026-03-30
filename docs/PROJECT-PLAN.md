@@ -82,7 +82,7 @@ responding to messages. Documents the connector lifecycle.
 Depends on: Task 1
 Both bots live and responding in Telegram.
 Bug filed as agenc-core #73 (double-registration).
-Fix PR #74 (fix/channels-double-registration) open for review.
+Fix PR #74 (fix/channels-double-registration) merged 2026-03-30.
 Dockerfile patch workaround in place (agenc-start.sh sed on daemon.js).
 Docs: HOW-TO-TELEGRAM-CONNECTOR.md
 
