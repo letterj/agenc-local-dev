@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 node:20-slim
 
 RUN apt-get update -qq && \
-    apt-get install -y vim curl python3 make g++ iproute2 socat -qq && \
+    apt-get install -y vim curl python3 make g++ iproute2 socat procps -qq && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @tetsuo-ai/agenc
@@ -37,6 +37,21 @@ if [ -n "$SQLITE_PATH" ]; then
   SQLITE_DIR=$(dirname $(dirname $SQLITE_PATH))
   echo "Rebuilding better-sqlite3..."
   cd $SQLITE_DIR && npm rebuild 2>/dev/null || true
+fi
+
+# Patch channel double-registration bug in runtime daemon.js
+# wireTelegram and wireExternalChannel both called registerGatewayChannel(deps.gateway, ...)
+# internally AND daemon.ts also calls gateway.registerChannel() on the returned map,
+# causing "Channel already registered" on startup. Remove the internal calls.
+# Tracked upstream: fix/channels-double-registration (letterj/agenc-core)
+DAEMON_JS=$(find /root/.agenc/runtime -name "daemon.js" -path "*/runtime/dist/bin/*" 2>/dev/null | head -1)
+if [ -n "$DAEMON_JS" ]; then
+  if grep -q "registerGatewayChannel(deps.gateway" "$DAEMON_JS"; then
+    sed -i 's/await registerGatewayChannel(deps\.gateway, [^)]*)[;]*/\/\/ patched: registration owned by daemon startup loop/g' "$DAEMON_JS"
+    echo "✅ Applied channel double-registration patch to daemon.js"
+  else
+    echo "✅ Channel patch already applied or not needed"
+  fi
 fi
 
 # Bridge external port 3101 → daemon loopback 3100 for Docker port mapping

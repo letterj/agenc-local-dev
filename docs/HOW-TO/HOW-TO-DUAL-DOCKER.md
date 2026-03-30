@@ -72,6 +72,11 @@ Each container has its host wallet keypair bind-mounted read-only to
 | `agenc-creator` | `~/.config/solana/id.json` | `/root/.config/solana/id.json:ro` |
 | `agenc-worker` | `~/.config/solana/worker.json` | `/root/.config/solana/id.json:ro` |
 
+### Installed Tools
+
+Both containers include `procps` (provides ps, top, free) to support
+agent system status queries via the bash tool.
+
 ### Config injection
 
 Each container has its pre-baked `config.json` bind-mounted read-only on top
