@@ -51,6 +51,32 @@ If nothing changed, skip silently.
 
 ---
 
+## Step 2b — Rebuild agenc-sdk dist if new commits landed
+
+If agenc-sdk had new commits in Step 1, rebuild the dist:
+
+```bash
+AGENC_SDK_COMMITS=$(git -C ~/workshop/agencproj/agenc-sdk \
+  log --oneline --since="yesterday" origin/main 2>/dev/null | wc -l | tr -d ' ')
+if [ "$AGENC_SDK_COMMITS" -gt 0 ]; then
+  echo "agenc-sdk: $AGENC_SDK_COMMITS new commit(s) — rebuilding dist..."
+  if cd ~/workshop/agencproj/forks/agenc-sdk && npm run build 2>&1; then
+    echo "✅ agenc-sdk dist rebuilt"
+  else
+    echo "⚠️  agenc-sdk dist build FAILED — scripts importing from dist/ may error"
+    echo "   Run manually: cd ~/workshop/agencproj/forks/agenc-sdk && npm run build"
+  fi
+else
+  echo "agenc-sdk: no new commits — dist unchanged"
+fi
+```
+
+The `dist/` directory is gitignored. Scripts in `agenc-local-dev/scripts/`
+import from `forks/agenc-sdk/dist/` — a stale dist causes BN-related or
+import errors. Build failure is reported but does not block the rest of the sync.
+
+---
+
 ## Step 3 — Rebase working branches if main changed
 
 For each fork that was synced:
@@ -97,7 +123,7 @@ If the search returns nothing, report "no open PRs".
 
 ---
 
-## Step 5b — Secrets audit (run before any commit this session)
+## Step 4b — Secrets audit (run before any commit this session)
 
 Use this pattern for all secrets scans:
 
@@ -152,23 +178,6 @@ For each flagged repo, report:
 
 ---
 
-## Step 5b — Check SDK dist is current
-
-If any `agenc-sdk` commits landed in Step 1, rebuild the SDK dist:
-
-```bash
-cd ~/workshop/agencproj/forks/agenc-sdk
-npm run build
-```
-
-The `dist/` directory is gitignored. Scripts in `agenc-local-dev/scripts/`
-import from `forks/agenc-sdk/dist/` — if the dist is stale they will fail
-with BN-related or import errors.
-
-If no `agenc-sdk` commits landed, skip silently.
-
----
-
 ## Step 6 — Start the Docker operator container
 
 ```bash
@@ -196,7 +205,8 @@ Print a clean summary:
 
 Repos synced:
   - agenc-core: N new commits
-  - agenc-sdk: no changes
+  - agenc-sdk: N new commits — dist rebuilt ✅
+  or: agenc-sdk: no changes
   ...
 
 New tetsuo-ai repos:
