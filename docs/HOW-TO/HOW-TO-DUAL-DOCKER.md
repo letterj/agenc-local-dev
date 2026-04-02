@@ -4,9 +4,9 @@
 - J Brett (letterj) — contributor, tester, domain context
 - Claude Sonnet 4.6 — drafting, code generation, research assistance
 
-Run two independent `agenc-operator` containers on a single Mac — one acting
-as the task creator (port 3100) and one as the task worker (port 3101) — each
-with its own Solana wallet, config, and persistent data volume.
+Run two independent containers on a single Mac — `agenc-creator` (port 3100) and
+`agenc-worker` (port 3101) — each with its own Solana wallet, config, and persistent
+data volume.
 
 ---
 
@@ -31,10 +31,10 @@ solana airdrop 1 $(solana-keygen pubkey ~/.config/solana/worker.json) --url devn
 
 ```
 agenc-local-dev/
-├── Dockerfile                  ← shared image (unchanged)
-├── docker-compose.yml          ← original single-container setup (preserved)
+├── Dockerfile                  ← shared image
+├── docker-compose.yml          ← canonical dual-container setup (agenc-creator + agenc-worker)
 └── docker/
-    ├── docker-compose.yml      ← dual-container setup
+    ├── docker-compose.yml      ← alternate compose (same services, run from docker/ subdir)
     ├── creator/
     │   └── config.json         ← creator agent config (port 3100, creator wallet)
     └── worker/
@@ -101,7 +101,7 @@ grep apiKey docker/worker/config.json
 ### Step 2 — Build and start
 
 ```bash
-cd ~/workshop/agencproj/agenc-local-dev/docker
+cd ~/workshop/agencproj/agenc-local-dev
 docker compose up -d
 ```
 
@@ -135,14 +135,14 @@ Expected output from `agenc status`:
 ### Start both containers
 
 ```bash
-cd ~/workshop/agencproj/agenc-local-dev/docker
+cd ~/workshop/agencproj/agenc-local-dev
 docker compose up -d
 ```
 
 ### Stop both containers
 
 ```bash
-cd ~/workshop/agencproj/agenc-local-dev/docker
+cd ~/workshop/agencproj/agenc-local-dev
 docker compose down
 ```
 
@@ -231,11 +231,13 @@ automatically on subsequent runs.
 
 ### Port conflict
 
-If port 3100 or 3101 is already in use (e.g. the old single-container setup):
+If port 3100 or 3101 is already in use:
 
 ```bash
+# Find the conflicting container
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+# Stop it, then start the compose stack
+docker stop <container-name>
 cd ~/workshop/agencproj/agenc-local-dev
-docker compose down   # stop the original single container
-cd docker
 docker compose up -d
 ```

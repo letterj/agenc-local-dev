@@ -50,6 +50,11 @@ Final working state: socat bridge restored, no `auth.secret` required.
 | `@tetsuo-ai/plugin-kit` | 0.1.1 |
 | `@tetsuo-ai/agenc` | 0.1.0 |
 
+The `agenc-morning-sync` skill checks `@tetsuo-ai/agenc` against this baseline on
+every session start (Step 3b). When a new version is detected, a rebuild is needed
+to pick up upstream changes — the Dockerfile installs the package unpinned, so
+`docker compose build --no-cache` pulls whatever `dist-tags.latest` resolves to.
+
 ---
 
 ## Prerequisites
@@ -88,6 +93,91 @@ Program: `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2, dep
 
 > If the devnet program is redeployed, run `scripts/devnet-register-agents.mjs` to get fresh PDAs
 > and update `scripts/devnet-task-lifecycle-test.mjs`. See `docs/HOW-TO/HOW-TO-FULL-TASK-LIFECYCLE.md`.
+
+**Creator agent confirmed live — 2026-04-02**
+
+Queried via `getAgent(program, agentPda)` with V2 IDL (`GN69C…`). Account fields:
+
+| Field | Value |
+|---|---|
+| authority | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` |
+| capabilities | 1 |
+| status | 1 (active) |
+| endpoint | `https://example.invalid/creator` |
+| stakeAmount | 1,000,000 lamports (0.001 SOL) |
+| activeTasks | 0 |
+| reputation | 5000 |
+| registeredAt | 1774734327 (2026-03-28) |
+
+Preconditions verified: creator container running (HTTP 200 on port 3100), creator wallet balance 33.36 SOL, devnet RPC reachable. No fresh registration needed — existing account remains valid.
+
+### Dual-Agent Task Lifecycle Run — 2026-04-02
+
+Full create → claim → complete lifecycle run against V2 program using both containers.
+
+**Preconditions:**
+- Creator container: HTTP 200, port 3100 ✅
+- Worker container: HTTP 200, port 3101 ✅ (started via `docker compose up -d agenc-worker`)
+- Creator wallet: 33.36 SOL ✅
+- Worker wallet: 14.91 SOL ✅
+- Both agent PDAs confirmed active on V2 program
+
+**Fix applied:** `scripts/devnet-task-lifecycle.mjs` had stale PDAs hardcoded (`GvXS49…` creator, `CmehT9…` worker — both V1-era). Updated to the V2 PDAs before running.
+
+**Results:**
+
+**Task PDA:** `2FVqsjXojtpsJ1tYpD22dkhyAV76XjKCpSfNxgFVRVBm`
+Reward: 0.01 SOL | completedAt: 2026-04-02T23:03:23Z
+
+| Step | Action | Status | Tx (devnet) |
+|---|---|---|---|
+| 0 | Fetch agent registrations | ✅ | — |
+| 1 | Create task | ✅ | [2REHbJQ…](https://solscan.io/tx/2REHbJQFEqh4N95fv98bJjq9cgSaCbWJjUBciYyGiuq1eB6TickZPYp1pU98cqc6zjjCvsNCMACufJU8KFhtJdez?cluster=devnet) |
+| 2 | Claim task | ✅ | [z9Zr2Aj…](https://solscan.io/tx/z9Zr2Aj9mXq2AsQUq3kBUh7RaLcaaiMCr8j6WxnxF9oiHxBAkP72rAyrTzh4e8t9EfZds2BR6kFedrQGzKNko3S?cluster=devnet) |
+| 3 | Complete task | ✅ | [4PDbvrc…](https://solscan.io/tx/4PDbvrcPnCwALqtgi4quC2vR9b3EhdK4KXLHryNeXFQ9yGbq93hEPBRRSDCxLTZppWPJoBguphx3aZbXSyDgWNL?cluster=devnet) |
+| — | Final state | ✅ Completed | 2026-04-02T23:03:23Z |
+
+### Protocol Config PDA (2026-04-02)
+
+- **Program:** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+- **Protocol config PDA (correct):** `GEXnAns2Wq27xjG84a7BnuxJBY3R5Qu9CdFy2HQ7vsiv` (initialized, devnet)
+- **Wrong PDA reported by client:** `9bE5CbHLW8ZAeAkxUTSeUdSwEjbivtr5skWxzjLYfCWi`
+- **Error seen:** `Failed to fetch protocol config: Account does not exist`
+
+**Root cause — investigated 2026-04-02:**
+
+The protocol config PDA is derived with seed `"protocol"` (single word, exact). Verified:
+
+```
+findProgramAddressSync([Buffer.from("protocol")], V1_6UcJzb...) → 5AhrM23...  (wrong)
+findProgramAddressSync([Buffer.from("protocol")], V2_GN69C...) → GEXnAns2...  ✓ correct
+```
+
+The SDK constant `PROGRAM_ID` in `agenc-sdk/src/constants.ts` is hardcoded to the V1 program
+(`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`). `deriveProtocolPda()` has a default
+parameter of `PROGRAM_ID`, so **any call to `deriveProtocolPda()` without an explicit
+`programId` argument will derive the wrong PDA** against the V1 program.
+
+The IDL at `forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json` is correct —
+it carries `"address": "GN69C..."`. Anchor's `Program` constructor reads this field, so
+`program.programId` is correct when the Program object is built from the IDL.
+
+**Status of local devnet scripts:** Safe. `devnet-task-lifecycle.mjs` and
+`devnet-task-lifecycle-test.mjs` build the Program object via `createProgram(connection, idl,
+keypair)` (which reads program ID from the IDL), and all `deriveProtocolPda` calls in the SDK
+pass `program.programId` explicitly. Scripts fail fast with a clear error if `AGENC_IDL_PATH`
+is unset.
+
+**Stale V1 references that still exist upstream (not blocking local scripts):**
+- `agenc-sdk/src/constants.ts` — `PROGRAM_ID` default (upstream issue, not yet updated)
+- `agenc-core/mcp/src/server.ts` line 355 — comment cites V1 program for PDA derivation
+- `agenc-core/scripts/agenc-devnet-soak*.{mjs,sh}` — hardcoded V1 defaults
+- `agenc-core/tools/localnet-social/bootstrap-cli.ts`, `scripts/generate-real-proof-cli.ts`
+
+**The exact derivation path that produced `9bE5CbH...` is unconfirmed** — no code in this
+workspace produces that PDA with any tested seed/program combination. It was reported by the
+dev team as a client-side derivation error; the likeliest cause is a call to
+`deriveProtocolPda()` without a `programId` argument in a code path not present in this repo.
 
 ### Known Devnet Drift (as of 2026-03-18)
 
@@ -177,6 +267,11 @@ done
 The `agenc-morning-sync` Claude skill (`skills/agenc-morning-sync/SKILL.md`) automates
 this entire section. Invoke it at session start with any phrase like "morning sync",
 "let's get started", or "sync the repos". Manual steps below for reference.
+
+The skill also checks whether tetsuo-ai has published a new `@tetsuo-ai/agenc` npm
+release (Step 3b). The Dockerfile installs this package unpinned — a `docker compose
+build` without a new upstream release installs the same binary already in the image.
+The check avoids unnecessary rebuilds and flags when one is actually warranted.
 
 Run at the start of each session:
 
@@ -302,23 +397,32 @@ cd ~/workshop/agencproj/agenc-local-dev
 docker compose build
 ```
 
-### Start the container
+### Start the containers
 
 ```bash
 docker compose up -d
 ```
 
-The container auto-starts the daemon. No manual steps needed.
+Starts both `agenc-creator` (port 3100) and `agenc-worker` (port 3101).
+Each container auto-starts its daemon. No manual steps needed.
+
+> **Note (2026-04-02):** The legacy `agenc-operator` single-container setup is retired.
+> The root `docker-compose.yml` now defines `agenc-creator` and `agenc-worker` as the
+> canonical containers. All ops commands use `agenc-creator` or `agenc-worker` by name.
 
 ### Daily operations (from Mac)
 
 ```bash
-docker compose up -d                    # start
-docker compose down                     # stop
-docker exec -it agenc-operator bash    # open shell
-docker exec agenc-operator agenc status # check status
-docker logs -f agenc-operator          # view logs
-docker exec agenc-operator agenc stop  # stop daemon only
+docker compose up -d                      # start both containers
+docker compose down                       # stop both containers
+docker exec -it agenc-creator bash        # open shell (creator)
+docker exec -it agenc-worker  bash        # open shell (worker)
+docker exec agenc-creator agenc status    # check creator daemon
+docker exec agenc-worker  agenc status    # check worker daemon
+docker logs -f agenc-creator              # creator logs
+docker logs -f agenc-worker               # worker logs
+docker exec agenc-creator agenc stop      # stop creator daemon only
+docker exec agenc-worker  agenc stop      # stop worker daemon only
 ```
 
 ### Access the UI
@@ -329,8 +433,8 @@ Open in browser: **http://localhost:3100/ui/**
 
 ## Dual Container Operations (Creator + Worker)
 
-Two agenc-operator containers sharing the same image: one creator (host port 3100)
-and one worker (host port 3101). Config and wallet are bind-mounted per container;
+Two containers sharing the same image: `agenc-creator` (host port 3100) and
+`agenc-worker` (host port 3101). Config and wallet are bind-mounted per container;
 data persists in separate named volumes.
 
 ### Layout
@@ -354,7 +458,7 @@ host:3101 → container agenc-worker:3101  → socat → 127.0.0.1:3100 (daemon)
 ### Start both
 
 ```bash
-cd ~/workshop/agencproj/agenc-local-dev/docker
+cd ~/workshop/agencproj/agenc-local-dev
 docker compose up -d
 ```
 
@@ -481,7 +585,7 @@ bridge IP limitation for `localBypass: true`.
 **Fix:** The `agenc-start.sh` script handles this automatically.  
 If it fails manually:
 ```bash
-docker exec agenc-operator bash -c "
+docker exec agenc-creator bash -c "
   cd \$(find /root/.agenc/runtime -name better-sqlite3 -type d | head -1)
   npm rebuild
 "
@@ -494,16 +598,23 @@ docker exec agenc-operator bash -c "
 
 ### 4. `agenc` CLI only supports Linux x64
 
-**Symptom:** `unsupported platform darwin-arm64` on macOS Apple Silicon.  
-**Workaround:** Run in Docker with `--platform linux/amd64` as described above.  
+**Symptom:** `unsupported platform darwin-arm64` on macOS Apple Silicon.
+**Workaround:** Run in Docker with `--platform linux/amd64` as described above.
 **Status:** No macOS issue filed upstream yet.
+
+### 5. Pack Smoke CI failure — PostCSS native binding *(upstream, 2026-04-02)*
+
+**Checks affected:** `public-install-min-node`, `private-kernel-registry`
+**Symptom:** Both checks fail when the PostCSS native binding is missing in the CI runner. The web build fails, cascading into the runtime dashboard asset build via `build-dashboard-assets.mjs`.
+**Root cause:** npm optional dependencies bug ([npm/cli#4828](https://github.com/npm/cli/issues/4828)) — pre-existing on upstream `main`, not PR-specific.
+**Status:** Confirmed failing on `main` as of 2026-04-02. PRs that pass `pack-smoke` but fail only these two checks are not the cause.
 
 ---
 
 ## Confirmed Working (2026-03-21)
 
 - ✅ Agent registered on devnet: `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs`
-- ✅ Daemon running in Docker: `agenc-operator` container
+- ✅ Daemon running in Docker: `agenc-creator` container (port 3100); `agenc-worker` (port 3101)
 - ✅ Web UI accessible: `http://localhost:3100/ui/`
 - ✅ Grok LLM connected: `grok-3`
 - ✅ Agent queried live devnet tasks via on-chain tools

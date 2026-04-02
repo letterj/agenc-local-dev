@@ -201,32 +201,32 @@ docker compose down
 ### Open a bash shell inside the running container
 
 ```bash
-docker exec -it agenc-operator bash
+docker exec -it agenc-creator bash
 ```
 
 ### Check daemon status
 
 ```bash
-docker exec agenc-operator agenc status
+docker exec agenc-creator agenc status
 ```
 
 ### View live logs
 
 ```bash
-docker logs -f agenc-operator
+docker logs -f agenc-creator
 ```
 
 ### Stop the daemon (without stopping the container)
 
 ```bash
-docker exec agenc-operator agenc stop
+docker exec agenc-creator agenc stop
 ```
 
 ### Restart the daemon
 
 ```bash
-docker exec agenc-operator agenc stop
-docker exec agenc-operator agenc-start.sh
+docker exec agenc-creator agenc stop
+docker exec agenc-creator agenc-start.sh
 ```
 
 ### Rebuild after Dockerfile changes
@@ -258,31 +258,31 @@ docker compose down -v
 Check daemon status and that socat is bridging:
 
 ```bash
-docker exec agenc-operator agenc status
-docker exec agenc-operator ss -tlnp | grep -E '3100|3101'
+docker exec agenc-creator agenc status
+docker exec agenc-creator ss -tlnp | grep -E '3100|3101'
 ```
 
 Expected: daemon on `127.0.0.1:3100`, socat on `0.0.0.0:3101`. If the daemon
 isn't running:
 
 ```bash
-docker logs agenc-operator --tail 30
+docker logs agenc-creator --tail 30
 ```
 
 ### Daemon fails with better-sqlite3 error
 
 ```bash
-docker exec agenc-operator bash -c "
+docker exec agenc-creator bash -c "
   cd \$(find /root/.agenc/runtime -name better-sqlite3 -type d | head -1)
   npm rebuild
 "
-docker exec agenc-operator agenc start
+docker exec agenc-creator agenc start
 ```
 
 ### Check API key is configured
 
 ```bash
-docker exec agenc-operator bash -c \
+docker exec agenc-creator bash -c \
   "grep apiKey /root/.agenc/config.json"
 ```
 

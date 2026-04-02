@@ -26,6 +26,7 @@ if [ -n "$GROK_API_KEY" ]; then
     cfg.llm = { provider: 'grok', apiKey: process.env.GROK_API_KEY, model: 'grok-3' };
     cfg.memory = { backend: 'sqlite', dbPath: '/root/.agenc/memory.db' };
     cfg.agent = { name: process.env.AGENT_NAME || 'letterj-operator' };
+    cfg.heartbeat = { enabled: false };
     fs.writeFileSync('/root/.agenc/config.json', JSON.stringify(cfg, null, 2));
   "
   echo "✅ Config updated from environment"

@@ -8,6 +8,87 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Docs
+- `docker-compose.yml` (root) — replaced legacy `agenc-operator` single-service definition
+  with dual `agenc-creator` (port 3100) and `agenc-worker` (port 3101) services. Root compose
+  is now canonical; `docker compose up -d` from `agenc-local-dev/` starts both containers.
+  Volume names: `agenc-local-dev_agenc-creator-data`, `agenc-local-dev_agenc-worker-data`.
+  Config bind-mounts from `./docker/creator/config.json` and `./docker/worker/config.json`.
+- `scripts/devnet-task-lifecycle.mjs` — updated hardcoded agent PDAs from stale V1-era values
+  (`GvXS49…` creator, `CmehT9…` worker) to current V2 PDAs (`HmZqAsDz…`, `DQ1drYVZ…`).
+  Root cause: PDAs were set at initial script creation and never updated after the V2 re-registration.
+- `CLAUDE.md` — retired "Operator Instance (Docker)" section; replaced with "Docker Containers"
+  table listing `agenc-creator` and `agenc-worker` with ports, wallets, and config paths.
+  Updated Quick Reference line to reference dual-container setup.
+- `README.md` — replaced all `docker exec agenc-operator` commands with `agenc-creator`.
+- `docs/RUNBOOK.md` — updated daily ops commands from `agenc-operator` to `agenc-creator`/
+  `agenc-worker`; updated dual-container start path from `docker/` subdir to root; added
+  retirement note for `agenc-operator`.
+- `docs/HOW-TO/HOW-TO-DUAL-DOCKER.md` — updated directory layout note, start/stop commands
+  now reference root compose instead of `docker/` subdir; updated port conflict section.
+- `skills/agenc-morning-sync/SKILL.md` — Step 6 updated to check `agenc-creator` and
+  `agenc-worker` independently and start via root `docker compose up -d`; summary block
+  updated to show both containers.
+- `docs/RUNBOOK.md` — dual-agent task lifecycle run (2026-04-02): full create→claim→complete
+  confirmed against V2 program (`GN69C…`) with both containers live (creator port 3100, worker
+  port 3101). Task PDA `2FVqsj…`, all three txs confirmed on devnet. Worker container was
+  down at start — started via `docker compose up -d agenc-worker`.
+  Fix: `scripts/devnet-task-lifecycle.mjs` had stale V1-era agent PDAs hardcoded (`GvXS49…`
+  creator, `CmehT9…` worker); updated to V2 PDAs (`HmZqAsDz…`, `DQ1drYVZ…`) before running.
+- `docs/RUNBOOK.md` — added creator agent confirmation entry (2026-04-02): queried
+  `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` via `getAgent()` with V2 IDL;
+  account is active against `GN69C…` (V2 program), authority `BP3rDM…` (creator wallet),
+  capabilities=1, status=1, stakeAmount=1,000,000 lamports, activeTasks=0, reputation=5000.
+  Creator container confirmed healthy (HTTP 200, port 3100), wallet balance 33.36 SOL.
+  No fresh registration was needed.
+- `docs/PROJECT-PLAN.md` — updated task statuses as of 2026-04-02: Tasks 1–3, 6–8 confirmed
+  done; Task 4 (TASKS UI bug) now reflects PR #43 open awaiting re-review from Pavelevich;
+  Task 5 closed as n/a (too minor, low upstream value); Tasks 9–10 marked on hold /
+  blocked pending dev team response on token usage logging. Added **Future PR Opportunities**
+  section cataloguing the stale `PROGRAM_ID` V1 constant in `agenc-sdk/src/constants.ts`
+  and downstream references in `agenc-core/mcp/src/server.ts`, soak scripts, and
+  `bootstrap-cli.ts` — not blocking today but candidate for upstream PR when team has
+  bandwidth.
+- `docs/RUNBOOK.md` — added Known Issue #5: Pack Smoke CI failure due to PostCSS native
+  binding missing in CI runner (`public-install-min-node` + `private-kernel-registry` checks);
+  root cause is npm optional deps bug [npm/cli#4828](https://github.com/npm/cli/issues/4828),
+  pre-existing on upstream `main` as of 2026-04-02, not PR-specific
+- `docs/RUNBOOK.md` — expanded Protocol Config PDA entry with full root cause analysis
+  (2026-04-02): seed is `"protocol"` (single word); V2 program `GN69C…` + seed →
+  `GEXnAns2…` ✓; `agenc-sdk/src/constants.ts` `PROGRAM_ID` constant is still the V1
+  program (`6UcJzb…`) so any `deriveProtocolPda()` call without an explicit `programId`
+  arg derives the wrong PDA; local devnet scripts are safe (build Program object from IDL,
+  pass `program.programId` explicitly); upstream stale V1 references catalogued in
+  agenc-core MCP server, soak scripts, and bootstrap-cli
+
+### Verified
+- **Dual-agent task lifecycle — V2 devnet — 2026-04-02:** full create → claim → complete
+  confirmed against program `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2)
+  using both containers running from root `docker-compose.yml`.
+  Creator (`agenc-creator`, port 3100, wallet `BP3rDM…`) created task;
+  worker (`agenc-worker`, port 3101, wallet `26d6kx…`) claimed and completed it.
+  Task PDA: `2FVqsjXojtpsJ1tYpD22dkhyAV76XjKCpSfNxgFVRVBm`. Reward: 0.01 SOL.
+  Final state: Completed at 2026-04-02T23:03:23Z.
+  Solscan txs: create `2REHbJQ…`, claim `z9Zr2Aj…`, complete `4PDbvrc…`.
+
+### Fixed
+- `scripts/devnet-task-lifecycle.mjs` — corrected stale V1-era agent PDAs hardcoded at script
+  creation (`GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs` creator, `CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V`
+  worker). Updated to V2 PDAs (`HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` creator,
+  `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` worker). Script was failing with
+  `AccountNotInitialized` on `creator_agent` because the old PDA no longer exists under
+  the V2 program.
+- `heartbeat.enabled: false` added to all container configs and Dockerfile injection
+  to stop idle LLM token burn. The runtime's heartbeat scheduler defaults to
+  **enabled** when no `heartbeat` key is present in config — firing grok-3 requests
+  every 5 minutes (2 meta-planner actions per fire) plus a `self-learning` cron
+  every 6 hours and a `curiosity` cron every 2 hours, all with no user activity.
+  Over ~7 days continuous this burned ~$50 in xAI tokens. The single config key
+  `"heartbeat": { "enabled": false }` gates the entire autonomous features block.
+  Applied to: `docker/creator/config.json`, `docker/creator/config.json.example`,
+  `docker/worker/config.json`, `docker/worker/config.json.example`, and the
+  `agenc-start.sh` injection script in `Dockerfile`.
+
 ### Added
 - `agenc-morning-sync` skill — codifies the session-start workflow as a reusable Claude skill:
   fetches upstream changes across all AgenC repos, syncs forks that have new commits,
@@ -15,6 +96,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `agenc-morning-sync` skill now checks the tetsuo-ai GitHub org for new repositories
   created since the previous session; flags anything matching `agenc-marketplace` or other
   extracted-component naming patterns against the known six-repo list
+- `agenc-morning-sync` skill: Step 3b — npm release check for `@tetsuo-ai/agenc`;
+  compares `dist-tags.latest` against baseline `0.1.0` (published 2026-03-19);
+  prints a single-line status in the sync summary; alerts with release date and
+  image rebuild prompt when a newer version is available — prevents rebuilding the
+  Docker image when tetsuo-ai has not yet published
 - `agenc-morning-sync` skill now includes Step 5b: rebuild `forks/agenc-sdk` dist if
   any agenc-sdk commits landed during sync (dist/ is gitignored; stale dist causes BN
   errors in devnet scripts)

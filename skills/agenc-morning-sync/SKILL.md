@@ -92,6 +92,32 @@ force the rebase. Let the user decide.
 
 ---
 
+## Step 3b — Check @tetsuo-ai/agenc npm release
+
+```bash
+LATEST=$(npm view @tetsuo-ai/agenc dist-tags.latest 2>/dev/null)
+BASELINE="0.1.0"
+if [ "$LATEST" = "$BASELINE" ]; then
+  echo "agenc npm: $BASELINE (no new release)"
+else
+  RELEASE_DATE=$(npm view @tetsuo-ai/agenc time --json 2>/dev/null \
+    | python3 -c "import json,sys; t=json.load(sys.stdin); print(t.get('$LATEST','?')[:10])" 2>/dev/null)
+  echo "agenc npm: $LATEST released $RELEASE_DATE ⚠️  new release — image rebuild available"
+fi
+```
+
+Baseline is `0.1.0`, published 2026-03-19. The container image installs `@tetsuo-ai/agenc`
+from npm with no pinned version — a rebuild without a new release picks up the same binary.
+If this step reports a new version, rebuild the image:
+
+```bash
+cd ~/workshop/agencproj/agenc-local-dev
+docker compose build --no-cache
+docker compose up -d
+```
+
+---
+
 ## Step 4 — Check open PRs status
 
 ```bash
@@ -108,7 +134,7 @@ gh search prs --author letterj \
 # For any known in-flight PRs, get full detail
 # Format: "owner/repo:pr_number"
 # e.g. for pr_spec in "tetsuo-ai/agenc-core:28"; do
-for pr_spec in "tetsuo-ai/agenc-core:43"; do  # add entries as PRs are filed
+for pr_spec in "tetsuo-ai/agenc-core:43" "tetsuo-ai/agenc-core:144" "tetsuo-ai/agenc-core:145"; do  # add entries as PRs are filed
   repo="${pr_spec%%:*}"
   num="${pr_spec##*:}"
   gh pr view "$num" --repo "$repo" \
@@ -183,14 +209,21 @@ For each flagged repo, report:
 ```bash
 cd ~/workshop/agencproj/agenc-local-dev
 
-if docker ps --filter "name=agenc-operator" --format "{{.Names}}" | grep -q agenc-operator; then
-  echo "✅ agenc-operator already running"
-  docker exec agenc-operator agenc status | grep -E "running|pid|port"
+cd ~/workshop/agencproj/agenc-local-dev
+
+CREATOR_UP=$(docker ps --filter "name=agenc-creator" --format "{{.Names}}" | grep -c agenc-creator || true)
+WORKER_UP=$(docker ps --filter "name=agenc-worker" --format "{{.Names}}" | grep -c agenc-worker || true)
+
+if [ "$CREATOR_UP" -gt 0 ] && [ "$WORKER_UP" -gt 0 ]; then
+  echo "✅ agenc-creator and agenc-worker already running"
+  docker exec agenc-creator agenc status | grep -E "running|pid|port"
+  docker exec agenc-worker  agenc status | grep -E "running|pid|port"
 else
   docker compose up -d
   sleep 10
-  docker exec agenc-operator agenc status | grep -E "running|pid|port"
-  echo "✅ agenc-operator started"
+  docker exec agenc-creator agenc status | grep -E "running|pid|port"
+  docker exec agenc-worker  agenc status | grep -E "running|pid|port"
+  echo "✅ containers started"
 fi
 ```
 
@@ -209,6 +242,10 @@ Repos synced:
   or: agenc-sdk: no changes
   ...
 
+npm package:
+  - agenc npm: 0.1.0 (no new release)
+  or: agenc npm: X.X.X released YYYY-MM-DD ⚠️  new release — image rebuild available
+
 New tetsuo-ai repos:
   - agenc-marketplace (created 2026-03-24) — ⚠️ extracted component?
   or: none since last session
@@ -217,9 +254,10 @@ PRs:
   - tetsuo-ai/agenc-core #NN: open | reviews: REVIEW_DECISION | comments: N | updated: YYYY-MM-DD | title
   or: no open PRs
 
-Container:
-  - agenc-operator: running | pid NNN | port 3100
-  - UI: http://localhost:3100/ui/
+Containers:
+  - agenc-creator: running | pid NNN | port 3100
+  - agenc-worker:  running | pid NNN | port 3101
+  - UIs: http://localhost:3100/ui/  http://localhost:3101/ui/
 
 Ready.
 ```
@@ -240,5 +278,5 @@ call it out clearly and stop so the user can decide how to proceed.
 | Working branch | `experiment/local-dev-setup` on all forks |
 | Docker project | `~/workshop/agencproj/agenc-local-dev/` |
 | Container UI | `http://localhost:3100/ui/` |
-| Tracked PRs | none currently — add to Step 4 tracked loop as PRs are filed |
+| Tracked PRs | agenc-core #43 (ui: wallet-scoped buttons), agenc-core #144 (runtime: named BN import), agenc-core #145 (cli: agent PDA auto-discovery) |
 | agenc-protocol default branch | `feature/bootstrap-wave1` — skill checks out `main` before pulling |

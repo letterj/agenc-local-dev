@@ -1,21 +1,36 @@
 services:
-  agenc-operator:
+  agenc-creator:
     build:
       context: .
       dockerfile: Dockerfile
     platform: linux/amd64
-    container_name: agenc-operator
+    container_name: agenc-creator
     ports:
       - "3100:3101"
     volumes:
-      - agenc-data:/root/.agenc
-    environment:
-      - GROK_API_KEY=${GROK_API_KEY}
-      - AGENT_NAME=${AGENT_NAME:-letterj-operator}
-      - AUTH_SECRET=${AUTH_SECRET}
+      - agenc-creator-data:/root/.agenc
+      - ./docker/creator/config.json:/root/.agenc/config.json:ro
+      - ${HOME}/.config/solana/id.json:/root/.config/solana/id.json:ro
+    stdin_open: true
+    tty: true
+
+  agenc-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    container_name: agenc-worker
+    ports:
+      - "3101:3101"
+    volumes:
+      - agenc-worker-data:/root/.agenc
+      - ./docker/worker/config.json:/root/.agenc/config.json:ro
+      - ${HOME}/.config/solana/worker.json:/root/.config/solana/id.json:ro
     stdin_open: true
     tty: true
 
 volumes:
-  agenc-data:
+  agenc-creator-data:
+    driver: local
+  agenc-worker-data:
     driver: local

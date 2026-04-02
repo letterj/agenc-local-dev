@@ -20,7 +20,7 @@ GitHub: `https://github.com/letterj`. Working from forks, submitting PRs upstrea
 - **Wallet:** `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` (~18.4 SOL)
 - **Registered agent PDA:** `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs`
 - **ADR-003 is current:** agenc-core is public
-- **Operator instance:** Docker container `agenc-operator`, UI at `http://localhost:3100/ui/`
+- **Containers:** `agenc-creator` (port 3100) and `agenc-worker` (port 3101) via `docker compose up -d`
 
 ---
 
@@ -49,37 +49,29 @@ ADR-002 (private kernel) is superseded.
 
 ---
 
-## Operator Instance (Docker)
+## Docker Containers
 
 The `agenc` CLI only supports Linux x64. On macOS, run in Docker.
 
+Two containers are defined in the root `docker-compose.yml`:
+
+| Container | Host port | Wallet | Config |
+|---|---|---|---|
+| `agenc-creator` | 3100 | `~/.config/solana/id.json` | `docker/creator/config.json` |
+| `agenc-worker` | 3101 | `~/.config/solana/worker.json` | `docker/worker/config.json` |
+
 ```bash
-# Build
-docker build --platform linux/amd64 \
-  -t agenc-operator \
-  -f ~/workshop/agencproj/Dockerfile.agenc \
-  ~/workshop/agencproj/
+# Start both
+cd ~/workshop/agencproj/agenc-local-dev
+docker compose up -d
 
-# Run
-docker run -it --platform linux/amd64 \
-  --name agenc-operator \
-  -p 3100:3101 \
-  agenc-operator
-
-# Inside container — first time
-agenc onboard
-vim /root/.agenc/config.json  # add llm block + "host": "0.0.0.0"
-agenc-start.sh
-
-# UI
-open http://localhost:3100/ui/
+# UIs
+open http://localhost:3100/ui/   # creator
+open http://localhost:3101/ui/   # worker
 ```
 
-Config must include:
-```json
-"gateway": { "port": 3100, "host": "0.0.0.0" },
-"llm": { "provider": "grok", "apiKey": "...", "model": "grok-3" }
-```
+Config is bind-mounted read-only — edit `docker/creator/config.json` or
+`docker/worker/config.json` and restart the container to pick up changes.
 
 ---
 

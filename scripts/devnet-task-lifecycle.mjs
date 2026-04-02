@@ -48,8 +48,8 @@ import {
 // Config
 // ---------------------------------------------------------------------------
 
-const CREATOR_AGENT_PDA = new PublicKey("GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs");
-const WORKER_AGENT_PDA  = new PublicKey("CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V");
+const CREATOR_AGENT_PDA = new PublicKey("HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H");
+const WORKER_AGENT_PDA  = new PublicKey("DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv");
 
 const RPC_URL        = process.env.RPC_URL         ?? "https://api.devnet.solana.com";
 const CREATOR_PATH   = process.env.CREATOR_WALLET  ?? `${process.env.HOME}/.config/solana/id.json`;

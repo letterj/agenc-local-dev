@@ -30,6 +30,9 @@
     "backend": "sqlite",
     "dbPath": "/root/.agenc/memory.db"
   },
+  "heartbeat": {
+    "enabled": false
+  },
   "logging": {
     "level": "debug",
     "trace": {
