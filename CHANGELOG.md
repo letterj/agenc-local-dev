@@ -8,6 +8,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Security
+- **Exposed API key remediation (2026-04-02):** `docker/creator/config.json` and
+  `docker/worker/config.json` were present in git history (commit `c5455a0`) with a real
+  xAI API key. GitHub push protection blocked the push. Key rotated, both files expunged
+  from all 45 commits via `git filter-repo --invert-paths`, history force-pushed clean.
+  GitHub secret scanning shows 0 open alerts post-push. Prevention notes added to
+  `docs/RUNBOOK.md` under new "Security Incidents" section.
+
 ### Docs
 - `docker-compose.yml` (root) — replaced legacy `agenc-operator` single-service definition
   with dual `agenc-creator` (port 3100) and `agenc-worker` (port 3101) services. Root compose

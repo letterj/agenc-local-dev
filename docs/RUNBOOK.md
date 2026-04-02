@@ -624,6 +624,34 @@ docker exec agenc-creator bash -c "
 
 ---
 
+## Security Incidents
+
+### Exposed API Key — xAI key in git history (2026-04-02)
+
+**What happened:** `docker/creator/config.json` and `docker/worker/config.json` were
+committed in commit `c5455a0` before the gitignore was fully in place, exposing a real
+xAI API key in git history. GitHub push protection caught it on the first push attempt
+and blocked the push.
+
+**Resolution:**
+
+1. Key rotated immediately at console.x.ai
+2. Local configs updated with new key (files remain gitignored — not re-committed)
+3. `git filter-repo` used to expunge both files from all 45 commits in history
+4. Force-pushed clean history to `origin/main`
+5. GitHub secret scanning confirmed 0 open alerts post-push
+
+**Prevention:**
+
+- Always confirm `docker/creator/` and `docker/worker/` are in `.gitignore` before
+  the first commit in any new repo
+- Run a security scan (grep for key patterns against `git ls-files` output) before
+  every push — now part of the pre-push workflow
+- Follow the `.env.example` pattern: commit example files with placeholder values,
+  never commit files containing real keys
+
+---
+
 ## Contributions Made
 
 | Repo | PR | Description | Status |
