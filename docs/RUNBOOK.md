@@ -646,7 +646,10 @@ and blocked the push.
 - Always confirm `docker/creator/` and `docker/worker/` are in `.gitignore` before
   the first commit in any new repo
 - Run a security scan (grep for key patterns against `git ls-files` output) before
-  every push — now part of the pre-push workflow
+  every push — now part of the pre-push workflow. Run two scan passes: (1) full tree
+  scan via `git ls-files` to cover all tracked files, and (2) a targeted scan of only
+  the files changed in the current commit — especially important when those files
+  document a security incident and may reference key patterns
 - Follow the `.env.example` pattern: commit example files with placeholder values,
   never commit files containing real keys
 
