@@ -671,6 +671,23 @@ The hook runs three passes on every commit attempt:
 2. Staged files scan (`git diff --cached`) — files in the current commit
 3. Docker config.json guard — blocks any `docker/*/config.json` from being staged
 
+**Upstream PR branch discipline:**
+
+Upstream PRs must always be opened from a dedicated branch created off
+`upstream/main` — never from `experiment/local-dev-setup`. That branch carries
+all local dev work and will pollute the PR with unrelated commits.
+
+Correct workflow for any upstream contribution:
+
+```bash
+cd ~/workshop/agencproj/forks/<REPO>
+git fetch upstream
+git checkout -b <descriptive-branch-name> upstream/main
+git cherry-pick <commit-sha>   # the specific commit(s) to contribute
+git push origin <descriptive-branch-name>
+gh pr create --repo tetsuo-ai/<REPO> --base main --head "letterj:<descriptive-branch-name>" ...
+```
+
 ---
 
 ## Contributions Made
