@@ -1,6 +1,6 @@
 # CLAUDE.md — AgenC Experiment Workspace
 
-Last updated: 2026-03-20
+Last updated: 2026-04-02
 
 ---
 
@@ -16,9 +16,10 @@ GitHub: `https://github.com/letterj`. Working from forks, submitting PRs upstrea
 - **Workspace:** `~/workshop/agencproj/`
 - **Active forks:** `forks/AgenC`, `agenc-sdk`, `agenc-protocol`, `agenc-plugin-kit`, `agenc-core`
 - **Active branch on all forks:** `experiment/local-dev-setup`
-- **Devnet program:** `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`
-- **Wallet:** `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` (~18.4 SOL)
-- **Registered agent PDA:** `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs`
+- **Devnet program:** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+- **Protocol config PDA:** `GEXnAns2Wq27xjG84a7BnuxJBY3R5Qu9CdFy2HQ7vsiv`
+- **Creator agent PDA:** `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` (wallet `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT`)
+- **Worker agent PDA:** `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` (wallet `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q`)
 - **ADR-003 is current:** agenc-core is public
 - **Containers:** `agenc-creator` (port 3100) and `agenc-worker` (port 3101) via `docker compose up -d`
 
@@ -107,7 +108,7 @@ npx -y node@20 scripts/pack-smoke.mjs
 
 ```bash
 solana config set --url devnet
-solana program show 6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab --url devnet
+solana program show GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3 --url devnet
 ```
 
 Known devnet drift — happy path works, edge case error names differ from SDK.
@@ -133,6 +134,8 @@ See `forks/agenc-sdk/docs/devnet-compatibility.md`.
 5. agenc-protocol fork defaults to wrong branch — verify `main` after forking
 6. `better-sqlite3` must be rebuilt in Docker on first start
 7. gateway.host is hardcoded — use socat workaround in Docker
+8. Upstream PR branch discipline: always create upstream PRs from a dedicated branch off `upstream/main` — never from `experiment/local-dev-setup`. See RUNBOOK.md for the correct workflow.
+9. Review before submitting: always show full content of any Issue, PR, commit message, or push before executing — wait for explicit approval. See RUNBOOK.md for details.
 
 ---
 
@@ -140,8 +143,8 @@ See `forks/agenc-sdk/docs/devnet-compatibility.md`.
 
 | Document | Location |
 |---|---|
-| Full runbook | `forks/AgenC/docs/AGENC-LOCAL-DEV-RUNBOOK.md` |
+| Full runbook | `docs/RUNBOOK.md` in agenc-local-dev |
 | Repository topology | `forks/AgenC/docs/REPOSITORY_TOPOLOGY.md` |
 | Devnet compat report | `forks/agenc-sdk/docs/devnet-compatibility.md` |
 | ADR-003 | `forks/agenc-core/docs/architecture/adr/adr-003-public-framework-product.md` |
-| Refactor history | `forks/AgenC/REFACTOR-MASTER-PROGRAM.md` |
+| Project plan | `docs/PROJECT-PLAN.md` in agenc-local-dev |

@@ -688,6 +688,16 @@ git push origin <descriptive-branch-name>
 gh pr create --repo tetsuo-ai/<REPO> --base main --head "letterj:<descriptive-branch-name>" ...
 ```
 
+**Review before submitting:**
+
+Always show the full content of any Issue, PR, commit message, or push to
+the user before executing. Wait for explicit approval before hitting
+submit/create/push. Never auto-submit. This applies to:
+- `git push` (show what will be pushed)
+- `gh pr create` (show full title + body)
+- `gh issue create` (show full title + body)
+- Any destructive or irreversible git operation
+
 ---
 
 ## Contributions Made

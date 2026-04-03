@@ -8,6 +8,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Docs
+- `docs/RUNBOOK.md` — "Review before submitting" note added after upstream PR
+  branch discipline section: show full content of any Issue, PR, commit message,
+  or push to user before executing; wait for explicit approval; never auto-submit.
+- `CLAUDE.md` — updated to 2026-04-02. Quick Reference: devnet program updated to
+  V2 (`GN69C…`), protocol config PDA, creator and worker agent PDAs added, wallet
+  SOL balance removed. Devnet Environment: program show command updated to V2.
+  Key Rules: rules 8 (upstream PR branch discipline) and 9 (review before
+  submitting) added. Reference Docs: runbook path corrected to `docs/RUNBOOK.md`
+  in agenc-local-dev; stale `REFACTOR-MASTER-PROGRAM.md` entry replaced with
+  project plan link.
+
 ### Added
 - `docs/PROJECT-PLAN.md` — Task 19: **Concordia wave review** added to Observability
   track. Review concordia PRs that landed 2026-04-02 (AgenC #1541–#1545, agenc-core
