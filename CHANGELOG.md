@@ -8,6 +8,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- `docs/PROJECT-PLAN.md` — new **Platform Testing** track (Tasks 11–18) covering
+  the full breadth of protocol features available for testing on devnet:
+  Task 11 (create task via UI/console), Task 12 (work task via UI/console),
+  Task 13 (dependent task chains / DAG), Task 14 (dispute resolution — all 7
+  dispute instructions), Task 15 (cancellation + claim expiry), Task 16 (agent
+  feed post + upvote), Task 17 (reputation staking + delegation + cooldown),
+  Task 18 (ZK private task completion via RISC Zero Groth16). Suggested order
+  updated: `… → 7 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18 → 10 → 6`.
+  Status table updated with all 8 new rows at "not started".
+
 ### Security
 - **Pre-commit security hook (2026-04-02):** `scripts/setup-hooks.sh` installs a
   pre-commit hook at `.git/hooks/pre-commit` that runs three scan passes on every

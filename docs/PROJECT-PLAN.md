@@ -3,7 +3,7 @@
 ## Overview
 
 Contributor roadmap for the letterj/agenc-local-dev workspace.
-Updated: 2026-04-02
+Updated: 2026-04-02 (tasks 11–18 added)
 
 ---
 
@@ -92,6 +92,58 @@ Docs: HOW-TO-TELEGRAM-CONNECTOR.md
 
 ---
 
+### Platform Testing
+
+End-to-end tests of protocol features using the live dual-container setup.
+
+**Task 11 — Create a task via UI and console**
+Test task creation through both the web UI (`http://localhost:3100/ui/`) and the
+`agenc-console` CLI. Document both paths — steps, feedback, differences in UX.
+Note any gaps or friction points worth filing upstream.
+Depends on: Task 1
+
+**Task 12 — Work a task via UI and console**
+Test the full claim → complete flow through both the web UI and `agenc-console`.
+Document both paths. Note any ownership guard behavior (PR #43 related).
+Depends on: Task 11
+
+**Task 13 — Complex dependent task chains**
+Use `create_dependent_task` to build a multi-step DAG — at least 3 tasks with
+dependencies. Verify on-chain ordering and dependency enforcement. Try to claim
+a dependent task before its parent completes — confirm it is blocked.
+Depends on: Task 7
+
+**Task 14 — Dispute resolution flow**
+Creator creates a task, worker completes it, creator initiates a dispute with
+evidence hash, arbiter votes, resolution executes. Verify refund/complete/split
+outcomes and slashing mechanic. Tests all 7 dispute instructions end-to-end.
+Depends on: Task 7
+
+**Task 15 — Task cancellation and claim expiry**
+Two sub-tests: (1) creator cancels a task mid-flight — verify refund. (2) Let
+a claimed task go stale, trigger `expire_claim` — verify state transition.
+Document both on-chain outcomes.
+Depends on: Task 7
+
+**Task 16 — Agent feed**
+Post to the on-chain feed from the creator agent. Upvote the post from the
+worker agent. Verify both on-chain. Lightweight test of the social layer.
+Depends on: Task 1
+
+**Task 17 — Reputation staking and delegation**
+Stake tokens from creator agent via `stake_reputation`. Delegate to worker agent
+via `delegate_reputation`. Verify on-chain state. Revoke delegation. Attempt
+withdraw before 7-day cooldown — confirm blocked. Document full flow.
+Depends on: Task 7
+
+**Task 18 — ZK private task completion**
+Use `complete_task_private` with a RISC Zero Groth16 proof instead of a public
+proof. Verifies the full ZK pipeline end-to-end on devnet. Reference the
+`risc0-proof-demo` example in the AgenC repo.
+Depends on: Task 7
+
+---
+
 ### Observability
 
 Token usage tracking and benchmarking.
@@ -133,7 +185,7 @@ Depends on: Task 9
 
 ## Suggested Order
 
-1 → 3 → 9 (file issue) → 4 → 7 → 2 → 8 → 10
+1 → 3 → 9 (file issue) → 4 → 7 → 2 → 8 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18 → 10 → 6
 
 ---
 
@@ -151,6 +203,14 @@ Depends on: Task 9
 | 8 | Telegram connector | ✅ done |
 | 9 | Token usage monitoring | ⏸ on hold |
 | 10 | Benchmark report | ⏸ blocked on Task 9 |
+| 11 | Create task via UI and console | not started |
+| 12 | Work task via UI and console | not started |
+| 13 | Complex dependent task chains | not started |
+| 14 | Dispute resolution flow | not started |
+| 15 | Task cancellation and claim expiry | not started |
+| 16 | Agent feed | not started |
+| 17 | Reputation staking and delegation | not started |
+| 18 | ZK private task completion | not started |
 
 ---
 
