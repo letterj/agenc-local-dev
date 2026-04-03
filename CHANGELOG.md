@@ -9,6 +9,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Security
+- **Pre-commit security hook (2026-04-02):** `scripts/setup-hooks.sh` installs a
+  pre-commit hook at `.git/hooks/pre-commit` that runs three scan passes on every
+  `git commit`: (1) full tracked-tree scan via `git ls-files`, (2) staged-files scan
+  via `git diff --cached`, and (3) a docker `config.json` guard. Blocks and reports
+  matches for xAI keys, Anthropic keys, Bearer tokens, and Telegram bot tokens. Hook
+  tested: confirmed blocks on fake `xai-AAA…` pattern, passes on clean files.
+  `.git/hooks/` is not tracked — new clones run `bash scripts/setup-hooks.sh` once.
 - **Exposed API key remediation (2026-04-02):** `docker/creator/config.json` and
   `docker/worker/config.json` were present in git history (commit `c5455a0`) with a real
   xAI API key. GitHub push protection blocked the push. Key rotated, both files expunged

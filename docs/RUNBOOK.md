@@ -653,6 +653,24 @@ and blocked the push.
 - Follow the `.env.example` pattern: commit example files with placeholder values,
   never commit files containing real keys
 
+**Pre-commit hook:**
+
+A git pre-commit hook automates both scan passes on every `git commit`. It is
+installed by running:
+
+```bash
+bash scripts/setup-hooks.sh
+```
+
+The hook lives at `.git/hooks/pre-commit` — this directory is **not** tracked by
+git, so every new clone must run the setup script once. `scripts/setup-hooks.sh`
+is committed to the repo and installs the hook from source.
+
+The hook runs three passes on every commit attempt:
+1. Full tree scan (`git ls-files`) — all tracked files
+2. Staged files scan (`git diff --cached`) — files in the current commit
+3. Docker config.json guard — blocks any `docker/*/config.json` from being staged
+
 ---
 
 ## Contributions Made
