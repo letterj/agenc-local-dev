@@ -9,6 +9,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `docs/PROJECT-PLAN.md` — Task 19: **Concordia wave review** added to Observability
+  track. Review concordia PRs that landed 2026-04-02 (AgenC #1541–#1545, agenc-core
+  #146–#147) — planned session flow, world-scoped memory, ESM build fix, sim launch
+  path, turn isolation, world-scoped host services. Identify contribution opportunities
+  and file any resulting issues or PRs. Depends on: nothing. Status: not started.
 - `docs/PROJECT-PLAN.md` — new **Platform Testing** track (Tasks 11–18) covering
   the full breadth of protocol features available for testing on devnet:
   Task 11 (create task via UI/console), Task 12 (work task via UI/console),

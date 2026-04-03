@@ -3,7 +3,7 @@
 ## Overview
 
 Contributor roadmap for the letterj/agenc-local-dev workspace.
-Updated: 2026-04-02 (tasks 11–18 added)
+Updated: 2026-04-02 (tasks 11–19 added)
 
 ---
 
@@ -148,6 +148,15 @@ Depends on: Task 7
 
 Token usage tracking and benchmarking.
 
+**Task 19 — Concordia wave review — contribution opportunity scan**
+Review the concordia-related PRs that landed 2026-04-02 (AgenC #1541–#1545,
+agenc-core #146–#147): planned session flow, world-scoped memory, ESM build fix,
+sim launch path, turn isolation, world-scoped host services. Read the diffs,
+understand the memory wiring and session checkpointing changes. Identify any
+gaps, rough edges, missing tests, or doc improvements that would make a good
+upstream PR. Document findings and file any issues or PRs that emerge.
+Depends on: nothing
+
 **Task 9 — Token usage monitoring** ⏸ on hold, awaiting dev team response
 File issue against agenc-core requesting LLM usage logging (input + output
 tokens per call). Build lightweight proxy script while waiting for upstream.
@@ -211,6 +220,7 @@ Depends on: Task 9
 | 16 | Agent feed | not started |
 | 17 | Reputation staking and delegation | not started |
 | 18 | ZK private task completion | not started |
+| 19 | Concordia wave review | not started |
 
 ---
 
