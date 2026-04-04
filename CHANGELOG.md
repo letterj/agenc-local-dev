@@ -21,6 +21,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   project plan link.
 
 ### Added
+- `docker-compose.yml` — added `AGENC_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
+  environment variable to both `agenc-creator` and `agenc-worker` service definitions.
+  The Tasks UI reads the program from `AGENC_PROGRAM_ID` (or `SOLANA_PROGRAM_ID` as a
+  fallback); without it the UI defaults to the V1 program (`6UcJzb…`) and V2 tasks
+  are not visible. Containers must be restarted to pick up the change.
+- `.env.example` — documented `AGENC_PROGRAM_ID` with description and fallback note.
 - `docs/PROJECT-PLAN.md` — Task 19: **Concordia wave review** added to Observability
   track. Review concordia PRs that landed 2026-04-02 (AgenC #1541–#1545, agenc-core
   #146–#147) — planned session flow, world-scoped memory, ESM build fix, sim launch

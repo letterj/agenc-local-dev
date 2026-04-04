@@ -390,6 +390,13 @@ AGENT_NAME=letterj-operator
 `AUTH_SECRET` is no longer used — the socat bridge architecture does not
 require `auth.secret` (daemon binds to loopback only).
 
+`AGENC_PROGRAM_ID` must be set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
+for the Tasks UI to show V2 tasks. The runtime also checks `SOLANA_PROGRAM_ID` as an
+alternative name. If neither is set, the UI falls back to the V1 default
+(`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`) and V2 tasks will not appear.
+This variable is set in `docker-compose.yml` for both container services — containers
+must be restarted after any change to pick it up.
+
 ### Build the image
 
 ```bash
