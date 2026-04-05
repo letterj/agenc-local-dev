@@ -390,12 +390,17 @@ AGENT_NAME=letterj-operator
 `AUTH_SECRET` is no longer used — the socat bridge architecture does not
 require `auth.secret` (daemon binds to loopback only).
 
-`AGENC_PROGRAM_ID` must be set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
-for the Tasks UI to show V2 tasks. The runtime also checks `SOLANA_PROGRAM_ID` as an
-alternative name. If neither is set, the UI falls back to the V1 default
-(`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`) and V2 tasks will not appear.
-This variable is set in `docker-compose.yml` for both container services — containers
-must be restarted after any change to pick it up.
+`AGENC_RUNTIME_PROGRAM_ID` must be set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
+for the daemon to use the V2 program. The CLI reads `connection.programId` from config
+(set in `docker/creator/config.json` and `docker/worker/config.json`) and also accepts
+`AGENC_RUNTIME_PROGRAM_ID` as an environment variable override. If neither is set, the
+runtime defaults to the V1 program (`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`)
+and V2 task/agent lookups will fail.
+`AGENC_RUNTIME_PROGRAM_ID` is set in `docker-compose.yml` for both container services —
+containers must be restarted after any change to pick it up.
+
+> **Note:** The earlier env var name `AGENC_PROGRAM_ID` is **not** read by the CLI.
+> `docker-compose.yml` was corrected to `AGENC_RUNTIME_PROGRAM_ID` on 2026-04-04.
 
 ### Build the image
 
@@ -615,6 +620,50 @@ docker exec agenc-creator bash -c "
 **Symptom:** Both checks fail when the PostCSS native binding is missing in the CI runner. The web build fails, cascading into the runtime dashboard asset build via `build-dashboard-assets.mjs`.
 **Root cause:** npm optional dependencies bug ([npm/cli#4828](https://github.com/npm/cli/issues/4828)) — pre-existing on upstream `main`, not PR-specific.
 **Status:** Confirmed failing on `main` as of 2026-04-02. PRs that pass `pack-smoke` but fail only these two checks are not the cause.
+
+---
+
+## Known Issues — Pending npm Release
+
+The following issues affect the `@tetsuo-ai/agenc` npm package at `0.1.0`
+(the version installed in the Docker image). They cannot be fully resolved
+in the running containers without a new npm release and image rebuild.
+
+### Watch console replaces operator console (2026-04-04)
+
+The `agenc` console binary now launches a workspace watch console instead of
+the operator console. Free-text chat returns no response. The operator console
+chat/tool functionality (`agenc.claimTask` etc.) is not accessible via the
+watch console. Pending npm release to assess the new operator surface.
+
+### connection.programId is the correct config key for V2 (2026-04-04)
+
+The runtime reads `programId` from `connection.programId` in config — **not**
+`protocol.programId`. The environment variable is `AGENC_RUNTIME_PROGRAM_ID`
+— **not** `AGENC_PROGRAM_ID`.
+
+Both `docker/creator/config.json` and `docker/worker/config.json` now have
+`connection.programId` set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`.
+`docker-compose.yml` sets `AGENC_RUNTIME_PROGRAM_ID` in both service definitions.
+Containers must be restarted to pick up the change.
+
+### handlers.ts V1 hardcoding (2026-04-04)
+
+`handlers.ts:createProgramContext` calls `createProgram(provider)` without
+passing `programId` — always defaults to the V1 program
+(`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`). This causes two symptoms:
+
+- Tasks UI shows V1 tasks (189 on devnet) instead of V2 tasks
+- `"Agent HmZqAs does not belong to connected signer"` — authority mismatch
+  because the agent account is fetched from the V1 program
+
+Fix: pass `connection.programId` from config as the second argument to
+`createProgram()`. Applied locally to
+`forks/agenc-core/runtime/src/channels/webchat/handlers.ts`.
+**Not pushed upstream — pending npm release assessment.**
+
+To take effect in the containers, the fix requires rebuilding the Docker
+image from the fork after a new npm release ships.
 
 ---
 

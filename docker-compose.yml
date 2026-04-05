@@ -8,7 +8,7 @@ services:
     ports:
       - "3100:3101"
     environment:
-      - AGENC_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+      - AGENC_RUNTIME_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
     volumes:
       - agenc-creator-data:/root/.agenc
       - ./docker/creator/config.json:/root/.agenc/config.json:ro
@@ -25,7 +25,7 @@ services:
     ports:
       - "3101:3101"
     environment:
-      - AGENC_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+      - AGENC_RUNTIME_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
     volumes:
       - agenc-worker-data:/root/.agenc
       - ./docker/worker/config.json:/root/.agenc/config.json:ro

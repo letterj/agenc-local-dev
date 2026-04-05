@@ -8,6 +8,37 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- `docker-compose.yml` — renamed `AGENC_PROGRAM_ID` → `AGENC_RUNTIME_PROGRAM_ID` in
+  both `agenc-creator` and `agenc-worker` service definitions. The CLI reads
+  `AGENC_RUNTIME_PROGRAM_ID` (`cli/index.ts:1332`); the old name was silently ignored,
+  meaning the env var had no effect. Containers must be restarted to pick up the change.
+- `docker/creator/config.json` — added `"programId": "GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3"`
+  to the `connection` block. The runtime reads program ID from `connection.programId` —
+  the `protocol.programId` field that was previously set is not read by `handlers.ts`.
+- `docker/worker/config.json` — same `connection.programId` fix as creator config.
+
+### Investigated (2026-04-04)
+- **Watch console replaces operator console:** The `agenc` console binary (npm 0.1.0)
+  now launches a workspace watch console instead of the operator console. Free-text chat
+  returns no response. `agenc.claimTask` and other operator tools are not accessible.
+  Pending npm release to assess new operator surface.
+- **handlers.ts V1 hardcoding:** `createProgramContext` in
+  `runtime/src/channels/webchat/handlers.ts` calls `createProgram(provider)` without
+  passing `programId` — always defaults to the V1 program (`6UcJzb…`). Root cause of
+  two observed bugs: (1) Tasks UI showing V1 tasks (189 on devnet) instead of V2; (2)
+  `"Agent HmZqAs does not belong to connected signer"` — authority mismatch from
+  fetching the agent account against the wrong program. Fix applied locally to
+  `forks/agenc-core` (pass `connection.programId` from config as second arg to
+  `createProgram()`; build passes). **Not pushed upstream — pending npm release
+  assessment.** Takes effect in containers only after image rebuild from the fork.
+
+### Docs
+- `docs/RUNBOOK.md` — added "Known Issues — Pending npm Release" section with three
+  entries: watch console regression, `connection.programId` correct config key, and
+  `handlers.ts` V1 hardcoding. Corrected "Environment variables" section: `AGENC_PROGRAM_ID`
+  → `AGENC_RUNTIME_PROGRAM_ID` with note that the old name is not read by the CLI.
+
 ### Docs
 - `docs/RUNBOOK.md` — "Review before submitting" note added after upstream PR
   branch discipline section: show full content of any Issue, PR, commit message,
