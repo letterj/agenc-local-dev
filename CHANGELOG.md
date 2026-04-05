@@ -34,10 +34,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   assessment.** Takes effect in containers only after image rebuild from the fork.
 
 ### Docs
-- `docs/RUNBOOK.md` — added "Known Issues — Pending npm Release" section with three
-  entries: watch console regression, `connection.programId` correct config key, and
-  `handlers.ts` V1 hardcoding. Corrected "Environment variables" section: `AGENC_PROGRAM_ID`
-  → `AGENC_RUNTIME_PROGRAM_ID` with note that the old name is not read by the CLI.
+- `docs/RUNBOOK.md` — expanded "Known Issues — Pending npm Release" section: watch
+  console entry updated with kill procedure (`agenc status` → `kill <pid>`), note that
+  `/quit`/`/exit` do not stop the daemon, and that `agenc status` is the recommended
+  diagnostic. Added new entry: "Mac daemon kill procedure" — same procedure with context
+  for macOS fork-binary usage. Total: four entries in the section.
+- `CLAUDE.md` — added Key Rule 10: use `agenc status` / `node .../agenc.js status` to
+  inspect daemon state (pid, port, config path, channel status); `/quit`/`/exit` do not
+  stop the daemon on macOS; kill via pid from status output.
+- `docs/RUNBOOK.md` — (prior commit) added "Known Issues — Pending npm Release" section
+  with three entries: watch console regression, `connection.programId` correct config key,
+  and `handlers.ts` V1 hardcoding. Corrected "Environment variables" section:
+  `AGENC_PROGRAM_ID` → `AGENC_RUNTIME_PROGRAM_ID` with note that the old name is not
+  read by the CLI.
 
 ### Docs
 - `docs/RUNBOOK.md` — "Review before submitting" note added after upstream PR

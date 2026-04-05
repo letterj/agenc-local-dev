@@ -136,6 +136,7 @@ See `forks/agenc-sdk/docs/devnet-compatibility.md`.
 7. gateway.host is hardcoded — use socat workaround in Docker
 8. Upstream PR branch discipline: always create upstream PRs from a dedicated branch off `upstream/main` — never from `experiment/local-dev-setup`. See RUNBOOK.md for the correct workflow.
 9. Review before submitting: always show full content of any Issue, PR, commit message, or push before executing — wait for explicit approval. See RUNBOOK.md for details.
+10. Use `node .../agenc.js status` (or `agenc status` inside Docker) to inspect daemon state — shows pid, port, config path, channel status. Most reliable daemon diagnostic tool. On macOS with the fork binary, `/quit` and `/exit` in the console do not stop the daemon; kill via `kill <pid from status>`.
 
 ---
 

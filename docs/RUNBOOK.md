@@ -632,9 +632,40 @@ in the running containers without a new npm release and image rebuild.
 ### Watch console replaces operator console (2026-04-04)
 
 The `agenc` console binary now launches a workspace watch console instead of
-the operator console. Free-text chat returns no response. The operator console
-chat/tool functionality (`agenc.claimTask` etc.) is not accessible via the
-watch console. Pending npm release to assess the new operator surface.
+the operator console. Free-text chat returns no response even with the webchat
+channel configured. `agenc.claimTask` and other protocol write tools are not
+accessible via the watch console.
+
+`/quit` and `/exit` commands do not stop the background daemon process — they
+only exit the console UI. The daemon must be killed manually.
+
+**Kill procedure (Mac / fork binary):**
+
+```bash
+node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js status
+# note the pid in the output, then:
+kill <pid>
+```
+
+`agenc status` is the most reliable way to inspect daemon state — it shows
+the pid, listening port, config path, and channel status without requiring
+the full daemon to be running.
+
+Pending npm release to assess the new operator surface.
+
+### Mac daemon kill procedure (2026-04-04)
+
+When running the fork binary directly on macOS (not in Docker), `/quit` and
+`/exit` in the watch console do not stop the daemon process. Use:
+
+```bash
+node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js status
+kill <pid from status output>
+```
+
+`agenc status` reliably reports pid, port, config path, and channel status.
+It is the recommended first step whenever the daemon is unresponsive or the
+port appears occupied.
 
 ### connection.programId is the correct config key for V2 (2026-04-04)
 
