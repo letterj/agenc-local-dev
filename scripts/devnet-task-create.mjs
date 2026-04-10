@@ -10,7 +10,8 @@
  *
  * Env vars:
  *   AGENC_PROGRAM_ID, AGENC_IDL_PATH, CREATOR_AGENT_PDA,
- *   TASK_DESCRIPTION, TASK_REWARD_SOL, TASK_PROOF_HASH
+ *   TASK_DESCRIPTION, TASK_REWARD_SOL,
+ *   TASK_CONSTRAINT_HASH (optional, default: null — set to a 64-char hex string to make the task private)
  *
  * Author: J Brett (letterj) with Claude Sonnet 4.6
  * Date: 2026-04-10
@@ -38,8 +39,8 @@ const IDL_PATH         = process.env.AGENC_IDL_PATH      ?? `${process.env.HOME}
 const CREATOR_AGENT_PDA = new PublicKey(process.env.CREATOR_AGENT_PDA ?? "8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5");
 
 const TASK_DESCRIPTION = process.env.TASK_DESCRIPTION ?? "Compute the SHA-256 hash of the string: This is only a test of the agenc-lifecycle on 2026-03-28";
-const TASK_REWARD_SOL  = parseFloat(process.env.TASK_REWARD_SOL ?? "0.01");
-const TASK_PROOF_HASH  = process.env.TASK_PROOF_HASH  ?? "91a3adb05ed70ededf6ea7cdd14255eaa7f3f93ce60730a408b7ca9ad89bdf60";
+const TASK_REWARD_SOL      = parseFloat(process.env.TASK_REWARD_SOL ?? "0.01");
+const TASK_CONSTRAINT_HASH = process.env.TASK_CONSTRAINT_HASH ?? null;
 
 const REWARD       = BigInt(Math.round(TASK_REWARD_SOL * 1_000_000_000));
 const DEADLINE_ADD = Number(process.env.DEADLINE_SECS ?? "3600"); // 1 hour
@@ -84,10 +85,10 @@ if (!creatorAgent) {
 
 console.log("\n[step 1] creating task...");
 
-const taskId      = crypto.randomBytes(32);
-const deadline    = Math.floor(Date.now() / 1000) + DEADLINE_ADD;
-const description = fixedUtf8Bytes(TASK_DESCRIPTION, 64);
-const proofHash   = Buffer.from(TASK_PROOF_HASH, "hex");
+const taskId         = crypto.randomBytes(32);
+const deadline       = Math.floor(Date.now() / 1000) + DEADLINE_ADD;
+const description    = fixedUtf8Bytes(TASK_DESCRIPTION, 64);
+const constraintHash = TASK_CONSTRAINT_HASH ? Buffer.from(TASK_CONSTRAINT_HASH, "hex") : null;
 
 const { taskPda, txSignature: createTx } = await createTask(
   connection,
@@ -102,7 +103,7 @@ const { taskPda, txSignature: createTx } = await createTask(
     maxWorkers: 1,
     deadline,
     taskType: 0,
-    constraintHash: proofHash,
+    constraintHash,
     minReputation: 0,
     rewardMint: null,
   },
