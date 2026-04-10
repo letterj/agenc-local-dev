@@ -5,7 +5,7 @@
  * Runs the full AgenC task lifecycle on devnet with separate creator and worker
  * wallets/agents:
  *
- *   Creator (id.json / BP3r...)    — creates and funds the task
+ *   Creator (creator.json / BP3r...)    — creates and funds the task
  *   Worker  (worker.json / 26d6...) — claims and completes the task
  *
  * Usage:
@@ -15,7 +15,7 @@
  *   AGENC_IDL_PATH   Path to agenc_coordination.json
  *
  * Optional env vars:
- *   CREATOR_WALLET   Keypair file (default: ~/.config/solana/id.json)
+ *   CREATOR_WALLET   Keypair file (default: ~/.config/solana/creator.json)
  *   WORKER_WALLET    Keypair file (default: ~/.config/solana/worker.json)
  *   RPC_URL          Devnet RPC endpoint (default: https://api.devnet.solana.com)
  *   REWARD_LAMPORTS  Task reward in lamports (default: 10000000 = 0.01 SOL)
@@ -52,7 +52,7 @@ const CREATOR_AGENT_PDA = new PublicKey("HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8
 const WORKER_AGENT_PDA  = new PublicKey("DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv");
 
 const RPC_URL        = process.env.RPC_URL         ?? "https://api.devnet.solana.com";
-const CREATOR_PATH   = process.env.CREATOR_WALLET  ?? `${process.env.HOME}/.config/solana/id.json`;
+const CREATOR_PATH   = process.env.CREATOR_WALLET  ?? `${process.env.HOME}/.config/solana/creator.json`;
 const WORKER_PATH    = process.env.WORKER_WALLET   ?? `${process.env.HOME}/.config/solana/worker.json`;
 const IDL_PATH       = process.env.AGENC_IDL_PATH;
 const REWARD         = BigInt(process.env.REWARD_LAMPORTS ?? "10000000"); // 0.01 SOL

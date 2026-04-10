@@ -43,7 +43,7 @@ const IDL_PATH          = process.env.AGENC_IDL_PATH    ?? `${process.env.HOME}/
 const CREATOR_AGENT_PDA = new PublicKey(process.env.CREATOR_AGENT_PDA ?? "8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5");
 
 const RPC_URL      = process.env.RPC_URL        ?? "https://api.devnet.solana.com";
-const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/id.json`;
+const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/creator.json`;
 
 const DRY_RUN = process.argv.includes("--dry-run");
 

@@ -621,6 +621,17 @@ docker exec agenc-creator bash -c "
 **Root cause:** npm optional dependencies bug ([npm/cli#4828](https://github.com/npm/cli/issues/4828)) — pre-existing on upstream `main`, not PR-specific.
 **Status:** Confirmed failing on `main` as of 2026-04-02. PRs that pass `pack-smoke` but fail only these two checks are not the cause.
 
+### PR Tracker Correction (2026-04-05)
+
+PRs #144 and #145 are in `tetsuo-ai/agenc-core`, not `tetsuo-ai/agenc-sdk` as previously documented. The agenc-sdk repo tops out at PR #29. Update any references accordingly.
+
+| PR | Repo | Branch | Status |
+|----|------|--------|--------|
+| #43 | tetsuo-ai/agenc-core | fix/task-ownership-ui | Open — awaiting Pavelevich re-review |
+| #144 | tetsuo-ai/agenc-core | fix/bn-import-interop | Open — 3/3 CI passing, rebased 2026-04-04 |
+| #145 | tetsuo-ai/agenc-core | fix/agent-pda-autodiscovery | Open — CI in progress after rebase 2026-04-05 |
+| #1547 | tetsuo-ai/AgenC | docs/concordia-event-stream-shim | Open |
+
 ---
 
 ## Known Issues — Pending npm Release
@@ -695,6 +706,242 @@ Fix: pass `connection.programId` from config as the second argument to
 
 To take effect in the containers, the fix requires rebuilding the Docker
 image from the fork after a new npm release ships.
+
+**Resolved upstream (2026-04-07):** The Phase 2 refactor (agenc-core PRs
+#174–192, landed 2026-04-07) deleted `tools/agenc/handlers.ts` and moved
+program construction into `runtime/src/tools/agenc/index.ts`, which now
+conditionally passes `context.programId` to both `createProgram` and
+`createReadOnlyProgram`. The root cause no longer exists in upstream main.
+No PR needed — the webchat `handlers.ts` (`channels/webchat/handlers.ts`)
+retains its own `createProgramContext` and is unaffected by this refactor.
+
+---
+
+## Devnet Testing
+
+### Lifecycle Test
+
+Full create → claim → complete lifecycle test against devnet V2 program. Confirmed passing 2026-04-07.
+
+**Script:** `scripts/devnet-task-lifecycle-test.mjs`
+
+**Run:**
+```bash
+cd ~/workshop/agencproj/agenc-local-dev
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json \
+node scripts/devnet-task-lifecycle-test.mjs
+```
+
+**Notes:**
+- Uses `@tetsuo-ai/sdk` and `forks/agenc-sdk/scripts/devnet-helpers.mjs` — no runtime binary dependency, unaffected by npm 0.1.0 blocker
+- IDL must point to `forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json` — `target/idl/` is Anchor build output and not committed
+- Creator agent `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` confirmed registered against V2 program `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
+- Run this any time to confirm devnet setup is healthy
+- `CREATOR_AGENT_PDA` and `WORKER_AGENT_PDA` default to team program PDAs when not set — override for private program
+
+**Private program run (confirmed passing 2026-04-09):**
+```bash
+cd ~/workshop/agencproj/agenc-local-dev
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc \
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json \
+CREATOR_AGENT_PDA=8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5 \
+WORKER_AGENT_PDA=8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5 \
+node scripts/devnet-task-lifecycle-test.mjs
+```
+
+---
+
+## Arbiter Wallets
+
+Generated 2026-04-09 for use with `scripts/marketplace-tui-devnet-smoke.ts`.
+
+| Role | Public Key | Keypair Path | Funded | Balance |
+|---|---|---|---|---|
+| arbiter-a | `BKKyRGjggY1dTZMZ51FnK1f83gQLn6fg3xygCbnXBxxi` | `~/.config/solana/arbiter-a.json` | 2026-04-09 | 3 SOL |
+| arbiter-b | `HA4zxn9BWSDnGPU36RPxKaRFq6sotjVQKTj6aaBNug5J` | `~/.config/solana/arbiter-b.json` | 2026-04-09 | 3 SOL |
+| arbiter-c | `YNTnajdxPfuACW1gL8UmFEvyPjMCp5gGRsUifQxZ6MD` | `~/.config/solana/arbiter-c.json` | 2026-04-09 | 3 SOL |
+
+Funded from creator wallet `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` (3 SOL each).
+
+### Protocol Authority Wallet
+
+Generated 2026-04-09 for private program deployment (see PROJECT-PLAN.md — "Own Protocol Authority" task).
+
+| Role | Public Key | Keypair Path | Permissions | Funded | Balance |
+|---|---|---|---|---|---|
+| Protocol Authority | `EEB7R1tYTGxPziNQfB6jdADs4E58d5ZYfLoRN4NyBnhx` | `~/.config/solana/protocol-authority.json` | 600 | 2026-04-09 | 4.94 SOL (topped up 2026-04-10) |
+
+Funded from creator wallet `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` (5 SOL).
+
+> ⚠️ **DO NOT commit this keypair. DO NOT share.** This key has administrative
+> control over any private program deployment — including `initialize_protocol`,
+> dispute resolution, fee configuration, and treasury. Treat as a production wallet.
+> File permissions must remain 600. Never bake into Docker images or `.env` files
+> tracked by git.
+
+### Env vars for marketplace-tui-devnet-smoke.ts
+
+```bash
+CREATOR_WALLET=~/.config/solana/creator.json
+WORKER_WALLET=~/.config/solana/worker.json
+ARBITER_A_WALLET=~/.config/solana/arbiter-a.json
+ARBITER_B_WALLET=~/.config/solana/arbiter-b.json
+ARBITER_C_WALLET=~/.config/solana/arbiter-c.json
+AGENC_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+# For team's V2 program — PROTOCOL_AUTHORITY_WALLET not available (held by tetsuo-ai team)
+# For private program deployment — use:
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json
+```
+
+Against the team's V2 program (`GN69Co...`), `PROTOCOL_AUTHORITY_WALLET` remains
+a hard blocker — the on-chain authority does not match our local keypair.
+Against the private program below, this keypair IS the authority and the full
+smoke test can run end-to-end.
+
+---
+
+## Private Program Deployment
+
+Deployed 2026-04-10. Self-contained devnet instance for full smoke test and protocol testing.
+
+| Item | Value |
+|---|---|
+| Program ID | `9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc` |
+| Protocol Config PDA | `6rGjoLyG4HicDqoDeweKFYFpxxrV81kWzyYZ8xsvA2Pe` |
+| Bid Marketplace PDA | `EifZXrtSfKJiyexvwJdBHuUQFwdE9ZLnGkJm2sjqxeiN` |
+| ZK Config PDA | `FMZHRR7NpkryTSAvPtqfjtHigjMLuDNvRYtpBys3yHVR` |
+| Protocol Authority | `EEB7R1tYTGxPziNQfB6jdADs4E58d5ZYfLoRN4NyBnhx` |
+| Second Signer | `Dix91kH4T2oyKmYv6YWMgyBWsd66Q9YLsdajdqW5JTam` |
+| Treasury | `7EipN8LdLyXjs2XXAPGtYSZVH7GMP2vXG1spWvmin4Cw` |
+| Deploy date | 2026-04-10 |
+| Source | `forks/agenc-protocol/programs/agenc-coordination` |
+| IDL | `forks/agenc-protocol/target/idl/agenc_coordination.json` |
+| Config profile | `docker/creator/config.private.json` |
+
+### Keypairs used
+
+| Role | Pubkey | Path | Permissions |
+|---|---|---|---|
+| Protocol Authority | `EEB7R1tYTGxPziNQfB6jdADs4E58d5ZYfLoRN4NyBnhx` | `~/.config/solana/protocol-authority.json` | 600 |
+| Second Signer | `Dix91kH4T2oyKmYv6YWMgyBWsd66Q9YLsdajdqW5JTam` | `~/.config/solana/agenc-private-second-signer.json` | 600 |
+| Treasury | `7EipN8LdLyXjs2XXAPGtYSZVH7GMP2vXG1spWvmin4Cw` | `~/.config/solana/agenc-private-treasury.json` | 600 |
+
+### Governance Initialization
+
+Standard `validation-initialize.mjs` does **not** cover `initializeGovernance`.
+A separate script is required — must run after `validation-initialize.mjs` and before
+the marketplace TUI smoke test.
+
+**Script:** `scripts/devnet-init-governance.mjs`
+
+**Run:**
+```bash
+cd ~/workshop/agencproj/agenc-local-dev
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json \
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc \
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json \
+node scripts/devnet-init-governance.mjs
+```
+
+**PDAs initialized:**
+- Governance Config PDA: `nXZbxo5v9L2Wi7PdhTW5qXALKNAhFFgiLRUEwMfVdWq`
+- Init tx: `5FXgScfnSrSsHryDwBKKYfSJ3Db92rUVzX7LTijQKexDMLGNoY7BTxE4ePyWj8CCTHncVt62UsK8FEzKeCoKxbRL`
+
+**When to run:**
+- Any time you deploy a fresh private program instance
+- Must run before `marketplace-tui-devnet-smoke.ts` governance phase
+- Idempotent — safe to re-run; exits cleanly if already initialized
+
+---
+
+### Env vars for marketplace-tui-devnet-smoke.ts (private program)
+
+```bash
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc
+CREATOR_WALLET=~/.config/solana/creator.json
+WORKER_WALLET=~/.config/solana/worker.json
+ARBITER_A_WALLET=~/.config/solana/arbiter-a.json
+ARBITER_B_WALLET=~/.config/solana/arbiter-b.json
+ARBITER_C_WALLET=~/.config/solana/arbiter-c.json
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json
+```
+
+### Agent Registrations (private program)
+
+Registered 2026-04-10 via `scripts/devnet-register-agents.mjs`.
+
+| Role | Wallet | Agent PDA | Registered |
+|---|---|---|---|
+| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5` | 2026-04-10 |
+| Worker | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5` | 2026-04-10 |
+
+Note: PDAs are keyed by random `agentId` (not wallet pubkey) — different from team V2 PDAs
+(`HmZqAsDz...` / `DQ1drYVZ...`). Both confirmed on-chain (566 bytes each).
+
+### Phase 5 — Baseline Lifecycle Test
+
+Date: 2026-04-10 — **✅ PASS**
+
+| Step | Transaction |
+|---|---|
+| create | `4RMD2BKcqoGKQxNQMmyZBWhv4xarkeETZE1BiMFwMiMrYQt7wFzph75DtiZwYLjoNpTLpupLDATS19jMQnqTLCPZ` |
+| claim  | `23wjJPoLQqSWNkHC7SjcqWPRQbRNTMNQUZxpLAttJ3nBcTaGyGFuc4TkUxNRoQQNSAPoMyjjY7UuviAtuGsRS36w` |
+| complete | `2hbem7aykB4WJQmsdL1PRSJNz5DrGyouX7ZpAx6bEqJSx7srHqAHxtgAKkrskTU9cNfFVoPVxJDPf5jywsWxYqFu` |
+
+Notes:
+- First run failed at `complete_task` — treasury had 0 SOL; fee transfer (100,000 lamports) below rent-exempt minimum. Fixed by funding treasury with 0.01 SOL.
+- Treasury must be funded before running smoke test (already done 2026-04-10).
+- `devnet-task-lifecycle-test.mjs` updated to accept `CREATOR_AGENT_PDA` / `WORKER_AGENT_PDA` env vars.
+
+---
+
+### Phase 6 — Full Marketplace TUI Devnet Smoke Test
+
+Date: 2026-04-09 — **✅ PASS (dispute resolution pending)**
+
+Run command:
+```bash
+cd ~/workshop/agencproj/forks/agenc-core
+CREATOR_WALLET=~/.config/solana/creator.json \
+WORKER_WALLET=~/.config/solana/worker.json \
+ARBITER_A_WALLET=~/.config/solana/arbiter-a.json \
+ARBITER_B_WALLET=~/.config/solana/arbiter-b.json \
+ARBITER_C_WALLET=~/.config/solana/arbiter-c.json \
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json \
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc \
+AGENC_RPC_URL=https://api.devnet.solana.com \
+npm run smoke:marketplace:tui:devnet
+```
+
+Results:
+| Phase | Result |
+|---|---|
+| reputation (stake + delegate) | ✅ |
+| task cancel flow | ✅ |
+| task completion flow | ✅ |
+| skills | ✅ skill `CNpUC94R5Ys3oKAJXYnDY5LjoyUVQKrd61UVFhr2K1BS` |
+| governance (proposal `DFA1zVuntFVWa47j5PL5dRgZXEvPNUdt4rRVX4mStcaa`) | ✅ |
+| dispute flow (3/3 arbiter votes) | ✅ |
+| dispute resolution | ⏳ pending deadline 2026-04-10T20:30:22Z |
+
+Dispute `EPAXHFWHtGivwG4UNaq7yyiKffAzfAAfCn1FW5WcP913`:
+- arbiter-a: `DPZu7eQrLsCKo4TxJsxjdo49Dea6ijSZovPu2o4bYKRH`
+- arbiter-b: `9J4QCxfbQgMSxK8h8yqXYAs81B9KUSUrpWUzr4DsxvGW`
+- arbiter-c: `2w3REkja6gztagUSi9rikiTtyuYgkHETSGRbiqD9eqiv`
+
+Resume artifact: `/var/folders/pj/_0z603bs42x7dl2fchrgq8jw0000gn/T/agenc-marketplace-tui-smoke/marketplace-tui-devnet-smoke-1775766630926.json`
+
+Resume command (run after 2026-04-10T20:30:22Z):
+```bash
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json \
+npm run smoke:marketplace:tui:devnet -- --resume /var/folders/pj/_0z603bs42x7dl2fchrgq8jw0000gn/T/agenc-marketplace-tui-smoke/marketplace-tui-devnet-smoke-1775766630926.json
+```
+
+Pre-requisites that needed to be set up before Phase 6:
+- `governance_config` PDA not initialized by `validation-initialize.mjs` — required separate init
+  script (`scripts/devnet-init-governance.mjs`). PDA: `nXZbxo5v9L2Wi7PdhTW5qXALKNAhFFgiLRUEwMfVdWq`
+  tx: `5FXgScfnSrSsHryDwBKKYfSJ3Db92rUVzX7LTijQKexDMLGNoY7BTxE4ePyWj8CCTHncVt62UsK8FEzKeCoKxbRL`
+- Arbiter wallets: `~/.config/solana/arbiter-a.json`, `arbiter-b.json`, `arbiter-c.json` (each ~3 SOL)
 
 ---
 
@@ -784,6 +1031,41 @@ submit/create/push. Never auto-submit. This applies to:
 - `gh pr create` (show full title + body)
 - `gh issue create` (show full title + body)
 - Any destructive or irreversible git operation
+
+---
+
+## Git Discipline
+
+### Git Discipline — Branch and Rebase Rules
+
+**`main` in all forks must stay clean and track upstream. Never commit directly to it.**
+
+Working changes belong on `experiment/local-dev-setup`. PR branches are cut from `upstream/main` and must never accumulate unrelated commits.
+
+#### Pre-flight checklist before any rebase or force push
+```bash
+git status                      # must be clean — no uncommitted changes
+git branch -vv                  # confirm tracking remote shows origin/..., not upstream/main
+git log upstream/main..HEAD     # review exactly what commits are yours
+```
+
+If `git branch -vv` shows the branch tracking `upstream/main` instead of `origin/<branch>`, push explicitly:
+```bash
+git push origin <branch-name> --force-with-lease
+```
+
+Never use bare `git push --force-with-lease` on a PR branch without first confirming tracking.
+
+#### If working tree is dirty on the wrong branch
+```bash
+git stash
+git checkout <correct-branch>
+git stash pop
+git add .
+git commit -m "chore: <description>"
+```
+
+Do not commit directly to `main` to "save" uncommitted work — stash it and move it.
 
 ---
 

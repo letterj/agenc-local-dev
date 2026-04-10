@@ -8,11 +8,12 @@ services:
     ports:
       - "3100:3101"
     environment:
-      - AGENC_RUNTIME_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+      - AGENC_RUNTIME_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc
     volumes:
       - agenc-creator-data:/root/.agenc
       - ./docker/creator/config.json:/root/.agenc/config.json:ro
-      - ${HOME}/.config/solana/id.json:/root/.config/solana/id.json:ro
+      - ${HOME}/.config/solana/creator.json:/root/.config/solana/creator.json:ro
+      - ${HOME}/workshop/agencproj/forks/agenc-core/runtime/dist:/root/.agenc/runtime/releases/0.1.0/linux-x64/node_modules/@tetsuo-ai/runtime/dist:ro
     stdin_open: true
     tty: true
 
@@ -25,11 +26,12 @@ services:
     ports:
       - "3101:3101"
     environment:
-      - AGENC_RUNTIME_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+      - AGENC_RUNTIME_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc
     volumes:
       - agenc-worker-data:/root/.agenc
       - ./docker/worker/config.json:/root/.agenc/config.json:ro
       - ${HOME}/.config/solana/worker.json:/root/.config/solana/id.json:ro
+      - ${HOME}/workshop/agencproj/forks/agenc-core/runtime/dist:/root/.agenc/runtime/releases/0.1.0/linux-x64/node_modules/@tetsuo-ai/runtime/dist:ro
     stdin_open: true
     tty: true
 

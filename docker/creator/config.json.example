@@ -7,7 +7,7 @@
   },
   "connection": {
     "rpcUrl": "https://api.devnet.solana.com",
-    "keypairPath": "~/.config/solana/id.json"
+    "keypairPath": "~/.config/solana/creator.json"
   },
   "llm": {
     "provider": "grok",

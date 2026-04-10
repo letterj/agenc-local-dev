@@ -58,7 +58,7 @@ Two containers are defined in the root `docker-compose.yml`:
 
 | Container | Host port | Wallet | Config |
 |---|---|---|---|
-| `agenc-creator` | 3100 | `~/.config/solana/id.json` | `docker/creator/config.json` |
+| `agenc-creator` | 3100 | `~/.config/solana/creator.json` | `docker/creator/config.json` |
 | `agenc-worker` | 3101 | `~/.config/solana/worker.json` | `docker/worker/config.json` |
 
 ```bash

@@ -32,7 +32,7 @@ Two independent operator containers — one creator (port 3100) and one worker
 docker/
 ├── docker-compose.yml      ← dual-container orchestration
 ├── creator/
-│   └── config.json         ← creator config (port 3100, id.json)
+│   └── config.json         ← creator config (port 3100, creator.json)
 └── worker/
     └── config.json         ← worker config (port 3101, worker.json)
 ```
@@ -94,7 +94,7 @@ complete task. Uses separate creator and worker wallets. Prints Solscan
 links for all three transactions.
 
 ```bash
-CREATOR_WALLET=~/.config/solana/id.json \
+CREATOR_WALLET=~/.config/solana/creator.json \
 WORKER_WALLET=~/.config/solana/worker.json \
 AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json \
 node scripts/devnet-task-lifecycle.mjs
@@ -121,7 +121,7 @@ See `docs/HOW-TO-TASK-LIFECYCLE.md` for the full walkthrough.
 
 | Role | Keypair file | Pubkey | Min balance |
 |---|---|---|---|
-| Creator | `~/.config/solana/id.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | reward + 0.02 SOL |
+| Creator | `~/.config/solana/creator.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | reward + 0.02 SOL |
 | Worker | `~/.config/solana/worker.json` | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | 0.005 SOL |
 
 Both wallets must have registered agents on devnet before running lifecycle

@@ -24,7 +24,7 @@ import {
 } from "@tetsuo-ai/sdk";
 
 const RPC_URL      = process.env.RPC_URL        ?? "https://api.devnet.solana.com";
-const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/id.json`;
+const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/creator.json`;
 const WORKER_PATH  = process.env.WORKER_WALLET  ?? `${process.env.HOME}/.config/solana/worker.json`;
 const IDL_PATH     = process.env.AGENC_IDL_PATH;
 

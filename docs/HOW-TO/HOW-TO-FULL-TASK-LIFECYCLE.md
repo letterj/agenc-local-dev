@@ -28,7 +28,7 @@ are not usable with the current IDL. Fresh registration is required.
 - Node.js >= 18, npm >= 10
 - Solana CLI 3.0.13
 - Two funded devnet wallets:
-  - Creator: `~/.config/solana/id.json` — needs reward + ~0.02 SOL buffer
+  - Creator: `~/.config/solana/creator.json` — needs reward + ~0.02 SOL buffer
   - Worker: `~/.config/solana/worker.json` — needs ~0.005 SOL for fees
 - SDK dist current: `cd ~/workshop/agencproj/forks/agenc-sdk && npm run build`
 - IDL from the current protocol fork:

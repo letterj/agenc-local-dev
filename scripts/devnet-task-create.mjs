@@ -46,7 +46,7 @@ const REWARD       = BigInt(Math.round(TASK_REWARD_SOL * 1_000_000_000));
 const DEADLINE_ADD = Number(process.env.DEADLINE_SECS ?? "3600"); // 1 hour
 
 const RPC_URL      = process.env.RPC_URL        ?? "https://api.devnet.solana.com";
-const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/id.json`;
+const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/creator.json`;
 
 const SOLSCAN = (sig) => `https://solscan.io/tx/${sig}?cluster=devnet`;
 

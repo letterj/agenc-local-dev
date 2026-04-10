@@ -194,7 +194,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   any agenc-sdk commits landed during sync (dist/ is gitignored; stale dist causes BN
   errors in devnet scripts)
 - `scripts/devnet-task-lifecycle.mjs` — full create→claim→complete task lifecycle on
-  devnet using separate creator (`id.json`) and worker (`worker.json`) wallets; confirmed
+  devnet using separate creator (`creator.json`) and worker (`worker.json`) wallets; confirmed
   working 2026-03-24 (create `4q2d3zL…`, claim `3RwRUqC…`, complete `3FCrfT8…`)
 - `package.json` — declares `@tetsuo-ai/sdk` (file path), `@coral-xyz/anchor`, and
   `@solana/web3.js` as explicit deps to ensure a single hoisted anchor instance and

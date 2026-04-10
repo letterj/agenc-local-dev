@@ -12,7 +12,7 @@
  *   AGENC_IDL_PATH   Path to agenc_coordination.json
  *
  * Optional env vars:
- *   CREATOR_WALLET   Keypair file (default: ~/.config/solana/id.json)
+ *   CREATOR_WALLET   Keypair file (default: ~/.config/solana/creator.json)
  *   RPC_URL          Devnet RPC endpoint (default: https://api.devnet.solana.com)
  *   REWARD_LAMPORTS  Task reward in lamports (default: 10000000 = 0.01 SOL)
  *   DEADLINE_SECS    Seconds from now until task deadline (default: 3600 = 1h)
@@ -46,7 +46,7 @@ const DEFAULT_DESCRIPTION =
   "Artemis II Lunar Flyby Report — research when Orion will reach closest approach to the Moon, trajectory type, lunar features visible, comms blackout duration, and distance record. Return as a structured report.";
 
 const RPC_URL      = process.env.RPC_URL            ?? "https://api.devnet.solana.com";
-const CREATOR_PATH = process.env.CREATOR_WALLET     ?? `${process.env.HOME}/.config/solana/id.json`;
+const CREATOR_PATH = process.env.CREATOR_WALLET     ?? `${process.env.HOME}/.config/solana/creator.json`;
 const IDL_PATH     = process.env.AGENC_IDL_PATH;
 const REWARD       = BigInt(process.env.REWARD_LAMPORTS ?? "10000000"); // 0.01 SOL
 const DEADLINE_ADD = Number(process.env.DEADLINE_SECS   ?? "3600");    // 1 hour

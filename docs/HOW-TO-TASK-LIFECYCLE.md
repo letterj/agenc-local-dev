@@ -8,7 +8,7 @@
 
 | Role | Wallet file | Pubkey | Agent PDA |
 |---|---|---|---|
-| Creator | `~/.config/solana/id.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs` |
+| Creator | `~/.config/solana/creator.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `GvXS49pWYMtgThmeVw32L7dPBFyCD1siYsTH4CaobpEs` |
 | Worker | `~/.config/solana/worker.json` | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `CmehT9UrmeCEFNKuXKVHuoQuAjZAa6J6sgC1W8gRr58V` |
 
 ---
@@ -32,7 +32,7 @@ and the escrow account is closed.
 
 ### 1. Two wallets with devnet SOL
 
-**Creator** (`~/.config/solana/id.json`) needs at least **0.03 SOL**
+**Creator** (`~/.config/solana/creator.json`) needs at least **0.03 SOL**
 (0.01 SOL reward + ~0.02 SOL for fees and escrow rent).
 
 **Worker** (`~/.config/solana/worker.json`) needs at least **0.005 SOL**
@@ -47,7 +47,7 @@ solana balance 26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q --url devnet
 Transfer SOL between wallets if needed (devnet airdrop is rate-limited):
 ```bash
 solana transfer 26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q 5 \
-  --from ~/.config/solana/id.json \
+  --from ~/.config/solana/creator.json \
   --url devnet \
   --allow-unfunded-recipient
 ```
@@ -98,7 +98,7 @@ node scripts/devnet-task-lifecycle.mjs
 
 | Variable | Default | Description |
 |---|---|---|
-| `CREATOR_WALLET` | `~/.config/solana/id.json` | Creator keypair path |
+| `CREATOR_WALLET` | `~/.config/solana/creator.json` | Creator keypair path |
 | `WORKER_WALLET` | `~/.config/solana/worker.json` | Worker keypair path |
 | `RPC_URL` | `https://api.devnet.solana.com` | Devnet RPC endpoint |
 | `REWARD_LAMPORTS` | `10000000` (0.01 SOL) | Task reward amount |
@@ -148,7 +148,7 @@ Task is `InProgress`. Two recovery options:
 
 ```bash
 # Check creator balance (needs reward + 0.02 SOL)
-solana balance ~/.config/solana/id.json --url devnet
+solana balance ~/.config/solana/creator.json --url devnet
 
 # Check worker balance (needs 0.005 SOL)
 solana balance ~/.config/solana/worker.json --url devnet
