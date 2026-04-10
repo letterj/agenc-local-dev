@@ -72,8 +72,8 @@ The script prints both agent PDAs at the end:
 === Registration complete ===
 
 Add these to devnet-task-lifecycle-test.mjs:
-  CREATOR_AGENT_PDA = new PublicKey("HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H")
-  WORKER_AGENT_PDA  = new PublicKey("DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv")
+  CREATOR_AGENT_PDA = new PublicKey("8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW")
+  WORKER_AGENT_PDA  = new PublicKey("4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy")
 ```
 
 Copy the two `PublicKey(...)` lines into `scripts/devnet-task-lifecycle-test.mjs`,
@@ -83,8 +83,8 @@ replacing the `CREATOR_AGENT_PDA` and `WORKER_AGENT_PDA` constants at the top.
 
 | Agent | PDA | Tx |
 |---|---|---|
-| Creator | `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` | `8729q3R9fHKMkZG9dkmKs6YFHnd1c2FaTzRqCxYetLowBM2PyLFNf5TAF33s9VM3na4aSS9fU8hb9UGBHJtiqce` |
-| Worker  | `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` | `339CkbVf2WEQL6wv5uSd4sjrXFPeXKNept5nCKGb8UfykYZ5Nxw3jvbH1bUL8jAwSeo1PkUc8SDthjGqJMQ8GiGx` |
+| Creator | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` | `8729q3R9fHKMkZG9dkmKs6YFHnd1c2FaTzRqCxYetLowBM2PyLFNf5TAF33s9VM3na4aSS9fU8hb9UGBHJtiqce` |
+| Worker  | `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` | `339CkbVf2WEQL6wv5uSd4sjrXFPeXKNept5nCKGb8UfykYZ5Nxw3jvbH1bUL8jAwSeo1PkUc8SDthjGqJMQ8GiGx` |
 
 ---
 

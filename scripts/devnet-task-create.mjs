@@ -36,7 +36,7 @@ import { getAgent, createTask } from "@tetsuo-ai/sdk";
 
 const PROGRAM_ID_STR   = process.env.AGENC_PROGRAM_ID   ?? "9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc";
 const IDL_PATH         = process.env.AGENC_IDL_PATH      ?? `${process.env.HOME}/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json`;
-const CREATOR_AGENT_PDA = new PublicKey(process.env.CREATOR_AGENT_PDA ?? "8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5");
+const CREATOR_AGENT_PDA = new PublicKey(process.env.CREATOR_AGENT_PDA ?? "8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW");
 
 const TASK_DESCRIPTION = process.env.TASK_DESCRIPTION ?? "Compute the SHA-256 hash of the string: This is only a test of the agenc-lifecycle on 2026-03-28";
 const TASK_REWARD_SOL      = parseFloat(process.env.TASK_REWARD_SOL ?? "0.01");

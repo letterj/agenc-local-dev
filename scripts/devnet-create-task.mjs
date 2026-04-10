@@ -39,8 +39,8 @@ import {
 // Config
 // ---------------------------------------------------------------------------
 
-const CREATOR_AGENT_PDA = new PublicKey("HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H");
-const WORKER_AGENT_PDA  = new PublicKey("DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv");
+const CREATOR_AGENT_PDA = new PublicKey("8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW");
+const WORKER_AGENT_PDA  = new PublicKey("4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy");
 
 const DEFAULT_DESCRIPTION =
   "Artemis II Lunar Flyby Report — research when Orion will reach closest approach to the Moon, trajectory type, lunar features visible, comms blackout duration, and distance record. Return as a structured report.";

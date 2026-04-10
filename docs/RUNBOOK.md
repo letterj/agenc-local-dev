@@ -80,16 +80,16 @@ ollama    0.17.7 (optional)
 
 > ⚠️ Mainnet program ID (`5j9ZbT3...`) is different. Never use mainnet for experiments.
 
-### Active Devnet Agents (V2 Program)
+### Active Devnet Agents (Private Program)
 
-Registered 2026-03-28 against the current program. Use these PDAs in lifecycle scripts.
+Registered 2026-04-10 against the private program. Use these PDAs in lifecycle scripts.
 
 | Role | Wallet | Agent PDA |
 |---|---|---|
-| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` |
-| Worker  | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` |
+| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` |
+| Worker  | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` |
 
-Program: `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2, deployed 2026-03-27)
+Program: `9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc` (private program)
 
 > If the devnet program is redeployed, run `scripts/devnet-register-agents.mjs` to get fresh PDAs
 > and update `scripts/devnet-task-lifecycle-test.mjs`. See `docs/HOW-TO/HOW-TO-FULL-TASK-LIFECYCLE.md`.
@@ -744,8 +744,8 @@ node scripts/devnet-task-lifecycle-test.mjs
 cd ~/workshop/agencproj/agenc-local-dev
 AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc \
 AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json \
-CREATOR_AGENT_PDA=8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5 \
-WORKER_AGENT_PDA=8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5 \
+CREATOR_AGENT_PDA=8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW \
+WORKER_AGENT_PDA=4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy \
 node scripts/devnet-task-lifecycle-test.mjs
 ```
 
@@ -872,8 +872,8 @@ Registered 2026-04-10 via `scripts/devnet-register-agents.mjs`.
 
 | Role | Wallet | Agent PDA | Registered |
 |---|---|---|---|
-| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5` | 2026-04-10 |
-| Worker | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5` | 2026-04-10 |
+| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` | 2026-04-10 |
+| Worker | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` | 2026-04-10 |
 
 Note: PDAs are keyed by random `agentId` (not wallet pubkey) — different from team V2 PDAs
 (`HmZqAsDz...` / `DQ1drYVZ...`). Both confirmed on-chain (566 bytes each).
