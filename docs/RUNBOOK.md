@@ -94,6 +94,34 @@ Program: `9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc` (private program)
 > If the devnet program is redeployed, run `scripts/devnet-register-agents.mjs` to get fresh PDAs
 > and update `scripts/devnet-task-lifecycle-test.mjs`. See `docs/HOW-TO/HOW-TO-FULL-TASK-LIFECYCLE.md`.
 
+**Stale agent deregistration — 2026-04-10**
+
+Old creator PDA `8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5` deregistered ✅ (tx: `3Z38Gq7...`).
+
+Old worker PDA `8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5` **blocked** — `disputes_as_defendant: 1`,
+7-day slash window (`SLASH_WINDOW = 604800s`). Eligible for deregistration after **2026-04-17T20:31:42 UTC**.
+
+Until then the worker wallet has 2 agent accounts on-chain. The runtime's `resolveAuthorityAgentPda`
+will return `MULTIPLE_AGENT_REGISTRATIONS` for the worker — the claimTask console command will
+need an explicit agent PDA until the stale account is removed.
+
+**Retry command (run on or after 2026-04-17T20:31:42 UTC):**
+
+```bash
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json \
+node scripts/devnet-deregister-agents.mjs
+```
+
+After successful deregistration, commit `scripts/devnet-deregister-agents.mjs` and verify:
+
+```bash
+# Should show exactly 1 match per wallet
+solana account 4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy --url devnet   # active
+solana account 8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5 --url devnet   # should be gone
+```
+
+---
+
 **Creator agent confirmed live — 2026-04-02**
 
 Queried via `getAgent(program, agentPda)` with V2 IDL (`GN69C…`). Account fields:

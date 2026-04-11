@@ -5,3 +5,11 @@ node_modules/
 # Skills are tracked
 docker/creator/config.json
 docker/worker/config.json
+
+# Anchor build artifacts
+docker/anchor-build/target/
+*.so
+
+# Private deployment config (contains API key)
+docker/creator/config.private.json
+docker/worker/config.private.json
