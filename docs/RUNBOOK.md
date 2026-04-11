@@ -84,10 +84,16 @@ ollama    0.17.7 (optional)
 
 Registered 2026-04-10 against the private program. Use these PDAs in lifecycle scripts.
 
-| Role | Wallet | Agent PDA |
-|---|---|---|
-| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` |
-| Worker  | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` |
+| Role | Wallet | Keypair file | Agent PDA |
+|---|---|---|---|
+| Creator  | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `creator.json`  | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` |
+| Worker2  | `SFG7VnuZDg9x1Y5Kz81moJkUTLwDF1xgTZFPD3V3mT1` | `worker2.json`  | `N8C3DLBzupr3Uzddu5g7DBd2pQwPyi3Nnkb774rVNC7`  |
+
+**Worker wallet history:**
+- `worker.json` (`26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q`): stale — 2 agent registrations due to slash-window block. No longer active in container.
+- `worker2.json` (`SFG7VnuZDg9x1Y5Kz81moJkUTLwDF1xgTZFPD3V3mT1`): created 2026-04-10, clean single registration, **active in worker container**.
+- `worker.json` retained on disk but no longer bind-mounted in `docker-compose.yml`.
+- `worker.json` stale agent PDA `4Rz7m7Ff...` still has a stale companion `8FfnjVhy...` (slash window — see below).
 
 Program: `9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc` (private program)
 
@@ -101,9 +107,9 @@ Old creator PDA `8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5` deregistered ✅ 
 Old worker PDA `8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5` **blocked** — `disputes_as_defendant: 1`,
 7-day slash window (`SLASH_WINDOW = 604800s`). Eligible for deregistration after **2026-04-17T20:31:42 UTC**.
 
-Until then the worker wallet has 2 agent accounts on-chain. The runtime's `resolveAuthorityAgentPda`
-will return `MULTIPLE_AGENT_REGISTRATIONS` for the worker — the claimTask console command will
-need an explicit agent PDA until the stale account is removed.
+The old `worker.json` wallet still has 2 agent accounts on-chain. **This does not affect worker2** —
+`worker2.json` has exactly 1 registration and is used by the worker container. The deregistration
+is only needed to keep the old wallet tidy and is no longer blocking operation.
 
 **Retry command (run on or after 2026-04-17T20:31:42 UTC):**
 

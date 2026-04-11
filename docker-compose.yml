@@ -30,7 +30,7 @@ services:
     volumes:
       - agenc-worker-data:/root/.agenc
       - ./docker/worker/config.json:/root/.agenc/config.json:ro
-      - ${HOME}/.config/solana/worker.json:/root/.config/solana/id.json:ro
+      - ${HOME}/.config/solana/worker2.json:/root/.config/solana/id.json:ro
       - ${HOME}/workshop/agencproj/forks/agenc-core/runtime/dist:/root/.agenc/runtime/releases/0.1.0/linux-x64/node_modules/@tetsuo-ai/runtime/dist:ro
     stdin_open: true
     tty: true
