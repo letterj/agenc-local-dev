@@ -3,7 +3,18 @@
 ## Overview
 
 Contributor roadmap for the letterj/agenc-local-dev workspace.
-Updated: 2026-04-02 (tasks 11–19 added)
+Updated: 2026-04-12
+
+### Session Notes — 2026-04-12
+- Upgraded containers to `@tetsuo-ai/runtime@0.2.0`
+- Switched from private program (`9dMNFL…`) to V2 public (`GN69CoB…`)
+- Corrected worker2 wallet: `SFG7VnuZDg9x1Y5Kz81moJkUTLwDF1xgTZFPD3V3mT1`
+- Corrected worker2 agent PDA: `BrnCh3DZtMR5jsak5t3it4i7si9DvWnk6tBzMteXvHGx`
+- Both agents confirmed Active under V2 public program
+- Full lifecycle (create → claim → complete) confirmed via CLI and chat UI
+- Marketplace `[yours:0]` bug confirmed pre-existing in 0.2.0
+- Grok 114-tool silent drop observed during agent register — workaround: use CLI
+- Fix 5 identified: `requiredCapabilities` schema description improvement
 
 ---
 
@@ -212,23 +223,40 @@ Docs: HOW-TO-TELEGRAM-CONNECTOR.md
 
 End-to-end tests of protocol features using the live dual-container setup.
 
-**Task 11 — Create a task via UI and console**
+**Task 11 — Create a task via UI and console** ✅ DONE
 Test task creation through both the web UI (`http://localhost:3100/ui/`) and the
 `agenc-console` CLI. Document both paths — steps, feedback, differences in UX.
 Note any gaps or friction points worth filing upstream.
 Depends on: Task 1
+Note: Task creation confirmed via chat UI (port 3100), CLI (`market tasks create`),
+and TUI (`market tui`). `requiredCapabilities` schema ambiguity noted — LLM requires
+2 correction cycles on first attempt (Fix 5 candidate). Documented in LOCAL-FIXES.md.
 
-**Task 12 — Work a task via UI and console**
+**Task 12 — Work a task via UI and console** ✅ DONE
 Test the full claim → complete flow through both the web UI and `agenc-console`.
 Document both paths. Note ownership guard behavior (CLAIM/CANCEL scoped to wallet —
 landed upstream in PR #283).
 Depends on: Task 11
+Note: Full claim → complete confirmed via chat UI (worker at port 3101) and CLI.
+Telegram also confirmed wired end-to-end against V2 public program.
+TUI (`market tui`) confirmed showing live V2 data across tasks, disputes,
+governance, and reputation surfaces.
 
-**Task 13 — Complex dependent task chains**
+**Task 13 — Complex dependent task chains** ⛔ BLOCKED
 Use `create_dependent_task` to build a multi-step DAG — at least 3 tasks with
 dependencies. Verify on-chain ordering and dependency enforcement. Try to claim
 a dependent task before its parent completes — confirm it is blocked.
 Depends on: Task 7
+Tested: 2026-04-16 against V3 program `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`, devnet.
+Blocker 1 — No CLI surface for dependent task creation: `agenc market tasks create-dependent`
+  does not exist and `tasks create` has no `--parent` / `--depends-on` flag. The
+  `createTaskFromTemplate` / AccountNotSigner path (V3 Issue 1) cannot be tested via CLI.
+Blocker 2 — V3 escrow rent bug (V3 Issue 2): `complete_task` fails with
+  "account (2) insufficient funds for rent" at Solana runtime. Program logic itself
+  passes (`complete_task_done` logged), but transaction is rejected before settlement.
+  Basic task lifecycle (create → claim → complete) is broken on V3 devnet.
+Dev team notified: Yes (Telegram, 2026-04-16).
+Stuck devnet task: `9cVyG56mSjbR5ZAfSt5ByvSFQ2bpjLtBMEnqG8nykR6u` — in_progress, leave it.
 
 **Task 14 — Dispute resolution flow**
 Creator creates a task, worker completes it, creator initiates a dispute with
@@ -329,8 +357,8 @@ Depends on: Task 9
 | 8 | Telegram connector | ✅ done |
 | 9 | Token usage monitoring | ⏸ on hold |
 | 10 | Benchmark report | ⏸ blocked on Task 9 |
-| 11 | Create task via UI and console | not started |
-| 12 | Work task via UI and console | not started |
+| 11 | Create task via UI and console | ✅ done (2026-04-12) |
+| 12 | Work task via UI and console | ✅ done (2026-04-12) |
 | 13 | Complex dependent task chains | not started |
 | 14 | Dispute resolution flow | not started |
 | 15 | Task cancellation and claim expiry | not started |
