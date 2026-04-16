@@ -36,6 +36,27 @@ All depend on the dual-container V2 setup (confirmed working 2026-04-12).
 | Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — not yet upstreamed |
 | Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — not yet upstreamed |
 | Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — not yet upstreamed |
+| Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — see below |
+
+### Ollama duplicate tool call ID bug
+
+**Status:** Not started — issue and PR not yet filed
+**Target:** `agenc-core/runtime/src/llm/ollama/adapter.ts`
+
+Ollama provider uses the tool name as the tool call ID instead of generating a unique ID per
+invocation. Multi-step tool tasks (write → compile → run) fail immediately with
+`Invalid tool-turn sequence (assistant_tool_call_id_duplicate)`. Single-turn responses work fine.
+
+**Tested on:** qwen2.5:14b, M2 32GB
+
+**Fix:** Replace tool call ID with `crypto.randomUUID()` — same fix applied to openai-compat
+provider in PR #402.
+
+**Actions:**
+1. File GitHub issue against `tetsuo-ai/agenc-core`
+2. PR with fix
+
+---
 
 ### openai-compat provider (issue #352)
 
