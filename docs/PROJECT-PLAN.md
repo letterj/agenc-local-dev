@@ -258,6 +258,20 @@ Blocker 2 — V3 escrow rent bug (V3 Issue 2): `complete_task` fails with
 Dev team notified: Yes (Telegram, 2026-04-16).
 Stuck devnet task: `9cVyG56mSjbR5ZAfSt5ByvSFQ2bpjLtBMEnqG8nykR6u` — in_progress, leave it.
 
+---
+**⛔ CASCADE BLOCKER — V3 `complete_task` escrow rent bug**
+Tasks 13, 16, and likely 17 are all blocked by the same root cause: the V3 program's
+`complete_task` instruction fails at Solana runtime with "account (2) insufficient funds
+for rent", even though program logic succeeds. Until this is fixed upstream:
+  - Task 13: can't complete tasks → dependent chain can't be exercised
+  - Task 16: can't earn reputation via task completion → reputation gate (5000 < 5500)
+    blocks `post_to_feed` for both agents
+  - Task 17: reputation staking/delegation can be tested, but `complete_task` scenarios
+    that affect reputation are blocked
+All three unblock simultaneously once the upstream rent fix lands in agenc-protocol.
+Known V3 stuck task on devnet: `9cVyG56mSjbR5ZAfSt5ByvSFQ2bpjLtBMEnqG8nykR6u` (in_progress, leave it).
+---
+
 **Task 14 — Dispute resolution flow**
 Creator creates a task, worker completes it, creator initiates a dispute with
 evidence hash, arbiter votes, resolution executes. Verify refund/complete/split
@@ -270,10 +284,20 @@ a claimed task go stale, trigger `expire_claim` — verify state transition.
 Document both on-chain outcomes.
 Depends on: Task 7
 
-**Task 16 — Agent feed**
+**Task 16 — Agent feed** ⛔ BLOCKED
 Post to the on-chain feed from the creator agent. Upvote the post from the
 worker agent. Verify both on-chain. Lightweight test of the social layer.
 Depends on: Task 1
+Tested: 2026-04-16, V3 program `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`.
+Blocker — Reputation gate: `post_to_feed` requires `reputation >= 5500`
+  (MIN_FEED_POST_REPUTATION, post_to_feed.rs:11). Both agents are at 5000 base
+  reputation (500 point gap each). Reputation only increases via `complete_task`,
+  which is broken by the V3 escrow rent bug. Delegation is computed off-chain only
+  and is not visible to the on-chain `author.reputation` field. No admin override.
+Secondary bug found: `topic` field must be non-zero — `[0u8; 32]` triggers
+  `FeedInvalidTopic` at post_to_feed.rs:71. Scripts patched (hash of "task16-test").
+Scripts ready: `scripts/devnet-feed-post.mjs` + `scripts/devnet-feed-upvote.mjs` —
+  correct and tested up to the reputation gate. Unblock immediately once rent bug fixed.
 
 **Task 17 — Reputation staking and delegation**
 Stake tokens from creator agent via `stake_reputation`. Delegate to worker agent
@@ -359,10 +383,10 @@ Depends on: Task 9
 | 10 | Benchmark report | ⏸ blocked on Task 9 |
 | 11 | Create task via UI and console | ✅ done (2026-04-12) |
 | 12 | Work task via UI and console | ✅ done (2026-04-12) |
-| 13 | Complex dependent task chains | not started |
+| 13 | Complex dependent task chains | ⛔ blocked (2026-04-16) |
 | 14 | Dispute resolution flow | not started |
 | 15 | Task cancellation and claim expiry | not started |
-| 16 | Agent feed | not started |
+| 16 | Agent feed | ⛔ blocked (2026-04-16) |
 | 17 | Reputation staking and delegation | not started |
 | 18 | ZK private task completion | not started |
 | 19 | Concordia wave review | not started |
