@@ -6,6 +6,139 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2026-04-17] — PR #418 filed; V3 rent bug retest; cascade blocker confirmed
+
+### Upstream Contributions
+- Filed issue tetsuo-ai/agenc-core#417 and PR tetsuo-ai/agenc-core#418
+  (`fix/ollama-tool-call-id-duplicate`) — fixes duplicate tool call ID bug in Ollama adapter;
+  closes issue #417. `randomUUID()` now used at both streaming and non-streaming paths in
+  `runtime/src/llm/ollama/adapter.ts`. 30/30 tests passing, pack-smoke green.
+
+### Testing
+- Retested V3 `complete_task` rent bug against post-refactor program — still present after
+  60-commit upstream runtime/LLM refactor (PR #413); refactor was unrelated to protocol.
+- Tasks 13, 16, 17 remain cascade-blocked by V3 rent bug.
+- Task 13 additionally blocked by missing `create-dependent` / `--parent` CLI surface.
+- Stuck devnet task `AySKChkQTAiyior3Yzo2LMT988R42iMNBtckFxuXqUg` — status `in_progress`,
+  uncancellable; leave it.
+
+---
+
+## [2026-04-15] — V3 program migration, feature branch rebase
+
+### Changed
+- Migrated all container configs and compose env vars from V2 program
+  (`GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`) to V3 program
+  (`2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`); updated
+  `docker/creator/config.json` (2 occurrences), `docker/worker/config.json` (1),
+  and `docker-compose.yml` (2 env var entries)
+- Containers stopped, recreated, and restarted with new program ID
+- Both agents re-registered under V3; PDAs confirmed on-chain
+
+### Agent Registration (V3)
+- Creator agent `HYZyLSXTpC2g9XNAweud7XeCNAH8PfzMNAX2JKEKzbQY` — registered
+  2026-04-15 under V3 program, tx `4HQKftu3iLRjbx6TEEr5jy4HLQ7L4wQGtLQRNX1mRxR9MLWHYBDM6qJwNqusa7Dmg6KwRVvmgzr7t84QDqzy3wXs`
+- Worker2 agent `2TPP4NJ7aYJUmr51T1qf7A5rEpggGCLNwGEdy7srjFCb` — registered
+  2026-04-15 under V3 program, tx `45yT9u2faxsK8aJYaRhqzsaMhtQM4S9fKbE1oc8F44BmG2Yue6gjv9UCfz3YHe1Rip3BdVfbCdhZfG9owPHtiBsw`
+- V2 PDAs (`HmZqAsDz…`, `BrnCh3DZ…`) superseded; no longer active under V3
+
+### Dev (agenc-core fork)
+- Rebased `feature/openai-compat-provider` onto upstream/main (25 new commits,
+  base moved from `1e17f95` to `b1f3130`); no conflicts on any watched file
+- Typecheck: 0 errors; 81 openai-compat tests pass; pre-existing failure count
+  moved from 14 → 19 (5 new upstream failures in `coding.test.ts` and
+  `context-compaction.integration.test.ts`, none in our files)
+- Rebuilt runtime dist: `0.2.0 @ cad417450839`
+
+---
+
+## [2026-04-13] — Shell interface discovery, agenc-watch regression, Gemma 4 E2E confirmed
+
+### Added
+- Discovered `agenc shell` as primary operator interface (coding-first-shell feature drop)
+- Confirmed shell works with both creator (Grok) and worker2-local (Gemma 4)
+- `agenc shell --profile general` and `--profile coding` both confirmed working
+- Gemma 4 26B confirmed working end-to-end via LM Studio + `agenc shell`
+
+### Fixed
+- Rebuilt runtime dist after rebase onto upstream/main (VERSION: 0.2.0 @ 3af6399)
+
+### Known Issues
+- `agenc-watch.js` cockpit not yet functional — crashes with "Missing required watch surface helper: cockpitFeedFingerprint" (upstream issue, coding-first-shell)
+- grok model display cosmetic bug confirmed — shell shows `grok-3`, API is running `grok-4-1-fast-reasoning` (reasoning_tokens > 0 confirmed)
+
+### Upstream
+- **Coding-first-shell roadmap shipped (PR #329, dcc8a74):**
+  - Shell profiles and shell-first startup
+  - Native coding tools: plan, files, grep, git, worktree, review, session
+  - Explicit workflow stages: plan, implement, review, verify
+  - Session continuity: list, inspect, history, resume, fork
+  - Shell extension UX for MCP, plugins, and skills
+  - Watch cockpit surfaces
+  - Explicit multi-agent shell orchestration
+  - Rollout gating and validation
+- **AgenC umbrella reconciliation (PR #1554, cbd9a4da):**
+  - Reduced root tech debt
+  - TODO.MD updated to reflect actual project state
+  - Coding-shell roadmap marked shipped, remaining work moved to backlog
+- **Unified session surfaces (PR #330, PR #331, b05b26b):**
+  - Shared daemon-backed session command surface across shell, console, web
+  - Structured command result families replacing transcript-only blobs
+  - Watch console convergence onto canonical daemon commands
+  - Structured web rendering for command results
+  - AgenC console bootstrap and auth loop fix
+  - Cockpit startup regression fix
+  - Removal of legacy command-name drift across canonical surfaces
+  - agenc-watch-agents.mjs deleted (replaced by unified surface)
+  - daemon-command-registry.ts +1800 lines
+
+---
+
+## [2026-04-12] — Container upgrade to 0.2.0, V2 public program, lifecycle validated
+
+### Changed
+- Upgraded containers to `@tetsuo-ai/agenc@0.2.0` / `@tetsuo-ai/runtime@0.2.0`
+- Switched from private program (`9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc`) to V2 public
+  program (`GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`) across all configs and compose env vars
+- `docker-compose.yml` bind mount path updated from `releases/0.1.0/linux-x64/` to `releases/0.2.0/linux-x64/`
+- Bind mount level changed: `runtime/dist` → `runtime/` (full package) to prevent `EBUSY` during fresh runtime install
+- Named volumes cleared (`docker compose down -v`) for clean 0.2.0 initialization
+- `VERSION` file in `runtime/dist` updated to `"runtimeVersion": "0.2.0"`
+- Corrected worker2 wallet: previously recorded address (`26d6kxsP…`) belonged to `worker.json`;
+  confirmed `worker2.json` public key is `SFG7VnuZDg9x1Y5Kz81moJkUTLwDF1xgTZFPD3V3mT1`
+
+### Fixed
+- `EBUSY: resource busy or locked, rmdir .../dist` on container startup — caused by 0.2.0 installer
+  attempting to remove a bind-mounted directory; fixed by mounting at the `@tetsuo-ai/runtime`
+  package level instead of just `dist/`
+- `LOCAL-FIXES.md` — corrected program ID label: `6UcJzb…` is V1 public (not V2);
+  V2 public is `GN69CoB…`; added program ID reference table to Fix 1
+
+### Agent Registration
+- Creator agent `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` — pre-existing V2 registration confirmed active
+- Worker2 agent `BrnCh3DZtMR5jsak5t3it4i7si9DvWnk6tBzMteXvHGx` — registered 2026-04-12 under V2 public program,
+  tx `4gHSJvv891HsxVVDeCQfSWecEXMGrS3DbU2BWpPRBGF5hQBxTcMXQ7nDCZUnDZ7YWCcxpApbm4apz182pEJT3cfr`
+
+### Verified
+- **CLI lifecycle — V2 devnet — 2026-04-12:** full create → claim → complete confirmed against
+  program `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` using both containers (0.2.0 image).
+  Creator (`HmZqAs…`, port 3100) created task; worker2 (`BrnCh3…`, port 3101) claimed and completed.
+  Task PDA: `CqCR4mXTkr4gnqGNvZAW64PXtRKqgR8uYFnfHFVApme2`. Reward: 0.01 SOL.
+  Create tx: `3kdDucoqurgEjv7UQtLMVyLmhb9rQwMHBXiZ4Pu6kJijBUL95nH4a6c6q62WB6aYQj4RAHKb7ZYD79L4J8wieuVG`
+  Claim tx:  `4mnKfeHCQFtG6XfdkuxpWRPT5JE2GB9dQi3DTVNcfZVags5Dof22xzTQxb5rotYcjPu4CtGjeU9oa6HKubjcuCVK`
+  Complete tx: `5kJo8iCFr7UVyJMfUo7Gy3Sp6hYLuvxx8WCZLfYjNEXr6eFCQZ6kpHG4kr52jpxARFzfSApLWxq69obRexEd5nVb`
+- **Chat UI lifecycle — V2 devnet — 2026-04-12:** full create → claim → complete confirmed via
+  webchat channel. Both agents correctly routed to V2 program.
+- **Telegram — 2026-04-12:** confirmed wired on both containers; returning live V2 on-chain data.
+
+### Known Issues (confirmed not fixed in 0.2.0)
+- Marketplace UI `[yours:0]` bug — owner-scoped task query returns zero results; root cause is
+  UI querying wrong program for owner-scoped tasks (same V1 PROGRAM_ID root cause as Fix 1)
+- `requiredCapabilities` schema ambiguity — LLM passes wrong type on first attempt; requires
+  2 correction cycles; Fix 5 candidate for `experiment/local-tool-fixes`
+
+---
+
 ## [Unreleased]
 
 ### Fixed

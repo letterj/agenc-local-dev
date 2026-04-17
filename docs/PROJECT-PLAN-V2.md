@@ -36,11 +36,14 @@ All depend on the dual-container V2 setup (confirmed working 2026-04-12).
 | Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — not yet upstreamed |
 | Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — not yet upstreamed |
 | Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — not yet upstreamed |
-| Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — see below |
+| Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — ✅ PR #418 filed 2026-04-17 |
 
 ### Ollama duplicate tool call ID bug
 
-**Status:** Not started — issue and PR not yet filed
+**Status:** ✅ Complete — PR #418 awaiting review
+**Issue:** tetsuo-ai/agenc-core#417
+**PR:** tetsuo-ai/agenc-core#418
+**Filed:** 2026-04-17
 **Target:** `agenc-core/runtime/src/llm/ollama/adapter.ts`
 
 Ollama provider uses the tool name as the tool call ID instead of generating a unique ID per
@@ -49,12 +52,11 @@ invocation. Multi-step tool tasks (write → compile → run) fail immediately w
 
 **Tested on:** qwen2.5:14b, M2 32GB
 
-**Fix:** Replace tool call ID with `crypto.randomUUID()` — same fix applied to openai-compat
-provider in PR #402.
+**Fix:** Replaced `tc.function?.name` with `randomUUID()` (named import from `node:crypto`) at
+both the streaming path (`chatStream`) and non-streaming path (`parseResponse`) in
+`runtime/src/llm/ollama/adapter.ts`. Same pattern as PR #402 (openai-compat fix).
 
-**Actions:**
-1. File GitHub issue against `tetsuo-ai/agenc-core`
-2. PR with fix
+**Tests:** 30/30 passing, pack-smoke green, 0 regressions
 
 ---
 
