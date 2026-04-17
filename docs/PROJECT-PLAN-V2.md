@@ -9,7 +9,7 @@
 
 - **Task 9 — Token usage monitoring:** awaiting dev team response via Telegram (message sent 2026-03-25). GitHub issue not yet filed.
 - **Task 10 — Benchmark report:** blocked on Task 9.
-- **V3 `complete_task` rent bug (cascade blocker):** Solana runtime rejects `complete_task` at account (2) with insufficient funds for rent-exemption. Program logic passes (`complete_task_validated` + `complete_task_done` succeed) but transaction fails at runtime level. Blocks Tasks 13, 16, and 17 simultaneously. Fix must land in `agenc-protocol` or the CLI's `complete_task` transaction builder. Dev team notified via Telegram 2026-04-17. Stuck devnet task `AySKChkQTAiyior3Yzo2LMT988R42iMNBtckFxuXqUg` — in_progress, uncancellable, leave it.
+- **V3 `complete_task` rent bug (cascade blocker):** Solana runtime rejects `complete_task` at account (2) with insufficient funds for rent-exemption. Program logic passes (`complete_task_validated` + `complete_task_done` succeed) but transaction fails at runtime level. Blocks Tasks 13, 16, and 17 simultaneously. Fix must land in `agenc-protocol` or the CLI's `complete_task` transaction builder. Dev team notified via Telegram 2026-04-17. **GitHub issue filed:** `tetsuo-ai/agenc-core#437` (2026-04-17). Stuck devnet task `AySKChkQTAiyior3Yzo2LMT988R42iMNBtckFxuXqUg` — in_progress, uncancellable, leave it.
 
 ---
 
@@ -45,10 +45,16 @@ uncancellable, leave it.
 ### Task 16 — Agent feed
 
 **Status:** ⛔ Blocked  
-**Tested:** 2026-04-16, V3 program `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
+**Tested:** 2026-04-16, V3 program `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`  
+**Retest:** 2026-04-17 — delegation workaround attempted; still blocked
 
 **Root cause:** `MIN_FEED_POST_REPUTATION = 5500`; both agents start at 5000 (500 gap).
-Reputation only increases via `complete_task`, which is blocked by the V3 rent bug.
+Reputation only increases via `complete_task`, which is blocked by the V3 rent bug (issue #437).
+
+**Delegation workaround — ineffective:** Worker received 5000 delegated rep from creator
+(`effectiveReputation: 10000`) but `post_to_feed.rs:62` reads `AgentRegistration.reputation`
+directly — it does not load delegation accounts. SDK `effectiveReputation` is a client-side
+aggregation only, not an on-chain primitive. Worker on-chain rep remains 5000 (below 5500 gate).
 
 **Secondary bug (patched in scripts):** `topic` field must be non-zero — `[0u8; 32]` triggers
 `FeedInvalidTopic`. Scripts use `sha256("task16-test")` as topic.
@@ -58,11 +64,29 @@ and tested up to the reputation gate. Will work immediately once the rent bug is
 
 ### Task 17 — Reputation staking and delegation
 
-**Status:** ⛔ Likely blocked  
-**Tested:** Not yet
+**Status:** Partially complete — staking and delegation work; withdraw blocked  
+**Tested:** 2026-04-17, V3 program `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
 
-Reputation earned via `complete_task`. Same cascade blocker applies — staking and delegation
-scenarios that require reputation thresholds will fail until the V3 rent bug is fixed.
+**What works:**
+- `reputation summary` ✅ — readable for both agents at any time
+- `reputation stake <lamports>` ✅ — converts base rep to staked balance; 7-day cooldown
+  enforced on-chain (`lockedUntil` set in `AgentRegistration`); staking reduces `baseReputation`
+  to 0 (not additive)
+- `reputation delegate <amount> --delegatee-agent-pda <pda>` ✅ — delegation PDA created
+  on-chain; `inboundDelegations` visible in delegatee's summary; `effectiveReputation` updated
+  client-side; amount is reputation points (100–10,000 range), not lamports
+
+**Blocker:** `reputation withdraw` — no CLI surface. `UNKNOWN_MARKET_COMMAND` returned.
+On-chain cooldown exists (`lockedUntil` populated) but is unreachable via CLI in this version.
+
+**Bug found:** Delegate amount validation error does not specify units. Error message reads
+`"amount must be between 100 and 10000"` with no indication these are reputation points (not
+lamports). Confusing UX — initial attempt with 500000 (lamport-scale) failed silently.
+
+**Note:** Delegation does NOT satisfy on-chain reputation gates. `post_to_feed.rs:62` reads
+`AgentRegistration.reputation` directly. SDK `effectiveReputation` is a display convenience
+only, not an on-chain primitive consulted by any instruction. Worker on-chain rep remains 5,000
+(below 5,500 gate). See Task 16 above.
 
 ---
 

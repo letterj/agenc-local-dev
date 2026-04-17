@@ -6,21 +6,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [2026-04-17] — PR #418 filed; V3 rent bug retest; cascade blocker confirmed
+## [2026-04-17] — PR #418 filed; V3 rent bug issue #437 filed; Tasks 16 & 17 tested
 
 ### Upstream Contributions
 - Filed issue tetsuo-ai/agenc-core#417 and PR tetsuo-ai/agenc-core#418
   (`fix/ollama-tool-call-id-duplicate`) — fixes duplicate tool call ID bug in Ollama adapter;
   closes issue #417. `randomUUID()` now used at both streaming and non-streaming paths in
   `runtime/src/llm/ollama/adapter.ts`. 30/30 tests passing, pack-smoke green.
+- Filed issue tetsuo-ai/agenc-core#437 — V3 `complete_task` rent bug; cascade blocker for
+  Tasks 13, 16, 17. Account (2) insufficient funds for rent at transaction level; program
+  logic passes. Confirmed still present after 59-commit upstream refactor (PRs #413–#435).
 
 ### Testing
 - Retested V3 `complete_task` rent bug against post-refactor program — still present after
-  60-commit upstream runtime/LLM refactor (PR #413); refactor was unrelated to protocol.
-- Tasks 13, 16, 17 remain cascade-blocked by V3 rent bug.
+  59-commit upstream runtime/LLM refactor (PR #413); refactor was unrelated to protocol.
+- Tasks 13, 16, 17 remain cascade-blocked by V3 rent bug (issue #437).
 - Task 13 additionally blocked by missing `create-dependent` / `--parent` CLI surface.
 - Stuck devnet task `AySKChkQTAiyior3Yzo2LMT988R42iMNBtckFxuXqUg` — status `in_progress`,
   uncancellable; leave it.
+- **Task 17 tested:** reputation staking (`reputation stake`) and delegation
+  (`reputation delegate`) both working on-chain. Stake: lamport-denominated, 7-day cooldown
+  enforced, reduces `baseReputation` to 0. Delegate: rep-point-denominated (100–10,000 range),
+  delegation PDA created, `effectiveReputation` updated client-side. `reputation withdraw` has
+  no CLI surface (`UNKNOWN_MARKET_COMMAND`). Bug: delegate validation error omits unit label
+  (rep points vs lamports).
+- **Task 16 retest:** still blocked. Attempted delegation workaround (worker `effectiveReputation`
+  raised to 10,000 via 5,000 delegated from creator) — ineffective. `post_to_feed.rs:62` reads
+  `AgentRegistration.reputation` directly; delegation accounts are not loaded by this instruction.
+  SDK `effectiveReputation` is client-side only. Worker on-chain rep 5,000 (below 5,500 gate).
 
 ---
 
