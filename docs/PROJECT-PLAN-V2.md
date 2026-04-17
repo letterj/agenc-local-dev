@@ -1,6 +1,6 @@
 # AgenC Project Plan — Open Items
 
-**Last updated:** 2026-04-15
+**Last updated:** 2026-04-17
 **Full history:** `docs/PROJECT-PLAN.md`
 
 ---
@@ -9,7 +9,7 @@
 
 - **Task 9 — Token usage monitoring:** awaiting dev team response via Telegram (message sent 2026-03-25). GitHub issue not yet filed.
 - **Task 10 — Benchmark report:** blocked on Task 9.
-- **Stale worker PDA deregister:** `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` registered under private program (`9dMNFL…`) for wallet `26d6kxsP…` (`worker.json`). Slash window blocks deregister until **2026-04-17T20:31:42 UTC**. Do not use `worker.json` for V2 testing before that date.
+- **V3 `complete_task` rent bug (cascade blocker):** Solana runtime rejects `complete_task` at account (2) with insufficient funds for rent-exemption. Program logic passes (`complete_task_validated` + `complete_task_done` succeed) but transaction fails at runtime level. Blocks Tasks 13, 16, and 17 simultaneously. Fix must land in `agenc-protocol` or the CLI's `complete_task` transaction builder. Dev team notified via Telegram 2026-04-17. Stuck devnet task `AySKChkQTAiyior3Yzo2LMT988R42iMNBtckFxuXqUg` — in_progress, uncancellable, leave it.
 
 ---
 
@@ -17,14 +17,52 @@
 
 All depend on the dual-container V2 setup (confirmed working 2026-04-12).
 
-| Task | Title | Notes |
-|---|---|---|
-| 13 | Complex dependent task chains | Use `create_dependent_task`; verify dependency blocking |
-| 14 | Dispute resolution flow | All 7 dispute instructions; requires arbiter wallet |
-| 15 | Task cancellation and claim expiry | Two sub-tests: creator cancel + `expire_claim` |
-| 16 | Agent feed | Post + upvote from creator/worker agents |
-| 17 | Reputation staking and delegation | Stake → delegate → revoke → cooldown check |
-| 18 | ZK private task completion | `complete_task_private` with RISC Zero Groth16 proof |
+| Task | Title | Status | Notes |
+|---|---|---|---|
+| 13 | Complex dependent task chains | ⛔ Blocked | See below |
+| 14 | Dispute resolution flow | Not started | All 7 dispute instructions; requires arbiter wallet |
+| 15 | Task cancellation and claim expiry | Not started | Two sub-tests: creator cancel + `expire_claim` |
+| 16 | Agent feed | ⛔ Blocked | See below |
+| 17 | Reputation staking and delegation | ⛔ Likely blocked | See below |
+| 18 | ZK private task completion | Not started | `complete_task_private` with RISC Zero Groth16 proof |
+
+### Task 13 — Complex dependent task chains
+
+**Status:** ⛔ Blocked  
+**Tested:** 2026-04-16, V3 program `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
+
+**Blocker 1:** No CLI surface for dependent task creation — `create-dependent` / `--parent` flag
+not available in `agenc market tasks`. The `create_dependent_task` instruction exists on-chain
+but is not exposed via the CLI.
+
+**Blocker 2:** V3 `complete_task` rent bug (cascade blocker — see Active Blockers). Even if the
+CLI gap were filled, completing a parent task to unblock a dependent task would fail at the
+`complete_task` step.
+
+**Stuck devnet task:** `9cVyG56mSjbR5ZAfSt5ByvSFQ2bpjLtBMEnqG8nykR6u` — in_progress,
+uncancellable, leave it.
+
+### Task 16 — Agent feed
+
+**Status:** ⛔ Blocked  
+**Tested:** 2026-04-16, V3 program `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
+
+**Root cause:** `MIN_FEED_POST_REPUTATION = 5500`; both agents start at 5000 (500 gap).
+Reputation only increases via `complete_task`, which is blocked by the V3 rent bug.
+
+**Secondary bug (patched in scripts):** `topic` field must be non-zero — `[0u8; 32]` triggers
+`FeedInvalidTopic`. Scripts use `sha256("task16-test")` as topic.
+
+**Scripts ready:** `scripts/devnet-feed-post.mjs` + `scripts/devnet-feed-upvote.mjs` — correct
+and tested up to the reputation gate. Will work immediately once the rent bug is fixed upstream.
+
+### Task 17 — Reputation staking and delegation
+
+**Status:** ⛔ Likely blocked  
+**Tested:** Not yet
+
+Reputation earned via `complete_task`. Same cascade blocker applies — staking and delegation
+scenarios that require reputation thresholds will fail until the V3 rent bug is fixed.
 
 ---
 
