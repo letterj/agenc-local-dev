@@ -26,6 +26,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `AgentStatus.Active`, auto-selects single active agent; 2 unit tests; happy path confirmed
   on devnet; baseline failure count unchanged.
 
+### CI
+- `private-kernel-registry` gate fixed upstream (2026-04-18) — now passing for all external
+  contributor PRs. Previously failing on all new PRs from non-org contributors.
+- Re-triggered CI on PR #402 and #418 after fix landed — all 4 checks green on both.
+- All 5 open PRs (#402, #418, #454, #456, #458) now fully green.
+
 ### Maintenance
 - Fixed morning sync PR detection — replaced `gh search prs` with GitHub Search API
   org-scoped query (`/search/issues?q=is:pr+is:open+author:letterj+org:tetsuo-ai`).

@@ -92,6 +92,10 @@ only, not an on-chain primitive consulted by any instruction. Worker on-chain re
 
 ## Upstream PR Opportunities
 
+**CI note (2026-04-18):** The `private-kernel-registry` gate was broken for external contributor
+PRs; the dev team fixed it on 2026-04-18. All 5 open PRs (#402, #418, #454, #456, #458) now
+have all 4 checks green. #402 and #418 required a manual CI re-trigger after the fix landed.
+
 | # | Target | Description |
 |---|---|---|
 | — | `agenc-sdk/src/constants.ts`, `agenc-core/mcp/src/server.ts` | `PROGRAM_ID` hardcoded to V1 (`6UcJzb…`) — callers without explicit `programId` silently target wrong program |
@@ -102,7 +106,7 @@ only, not an on-chain primitive consulted by any instruction. Worker on-chain re
 
 ### Fix 4 — Active-status filter in resolveAuthorityAgentPda
 
-**Status:** ✅ Complete — PR #458 awaiting review
+**Status:** ✅ Complete — PR #458 all checks passing, awaiting review
 **Issue:** tetsuo-ai/agenc-core#457
 **PR:** tetsuo-ai/agenc-core#458
 **Filed:** 2026-04-18
@@ -132,7 +136,7 @@ pre-existing upstream failures (baseline unchanged), 0 TypeScript errors.
 
 ### Fix 3 — Rename description to taskDescription in create_task tool schema
 
-**Status:** ✅ Complete — PR #456 awaiting review
+**Status:** ✅ Complete — PR #456 all checks passing, awaiting review
 **Issue:** tetsuo-ai/agenc-core#455
 **PR:** tetsuo-ai/agenc-core#456
 **Filed:** 2026-04-18
@@ -148,14 +152,18 @@ to be silently dropped or misrouted.
 at both call sites (dedup key and `parseTaskDescription`) for backwards compatibility.
 
 **Tests:** 2 new regression tests asserting `taskDescription` present / `description` absent
-in both `properties` and `required`. 35/35 targeted passing, 21 pre-existing upstream
-failures (baseline unchanged), 0 TypeScript errors.
+in both `properties` and `required`. Also updated upstream's new "preserves task creation
+when devnet lacks job spec metadata" test to pass `taskDescription` (rebased 2026-04-18 after
+PR #459 added that test to the same file). Fixed missed `args.description` reference in
+`persistMarketplaceJobSpec` call — added same `args.taskDescription ?? args.description`
+fallback. 36/36 targeted passing, 21 pre-existing upstream failures (baseline unchanged),
+0 TypeScript errors.
 
 ---
 
 ### Fix 2 — Tilde expansion in keypairPath config field
 
-**Status:** ✅ Complete — PR #454 awaiting review
+**Status:** ✅ Complete — PR #454 all checks passing, awaiting review
 **Issue:** tetsuo-ai/agenc-core#453
 **PR:** tetsuo-ai/agenc-core#454
 **Filed:** 2026-04-18
@@ -177,7 +185,7 @@ path with `expandPath()` before calling `loadKeypairFromFile`.
 
 ### Ollama duplicate tool call ID bug
 
-**Status:** ✅ Complete — PR #418 awaiting review
+**Status:** ✅ Complete — PR #418 all checks passing, awaiting review
 **Issue:** tetsuo-ai/agenc-core#417
 **PR:** tetsuo-ai/agenc-core#418
 **Filed:** 2026-04-17
@@ -199,7 +207,7 @@ both the streaming path (`chatStream`) and non-streaming path (`parseResponse`) 
 
 ### openai-compat provider (issue #352)
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete — all checks passing, awaiting review
 **PR:** tetsuo-ai/agenc-core#402 — filed 2026-04-15, awaiting upstream review (merge date TBD)
 **Branch:** feature/openai-compat-provider (4 commits on upstream/main)
 **Issue:** https://github.com/tetsuo-ai/agenc-core/issues/352
