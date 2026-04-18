@@ -97,8 +97,38 @@ only, not an on-chain primitive consulted by any instruction. Worker on-chain re
 | — | `agenc-sdk/src/constants.ts`, `agenc-core/mcp/src/server.ts` | `PROGRAM_ID` hardcoded to V1 (`6UcJzb…`) — callers without explicit `programId` silently target wrong program |
 | Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — ✅ PR #454 filed 2026-04-18 |
 | Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — ✅ PR #456 filed 2026-04-18 |
-| Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — not yet upstreamed |
+| Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — ✅ PR #458 filed 2026-04-18 |
 | Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — ✅ PR #418 filed 2026-04-17 |
+
+### Fix 4 — Active-status filter in resolveAuthorityAgentPda
+
+**Status:** ✅ Complete — PR #458 awaiting review
+**Issue:** tetsuo-ai/agenc-core#457
+**PR:** tetsuo-ai/agenc-core#458
+**Filed:** 2026-04-18
+**Target:** `agenc-core/runtime/src/tools/agenc/mutation-tools.ts`
+
+When a signer wallet has multiple agent registrations, `resolveAuthorityAgentPda` returned an
+ambiguity error listing all of them — including suspended or deregistered agents. An operator
+with one active and one old deregistered registration would have to manually specify the PDA
+every time.
+
+**Fix:** Added `AgentStatus` to the import. In the multi-match branch, calls
+`fetchMultiple` to fetch full account data for all candidates, filters to
+`AgentStatus.Active` only. If exactly one active agent remains, returns it directly (no
+ambiguity). If multiple active remain, surfaces them in the ambiguity error (suppressing
+inactive entries). Falls back to all candidates if `fetchMultiple` fails or returns no data.
+
+**Functional testing:** Happy path confirmed on devnet (task created successfully).
+Suspended/deregistered agent paths require protocol authority to set — covered by unit
+tests only.
+
+**Tests:** 2 new unit tests: (1) single active auto-selected when one of two is suspended;
+(2) ambiguity error count = 2 when 2 active + 1 suspended. `fetchMultiple` added to base
+mock with safe `[]` default preserving all existing tests. 35/35 targeted passing, 21
+pre-existing upstream failures (baseline unchanged), 0 TypeScript errors.
+
+---
 
 ### Fix 3 — Rename description to taskDescription in create_task tool schema
 

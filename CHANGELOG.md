@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [2026-04-18] — PR #454 filed; morning sync PR detection fixed
+## [2026-04-18] — PRs #454, #456, #458 filed; morning sync PR detection fixed
 
 ### Upstream Contributions
 - Filed issue tetsuo-ai/agenc-core#453 — `keypairPath` config field does not expand `~/`;
@@ -19,6 +19,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Filed PR tetsuo-ai/agenc-core#456 (`fix/task-description-field-rename`) — Fix 3 from
   local-tool-fixes backlog. Renamed `description` → `taskDescription` in schema; backwards-compat
   fallback at both call sites; 2 regression tests; baseline failure count unchanged.
+- Filed issue tetsuo-ai/agenc-core#457 — `resolveAuthorityAgentPda` does not filter for
+  active agent status; suspended/deregistered agents appear as valid candidates.
+- Filed PR tetsuo-ai/agenc-core#458 (`fix/resolve-authority-agent-pda-status-filter`) — Fix 4
+  from local-tool-fixes backlog. Fetches full account data via `fetchMultiple`, filters to
+  `AgentStatus.Active`, auto-selects single active agent; 2 unit tests; happy path confirmed
+  on devnet; baseline failure count unchanged.
 
 ### Maintenance
 - Fixed morning sync PR detection — replaced `gh search prs` with GitHub Search API
