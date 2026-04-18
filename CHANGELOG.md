@@ -6,6 +6,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2026-04-18] — PR #454 filed; morning sync PR detection fixed
+
+### Upstream Contributions
+- Filed issue tetsuo-ai/agenc-core#453 — `keypairPath` config field does not expand `~/`;
+  causes `ENOENT` when keypair path is set with a tilde in config.
+- Filed PR tetsuo-ai/agenc-core#454 (`fix/keypair-path-tilde-expansion`) — Fix 2 from
+  local-tool-fixes backlog. Added `expandPath()` helper in `wallet-loader.ts`; 5 unit tests;
+  baseline failure count unchanged (21 pre-existing upstream failures).
+
+### Maintenance
+- Fixed morning sync PR detection — replaced `gh search prs` with GitHub Search API
+  org-scoped query (`/search/issues?q=is:pr+is:open+author:letterj+org:tetsuo-ai`).
+  Covers all tetsuo-ai repos in one call including cross-fork PRs. Previously missing
+  tetsuo-ai/AgenC#1547 entirely.
+
+### Research
+- Investigated marketplace order `ord_research-report_mo27c3lg_pfe3z7` — confirmed task
+  PDA is a mock identifier, not an on-chain account. Storefront running in simulation mode,
+  likely due to V3 rent bug blocking real task settlement.
+
+---
+
 ## [2026-04-17] — PR #418 filed; V3 rent bug issue #437 filed; Tasks 16 & 17 tested
 
 ### Upstream Contributions

@@ -95,10 +95,32 @@ only, not an on-chain primitive consulted by any instruction. Worker on-chain re
 | # | Target | Description |
 |---|---|---|
 | — | `agenc-sdk/src/constants.ts`, `agenc-core/mcp/src/server.ts` | `PROGRAM_ID` hardcoded to V1 (`6UcJzb…`) — callers without explicit `programId` silently target wrong program |
-| Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — not yet upstreamed |
+| Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — ✅ PR #454 filed 2026-04-18 |
 | Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — not yet upstreamed |
 | Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — not yet upstreamed |
 | Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — ✅ PR #418 filed 2026-04-17 |
+
+### Fix 2 — Tilde expansion in keypairPath config field
+
+**Status:** ✅ Complete — PR #454 awaiting review
+**Issue:** tetsuo-ai/agenc-core#453
+**PR:** tetsuo-ai/agenc-core#454
+**Filed:** 2026-04-18
+**Target:** `agenc-core/runtime/src/gateway/wallet-loader.ts`
+
+`keypairPath` values starting with `~/` were passed directly to the filesystem without
+expansion, causing `ENOENT` when the config used a tilde path. Upstream default
+`getDefaultKeypairPath()` always returns an absolute path, so the bug only surfaces when
+`keypairPath` is set explicitly in config.
+
+**Fix:** Added exported `expandPath(p: string)` helper — expands `~/` to `os.homedir()`,
+passes absolute paths and relative paths through unchanged. `loadWallet` wraps the resolved
+path with `expandPath()` before calling `loadKeypairFromFile`.
+
+**Tests:** 5/5 targeted passing, 21 pre-existing upstream failures (baseline unchanged),
+0 TypeScript errors.
+
+---
 
 ### Ollama duplicate tool call ID bug
 
