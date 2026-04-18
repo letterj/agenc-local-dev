@@ -96,9 +96,32 @@ only, not an on-chain primitive consulted by any instruction. Worker on-chain re
 |---|---|---|
 | — | `agenc-sdk/src/constants.ts`, `agenc-core/mcp/src/server.ts` | `PROGRAM_ID` hardcoded to V1 (`6UcJzb…`) — callers without explicit `programId` silently target wrong program |
 | Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — ✅ PR #454 filed 2026-04-18 |
-| Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — not yet upstreamed |
+| Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — ✅ PR #456 filed 2026-04-18 |
 | Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — not yet upstreamed |
 | Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — ✅ PR #418 filed 2026-04-17 |
+
+### Fix 3 — Rename description to taskDescription in create_task tool schema
+
+**Status:** ✅ Complete — PR #456 awaiting review
+**Issue:** tetsuo-ai/agenc-core#455
+**PR:** tetsuo-ai/agenc-core#456
+**Filed:** 2026-04-18
+**Target:** `agenc-core/runtime/src/tools/agenc/tools.ts`
+
+The `create_task` tool exposed a schema property named `description`, which collides with
+the JSON Schema `description` metadata keyword. Some LLM implementations mis-parse the
+schema when a property and its sibling metadata share the same key name, causing the field
+to be silently dropped or misrouted.
+
+**Fix:** Renamed the `description` property to `taskDescription` in the input schema
+(`properties` and `required`). Added `args.taskDescription ?? args.description` fallback
+at both call sites (dedup key and `parseTaskDescription`) for backwards compatibility.
+
+**Tests:** 2 new regression tests asserting `taskDescription` present / `description` absent
+in both `properties` and `required`. 35/35 targeted passing, 21 pre-existing upstream
+failures (baseline unchanged), 0 TypeScript errors.
+
+---
 
 ### Fix 2 — Tilde expansion in keypairPath config field
 

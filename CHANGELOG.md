@@ -14,6 +14,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Filed PR tetsuo-ai/agenc-core#454 (`fix/keypair-path-tilde-expansion`) — Fix 2 from
   local-tool-fixes backlog. Added `expandPath()` helper in `wallet-loader.ts`; 5 unit tests;
   baseline failure count unchanged (21 pre-existing upstream failures).
+- Filed issue tetsuo-ai/agenc-core#455 — `description` field in `create_task` tool schema
+  collides with JSON Schema keyword; causes silent field mis-parse in some LLM implementations.
+- Filed PR tetsuo-ai/agenc-core#456 (`fix/task-description-field-rename`) — Fix 3 from
+  local-tool-fixes backlog. Renamed `description` → `taskDescription` in schema; backwards-compat
+  fallback at both call sites; 2 regression tests; baseline failure count unchanged.
 
 ### Maintenance
 - Fixed morning sync PR detection — replaced `gh search prs` with GitHub Search API
