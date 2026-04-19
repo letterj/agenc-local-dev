@@ -6,6 +6,39 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2026-04-19] — Upstream scan; PR #402 and #418 rebased
+
+### Morning Sync
+- agenc-core: 38 new commits, 128 files changed — runtime/gateway/LLM layer work
+- Rebased PR #402 (`feature/openai-compat-provider`) onto upstream/main — clean rebase;
+  stateless-transport parity updates applied to `adapter.ts` (`resolveLLMStatefulResponsesConfig`
+  → `resolveLLMCompactionConfig`, `getCapabilities()` removed, `previousResponseId` field removed);
+  77 unit tests passing, typecheck clean
+- Rebased PR #418 (`fix/ollama-tool-call-id-duplicate`) onto upstream/main — clean rebase,
+  no changes needed; 28 tests passing
+- `private-kernel-registry` CI check regressed overnight — failing on #402 and #418 with
+  `npm error command sh -c npx tsx scripts/run-required-validation.ts`; pack-smoke still green;
+  team-side issue, no action on our end
+
+### Upstream Findings
+- **Rent bug (#437):** Unresolved — 38 new commits, none touched `completion_helpers`,
+  `complete_task`, or escrow/rent paths. Cascade blocker for Tasks 13, 16, 17 remains.
+- **Dependent task CLI gap:** Unresolved — 38 new commits, no new `create-dependent`
+  or `--parent` flag surface. Blocks Task 13 independently of the rent bug.
+- **Task 9 — token usage monitoring:** Foundation now exists upstream. PR #461 (`f5ec28e`)
+  adds `getSessionCostUsd(sessionId)`, `ChatUsagePayload.sessionCostUsd`, and
+  `runtime/src/llm/grok/pricing.ts` with per-1M USD rates ($2/$6 grok-4.20 family,
+  $0.20/$0.50 grok-4-1-fast). Internal accumulation + TUI display only, not an external
+  API. Implementation path: read from `getSessionCostUsd` or parse `ChatUsagePayload`.
+  Task 9 no longer fully blocked.
+- **xAI model ID catalog change:** Canonical IDs are now `grok-4.20-0309-*` and
+  `grok-4.20-multi-agent-0309`; old beta-infixed forms demoted to legacy aliases.
+  Handled in upstream runtime — check local scripts for hardcoded old model IDs.
+- **New tool helper:** `listOpenTasksForSession` added (`9eb8c01`) — potentially useful
+  for dependent task workflows.
+
+---
+
 ## [2026-04-18] — PRs #454, #456, #458 filed; morning sync PR detection fixed
 
 ### Upstream Contributions

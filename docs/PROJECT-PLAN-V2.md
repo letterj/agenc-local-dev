@@ -1,15 +1,16 @@
 # AgenC Project Plan — Open Items
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-19
 **Full history:** `docs/PROJECT-PLAN.md`
 
 ---
 
 ## Active Blockers
 
-- **Task 9 — Token usage monitoring:** awaiting dev team response via Telegram (message sent 2026-03-25). GitHub issue not yet filed.
+- **Task 9 — Token usage monitoring:** No longer fully blocked. Upstream now has Grok session cost tracking (PR #461, commit `f5ec28e`): `getSessionCostUsd(sessionId)`, `ChatUsagePayload.sessionCostUsd`, and `runtime/src/llm/grok/pricing.ts` with per-1M USD rates ($2/$6 for grok-4.20 family, $0.20/$0.50 for grok-4-1-fast). Not a structured external API — internal accumulation + TUI display only. Implementation path: read from `getSessionCostUsd` or parse `ChatUsagePayload`. openai-compat provider will need a companion cost module for parity.
 - **Task 10 — Benchmark report:** blocked on Task 9.
-- **V3 `complete_task` rent bug (cascade blocker):** Solana runtime rejects `complete_task` at account (2) with insufficient funds for rent-exemption. Program logic passes (`complete_task_validated` + `complete_task_done` succeed) but transaction fails at runtime level. Blocks Tasks 13, 16, and 17 simultaneously. Fix must land in `agenc-protocol` or the CLI's `complete_task` transaction builder. Dev team notified via Telegram 2026-04-17. **GitHub issue filed:** `tetsuo-ai/agenc-core#437` (2026-04-17). Stuck devnet task `AySKChkQTAiyior3Yzo2LMT988R42iMNBtckFxuXqUg` — in_progress, uncancellable, leave it.
+- **V3 `complete_task` rent bug (cascade blocker):** Unresolved — 38 new upstream commits (2026-04-19) confirmed, none touched `completion_helpers`, `complete_task`, or escrow/rent paths. Solana runtime rejects `complete_task` at account (2) with insufficient funds for rent-exemption. Program logic passes (`complete_task_validated` + `complete_task_done` succeed) but transaction fails at runtime level. Blocks Tasks 13, 16, and 17 simultaneously. Fix must land in `agenc-protocol` or the CLI's `complete_task` transaction builder. Dev team notified via Telegram 2026-04-17. **GitHub issue filed:** `tetsuo-ai/agenc-core#437` (2026-04-17). Stuck devnet task `AySKChkQTAiyior3Yzo2LMT988R42iMNBtckFxuXqUg` — in_progress, uncancellable, leave it.
+- **Dependent task CLI gap:** Unresolved — 38 new upstream commits (2026-04-19) confirmed, no new `create-dependent` or `--parent` flag surface. The `create_dependent_task` instruction exists on-chain but remains unexposed via the CLI. Blocks Task 13 independently of the rent bug.
 
 ---
 
@@ -95,6 +96,10 @@ only, not an on-chain primitive consulted by any instruction. Worker on-chain re
 **CI note (2026-04-18):** The `private-kernel-registry` gate was broken for external contributor
 PRs; the dev team fixed it on 2026-04-18. All 5 open PRs (#402, #418, #454, #456, #458) now
 have all 4 checks green. #402 and #418 required a manual CI re-trigger after the fix landed.
+
+**CI note (2026-04-19):** `private-kernel-registry` check regressed overnight — failing again on
+#402 and #418 with `npm error command sh -c npx tsx scripts/run-required-validation.ts`. Pack-smoke
+still green. Team-side issue; no action on our end.
 
 | # | Target | Description |
 |---|---|---|
@@ -270,6 +275,7 @@ should now be functional (pending local retest after rebuild).
 | Fix 5 (`requiredCapabilities` schema description) — resolved upstream in commit `aad3590`, tools.ts line 2214 | ✅ Resolved — no longer tracked | None needed |
 | `agenc-watch.js` cockpit — crashes with "Missing required watch surface helper: cockpitFeedFingerprint" | Likely fixed in PR #331 — pending retest after rebuild | Use `agenc shell` instead |
 | V3 createTaskFromTemplate AccountNotSigner | Reported to dev team via Telegram 2026-04-15 | Use CLI market tasks create or wait for team response |
+| xAI model ID catalog change (2026-04-19) — canonical IDs are now `grok-4.20-0309-*` and `grok-4.20-multi-agent-0309`; old beta-infixed forms demoted to legacy aliases | Handled in upstream runtime — check local scripts for hardcoded old model IDs | Update any hardcoded model ID strings |
 
 ---
 
