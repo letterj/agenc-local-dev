@@ -1,6 +1,6 @@
 # AgenC Project Plan — Open Items
 
-**Last updated:** 2026-04-19
+**Last updated:** 2026-04-20
 **Full history:** `docs/PROJECT-PLAN.md`
 
 ---
@@ -101,17 +101,22 @@ have all 4 checks green. #402 and #418 required a manual CI re-trigger after the
 #402 and #418 with `npm error command sh -c npx tsx scripts/run-required-validation.ts`. Pack-smoke
 still green. Team-side issue; no action on our end.
 
+**2026-04-20:** PRs #402, #418, #456, #458 all merged overnight. AgenC #1547 also merged.
+`feature/openai-compat-provider` branch deleted — merged upstream. Fix 6 in
+`experiment/local-tool-fixes` (google_gemma xai-strict-filter workaround) can now be removed —
+superseded by merged PR #402. 7 stale branches deleted total (6 agenc-core + 1 AgenC).
+
 | # | Target | Description |
 |---|---|---|
 | — | `agenc-sdk/src/constants.ts`, `agenc-core/mcp/src/server.ts` | `PROGRAM_ID` hardcoded to V1 (`6UcJzb…`) — callers without explicit `programId` silently target wrong program |
-| Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — ✅ PR #454 filed 2026-04-18 |
-| Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — ✅ PR #456 filed 2026-04-18 |
-| Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — ✅ PR #458 filed 2026-04-18 |
-| Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — ✅ PR #418 filed 2026-04-17 |
+| Fix 2 | `agenc-core/runtime/src/gateway/wallet-loader.ts` | Tilde expansion for `keypairPath` — PR #454 open, awaiting review |
+| Fix 3 | `agenc-core/runtime/src/tools/agenc/tools.ts` | `taskDescription` rename to avoid JSON Schema collision — ✅ PR #456 **merged 2026-04-20** |
+| Fix 4 | `agenc-core/runtime/src/tools/agenc/mutation-tools.ts` | Active-status filter in `resolveAuthorityAgentPda` — ✅ PR #458 **merged 2026-04-20** |
+| Fix 5 | `agenc-core/runtime/src/llm/ollama/adapter.ts` | Duplicate tool call ID bug — ✅ PR #418 **merged 2026-04-20** |
 
 ### Fix 4 — Active-status filter in resolveAuthorityAgentPda
 
-**Status:** ✅ Complete — PR #458 all checks passing, awaiting review
+**Status:** ✅ **Merged 2026-04-20** — tetsuo-ai/agenc-core#458
 **Issue:** tetsuo-ai/agenc-core#457
 **PR:** tetsuo-ai/agenc-core#458
 **Filed:** 2026-04-18
@@ -141,7 +146,7 @@ pre-existing upstream failures (baseline unchanged), 0 TypeScript errors.
 
 ### Fix 3 — Rename description to taskDescription in create_task tool schema
 
-**Status:** ✅ Complete — PR #456 all checks passing, awaiting review
+**Status:** ✅ **Merged 2026-04-20** — tetsuo-ai/agenc-core#456
 **Issue:** tetsuo-ai/agenc-core#455
 **PR:** tetsuo-ai/agenc-core#456
 **Filed:** 2026-04-18
@@ -168,7 +173,7 @@ fallback. 36/36 targeted passing, 21 pre-existing upstream failures (baseline un
 
 ### Fix 2 — Tilde expansion in keypairPath config field
 
-**Status:** ✅ Complete — PR #454 all checks passing, awaiting review
+**Status:** ✅ Complete — PR #454 open, awaiting review
 **Issue:** tetsuo-ai/agenc-core#453
 **PR:** tetsuo-ai/agenc-core#454
 **Filed:** 2026-04-18
@@ -190,7 +195,7 @@ path with `expandPath()` before calling `loadKeypairFromFile`.
 
 ### Ollama duplicate tool call ID bug
 
-**Status:** ✅ Complete — PR #418 all checks passing, awaiting review
+**Status:** ✅ **Merged 2026-04-20** — tetsuo-ai/agenc-core#418
 **Issue:** tetsuo-ai/agenc-core#417
 **PR:** tetsuo-ai/agenc-core#418
 **Filed:** 2026-04-17
@@ -212,9 +217,9 @@ both the streaming path (`chatStream`) and non-streaming path (`parseResponse`) 
 
 ### openai-compat provider (issue #352)
 
-**Status:** ✅ Complete — all checks passing, awaiting review
-**PR:** tetsuo-ai/agenc-core#402 — filed 2026-04-15, awaiting upstream review (merge date TBD)
-**Branch:** feature/openai-compat-provider (4 commits on upstream/main)
+**Status:** ✅ **Merged 2026-04-20** — tetsuo-ai/agenc-core#402
+**PR:** tetsuo-ai/agenc-core#402 — filed 2026-04-15, merged 2026-04-20
+**Branch:** feature/openai-compat-provider — deleted (merged upstream)
 **Issue:** https://github.com/tetsuo-ai/agenc-core/issues/352
 
 Adds OpenAICompatProvider — connects to any OpenAI-compatible local

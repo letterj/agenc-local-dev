@@ -6,6 +6,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2026-04-20] — 5 PRs merged overnight; branch cleanup
+
+### PRs Merged Overnight
+- `tetsuo-ai/agenc-core#402` — feat(llm): openai-compat provider for locally-hosted LLMs ✅
+- `tetsuo-ai/agenc-core#418` — fix(llm): generate unique tool call IDs in Ollama adapter ✅
+- `tetsuo-ai/agenc-core#456` — fix(tools): rename taskDescription to avoid JSON Schema collision ✅
+- `tetsuo-ai/agenc-core#458` — fix(tools): filter for active agent status in resolveAuthorityAgentPda ✅
+- `tetsuo-ai/AgenC#1547` — docs(concordia): clarify event_stream.py shim role ✅
+
+### Still Open
+- `tetsuo-ai/agenc-core#454` — fix(gateway): expand tilde in keypairPath config field
+
+### Branch Cleanup
+- Resolved AgenC `experiment/local-dev-setup` conflict (SDK 1.3.1 → 1.4.0 + keep @tetsuo-ai/protocol dep)
+- Deleted 7 stale branches (6 agenc-core + 1 AgenC)
+- agenc-core now has 4 branches: main, experiment/local-dev-setup, experiment/local-tool-fixes, fix/keypair-path-tilde-expansion
+
+---
+
 ## [2026-04-19] — Upstream scan; PR #402 and #418 rebased
 
 ### Morning Sync
