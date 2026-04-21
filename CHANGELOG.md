@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [2026-04-20] — 5 PRs merged overnight; branch cleanup
+## [2026-04-20] — 5 PRs merged overnight; PR #454 update; upstream pivot alert
 
 ### PRs Merged Overnight
 - `tetsuo-ai/agenc-core#402` — feat(llm): openai-compat provider for locally-hosted LLMs ✅
@@ -15,13 +15,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `tetsuo-ai/agenc-core#458` — fix(tools): filter for active agent status in resolveAuthorityAgentPda ✅
 - `tetsuo-ai/AgenC#1547` — docs(concordia): clarify event_stream.py shim role ✅
 
-### Still Open
-- `tetsuo-ai/agenc-core#454` — fix(gateway): expand tilde in keypairPath config field
+### PR #454 Update
+- Reviewer requested moving `expandPath` to `runtime/src/types/wallet.ts` so all CLI call sites are covered
+- Implemented: `expandPath` moved to `wallet.ts`, applied at entry of both `loadKeypairFromFile` and `loadKeypairFromFileSync`; `wallet-loader.ts` drops `os`/`path` imports and the helper entirely
+- Tests: 30/30 `wallet.ts` targeted, 2/2 `wallet-loader.ts` targeted, 0 regressions
+- Force pushed, comment posted, pack-smoke green, awaiting merge
 
-### Branch Cleanup
-- Resolved AgenC `experiment/local-dev-setup` conflict (SDK 1.3.1 → 1.4.0 + keep @tetsuo-ai/protocol dep)
+### Upstream Alert
+- `gut` branch discovered on `tetsuo-ai/agenc-core`: 1,644 files changed, 574,207 deletions — mass removal of blockchain, desktop, voice, mobile, web subsystems
+- Commit messages: "mass deletion — blockchain, desktop, voice, mobile, web" / "strip dangling imports, aggressive subsystem prune" / "skeletal query loop + coding tool registry + real CLI entry"
+- Team appears to be pivoting to pure coding agent, stripping on-chain protocol layer
+- Related branches: `archive/pre-gut-marketplace`, `refactor/remove-runtime-marketplace`, `fix/marketplace-settlement-plumbing`
+- Marketplace storefront confirmed mock; order `ord_research-report_mo27c3lg_pfe3z7` removed from watch list
+- All new on-chain work (Tasks 13–18) on hold pending clarity on pivot direction
+
+### Branch/Repo Cleanup
+- Resolved AgenC `experiment/local-dev-setup` conflict (SDK 1.4.0 + keep @tetsuo-ai/protocol dep)
 - Deleted 7 stale branches (6 agenc-core + 1 AgenC)
 - agenc-core now has 4 branches: main, experiment/local-dev-setup, experiment/local-tool-fixes, fix/keypair-path-tilde-expansion
+
+### Still Open
+- `tetsuo-ai/agenc-core#454` — fix(gateway): expand tilde in keypairPath config field — force-pushed, awaiting merge
 
 ---
 

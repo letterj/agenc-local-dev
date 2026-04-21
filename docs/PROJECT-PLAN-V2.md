@@ -1,7 +1,20 @@
 # AgenC Project Plan — Open Items
 
-**Last updated:** 2026-04-20
+**Last updated:** 2026-04-20 (session 2)
 **Full history:** `docs/PROJECT-PLAN.md`
+
+---
+
+## ⚠️ Upstream Architecture Alert (2026-04-20)
+
+The `gut` branch on `tetsuo-ai/agenc-core` contains 3 commits with **1,644 files changed and 574,207 deletions**. Commit messages: "mass deletion — blockchain, desktop, voice, mobile, web", "strip dangling imports, aggressive subsystem prune", "skeletal query loop + coding tool registry + real CLI entry". The team appears to be pivoting away from the on-chain coordination protocol entirely toward a pure coding agent. Related branches: `archive/pre-gut-marketplace`, `refactor/remove-runtime-marketplace`, `fix/marketplace-settlement-plumbing`.
+
+**Impact:**
+- All on-chain platform testing (Tasks 13–18) may become irrelevant if the protocol layer is removed
+- Open issues (#437, #453, #455, #457) may be closed as won't-fix
+- PR #454 may still merge but scope of wallet-loader.ts uncertain post-gut
+- Marketplace storefront confirmed mock layer — order `ord_research-report_mo27c3lg_pfe3z7` will never be fulfilled, removed from watch list
+- **Hold all new on-chain work pending clarity on pivot direction**
 
 ---
 
@@ -173,23 +186,27 @@ fallback. 36/36 targeted passing, 21 pre-existing upstream failures (baseline un
 
 ### Fix 2 — Tilde expansion in keypairPath config field
 
-**Status:** ✅ Complete — PR #454 open, awaiting review
+**Status:** ✅ Complete — PR #454 force-pushed (2026-04-20), pack-smoke green, awaiting merge
 **Issue:** tetsuo-ai/agenc-core#453
 **PR:** tetsuo-ai/agenc-core#454
 **Filed:** 2026-04-18
-**Target:** `agenc-core/runtime/src/gateway/wallet-loader.ts`
+**Target:** `agenc-core/runtime/src/types/wallet.ts` (moved per reviewer feedback)
 
 `keypairPath` values starting with `~/` were passed directly to the filesystem without
 expansion, causing `ENOENT` when the config used a tilde path. Upstream default
 `getDefaultKeypairPath()` always returns an absolute path, so the bug only surfaces when
 `keypairPath` is set explicitly in config.
 
-**Fix:** Added exported `expandPath(p: string)` helper — expands `~/` to `os.homedir()`,
-passes absolute paths and relative paths through unchanged. `loadWallet` wraps the resolved
-path with `expandPath()` before calling `loadKeypairFromFile`.
+**Original fix (2026-04-18):** `expandPath()` in `wallet-loader.ts`, wrapping `loadWallet` call only.
 
-**Tests:** 5/5 targeted passing, 21 pre-existing upstream failures (baseline unchanged),
-0 TypeScript errors.
+**Revised fix (2026-04-20 — reviewer feedback):** Moved `expandPath` into
+`runtime/src/types/wallet.ts`, applied at entry of both `loadKeypairFromFile` and
+`loadKeypairFromFileSync`. Covers all call sites (gateway WebSocket handlers + agent-cli,
+marketplace-cli, registry-cli, security, health CLIs) in one change. `wallet-loader.ts` no
+longer holds the helper or the `os`/`path` imports.
+
+**Tests:** 30/30 `wallet.ts` targeted, 2/2 `wallet-loader.ts` targeted, 0 regressions
+(17 pre-existing upstream failures, baseline unchanged), 0 TypeScript errors.
 
 ---
 
