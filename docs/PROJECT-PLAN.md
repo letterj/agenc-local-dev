@@ -7,7 +7,7 @@ Updated: 2026-04-12
 
 ### Session Notes — 2026-04-12
 - Upgraded containers to `@tetsuo-ai/runtime@0.2.0`
-- Switched from private program (`9dMNFL…`) to V2 public (`GN69CoB…`)
+- Switched from private program (`9dMNFL…`) to V2 public (`GN69CoB…`) — V2 superseded 2026-04-22 by V3 `2jdBSJ8U…`
 - Corrected worker2 wallet: `SFG7VnuZDg9x1Y5Kz81moJkUTLwDF1xgTZFPD3V3mT1`
 - Corrected worker2 agent PDA: `BrnCh3DZtMR5jsak5t3it4i7si9DvWnk6tBzMteXvHGx`
 - Both agents confirmed Active under V2 public program
@@ -147,7 +147,7 @@ Deploy a private instance of `programs/agenc-coordination` to devnet with a loca
    — Run resume with `PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json npm run smoke:marketplace:tui:devnet -- --resume <artifact>`
 
 **What this does NOT affect:**
-- Team's V2 program (`GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`) — untouched
+- Team's V2 program (`GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`) — untouched (superseded 2026-04-22 by V3 `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`)
 - Existing agent registrations on team's program — untouched
 - `experiment/local-dev-setup` branch — no code changes needed
 - Ability to submit PRs upstream — completely independent
@@ -195,7 +195,7 @@ Hands-on work with the AgenC protocol.
 Re-run `devnet-task-lifecycle.mjs` with creator and worker running as
 separate agenc containers. Verify end-to-end with two live daemons.
 Depends on: Task 1
-Note: Devnet program redeployed 2026-03-27 to new program ID GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+Note: Devnet program redeployed 2026-03-27 to new program ID GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3 (V2, superseded 2026-04-22 by V3 `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`)
 with Task Validation V2. Old program 6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab still has registered agents
 but is superseded. Task 7 requires fresh agent registration against the
 new program using the current IDL.
@@ -403,7 +403,7 @@ Items not blocking current work but worth upstreaming when the team has bandwidt
 (`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`). Because `deriveProtocolPda()`
 defaults to this constant when called without an explicit `programId` argument,
 any caller that omits the argument silently targets V1 rather than the current
-V2 program (`GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`).
+V3 program (`2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`).
 
 The same stale reference appears in:
 - `agenc-core/mcp/src/server.ts`

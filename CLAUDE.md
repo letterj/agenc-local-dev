@@ -108,7 +108,7 @@ npx -y node@20 scripts/pack-smoke.mjs
 
 ```bash
 solana config set --url devnet
-solana program show GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3 --url devnet
+solana program show 2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7 --url devnet
 ```
 
 Known devnet drift — happy path works, edge case error names differ from SDK.

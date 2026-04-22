@@ -6,6 +6,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2026-04-22] — Program ID migration to V3
+
+### Program ID Change
+- New devnet program: `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7` (V3, announced 2026-04-22 by tetsuo-ai team)
+- Supersedes: `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+- Protocol/upgrade authority: `E9ws2V2vuv53HXRh8ydX5PRGAiCsg2QTmsTZAu145Frg`
+- New explorer: https://devnet.agenc.tech
+
+### What Was Updated
+- Runtime configs were already set to the new program (updated prior to this session):
+  - `docker-compose.yml`: `AGENC_RUNTIME_PROGRAM_ID=2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
+  - `docker/creator/config.json` and `docker/worker/config.json`: `"programId": "2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7"`
+- Docs migrated: RUNBOOK.md, LOCAL-FIXES.md, PROJECT-PLAN.md, HOW-TO-FULL-TASK-LIFECYCLE.md, CLAUDE.md
+
+### Blockers / Outstanding
+- IDL in agenc-protocol not yet updated to new program address — pending upstream push from tetsuo-ai team
+- Agent re-registration required against new program — run `npm run smoke:marketplace:devnet` first
+
+---
+
 ## [2026-04-20] — 5 PRs merged overnight; PR #454 update; upstream pivot alert
 
 ### PRs Merged Overnight

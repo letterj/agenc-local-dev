@@ -15,8 +15,9 @@ Validated 2026-03-28 against the Task Validation V2 devnet deployment.
 
 | Program | ID | Status |
 |---|---|---|
-| New (V2, current) | `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` | Active — use this |
-| Old (pre-V2) | `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab` | Superseded — do not use |
+| Current (V3) | `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7` | Active — use this |
+| Superseded (V2) | `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` | Superseded 2026-04-22 — do not use |
+| Superseded (V1) | `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab` | Superseded — do not use |
 
 The new program was deployed 2026-03-27. Any agents registered on the old program
 are not usable with the current IDL. Fresh registration is required.
@@ -46,7 +47,7 @@ export AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/artifacts/anchor
 ## Step 0 — Verify program and balances
 
 ```bash
-solana program show GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3 --url devnet
+solana program show 2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7 --url devnet
 solana balance BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT --url devnet
 solana balance $(solana-keygen pubkey ~/.config/solana/worker.json) --url devnet
 ```

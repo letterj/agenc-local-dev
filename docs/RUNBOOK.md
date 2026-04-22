@@ -41,14 +41,14 @@ Final working state: socat bridge restored, no `auth.secret` required.
 | `agenc-core` | Public | Runtime engine, daemon, MCP, web, mobile, desktop |
 | `agenc-prover` | Public | ZK prover service, admin tools |
 
-### Published Package Versions (2026-03-21)
+### Published Package Versions (updated 2026-04-12)
 
 | Package | Version |
 |---|---|
 | `@tetsuo-ai/sdk` | 1.3.1 |
 | `@tetsuo-ai/protocol` | 0.1.1 |
 | `@tetsuo-ai/plugin-kit` | 0.1.1 |
-| `@tetsuo-ai/agenc` | 0.1.0 |
+| `@tetsuo-ai/agenc` | 0.2.0 |
 
 The `agenc-morning-sync` skill checks `@tetsuo-ai/agenc` against this baseline on
 every session start (Step 3b). When a new version is detected, a rebuild is needed
@@ -75,8 +75,9 @@ ollama    0.17.7 (optional)
 
 **Wallet:** `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT`
 **Balance:** ~33 SOL
-**Program ID (devnet, current):** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2, deployed 2026-03-27)
-**Program ID (devnet, superseded):** `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`
+**Program ID (devnet, current):** `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7` (V3, announced 2026-04-22)
+**Program ID (devnet, superseded):** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+**Program ID (devnet, V1, superseded):** `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`
 
 > ⚠️ Mainnet program ID (`5j9ZbT3...`) is different. Never use mainnet for experiments.
 
@@ -173,7 +174,7 @@ Reward: 0.01 SOL | completedAt: 2026-04-02T23:03:23Z
 
 ### Protocol Config PDA (2026-04-02)
 
-- **Program:** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+- **Program:** `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7` (V3, announced 2026-04-22)
 - **Protocol config PDA (correct):** `GEXnAns2Wq27xjG84a7BnuxJBY3R5Qu9CdFy2HQ7vsiv` (initialized, devnet)
 - **Wrong PDA reported by client:** `9bE5CbHLW8ZAeAkxUTSeUdSwEjbivtr5skWxzjLYfCWi`
 - **Error seen:** `Failed to fetch protocol config: Account does not exist`
@@ -424,8 +425,8 @@ AGENT_NAME=letterj-operator
 `AUTH_SECRET` is no longer used — the socat bridge architecture does not
 require `auth.secret` (daemon binds to loopback only).
 
-`AGENC_RUNTIME_PROGRAM_ID` must be set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
-for the daemon to use the V2 program. The CLI reads `connection.programId` from config
+`AGENC_RUNTIME_PROGRAM_ID` must be set to `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
+for the daemon to use the V3 program. The CLI reads `connection.programId` from config
 (set in `docker/creator/config.json` and `docker/worker/config.json`) and also accepts
 `AGENC_RUNTIME_PROGRAM_ID` as an environment variable override. If neither is set, the
 runtime defaults to the V1 program (`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`)
@@ -668,11 +669,11 @@ PRs #144 and #145 are in `tetsuo-ai/agenc-core`, not `tetsuo-ai/agenc-sdk` as pr
 
 ---
 
-## Known Issues — Pending npm Release
+## Known Issues — npm 0.1.0 era (pre 0.2.0 upgrade)
 
-The following issues affect the `@tetsuo-ai/agenc` npm package at `0.1.0`
-(the version installed in the Docker image). They cannot be fully resolved
-in the running containers without a new npm release and image rebuild.
+The following issues were observed against `@tetsuo-ai/agenc@0.1.0`.
+Containers now run `0.2.0` — verify whether each issue is still present
+before acting on it.
 
 ### Watch console replaces operator console (2026-04-04)
 
@@ -719,7 +720,7 @@ The runtime reads `programId` from `connection.programId` in config — **not**
 — **not** `AGENC_PROGRAM_ID`.
 
 Both `docker/creator/config.json` and `docker/worker/config.json` now have
-`connection.programId` set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`.
+`connection.programId` set to `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`.
 `docker-compose.yml` sets `AGENC_RUNTIME_PROGRAM_ID` in both service definitions.
 Containers must be restarted to pick up the change.
 
@@ -769,7 +770,7 @@ node scripts/devnet-task-lifecycle-test.mjs
 **Notes:**
 - Uses `@tetsuo-ai/sdk` and `forks/agenc-sdk/scripts/devnet-helpers.mjs` — no runtime binary dependency, unaffected by npm 0.1.0 blocker
 - IDL must point to `forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json` — `target/idl/` is Anchor build output and not committed
-- Creator agent `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` confirmed registered against V2 program `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
+- Creator agent `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` was registered against V2 program `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` — **re-registration required against V3** `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
 - Run this any time to confirm devnet setup is healthy
 - `CREATOR_AGENT_PDA` and `WORKER_AGENT_PDA` default to team program PDAs when not set — override for private program
 
@@ -821,7 +822,7 @@ WORKER_WALLET=~/.config/solana/worker.json
 ARBITER_A_WALLET=~/.config/solana/arbiter-a.json
 ARBITER_B_WALLET=~/.config/solana/arbiter-b.json
 ARBITER_C_WALLET=~/.config/solana/arbiter-c.json
-AGENC_PROGRAM_ID=GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3
+AGENC_PROGRAM_ID=2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7
 # For team's V2 program — PROTOCOL_AUTHORITY_WALLET not available (held by tetsuo-ai team)
 # For private program deployment — use:
 PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json
@@ -1115,6 +1116,143 @@ Do not commit directly to `main` to "save" uncommitted work — stash it and mov
 
 ---
 
+## Version Upgrade Procedure
+
+Steps required when a new `@tetsuo-ai/agenc` npm release is available.
+
+**Before starting:** check the upstream release branch for breaking changes
+(bind mount paths, program IDs, schema changes). See `LOCAL-FIXES.md` for
+the current bind mount pattern and known issues to recheck after upgrade.
+
+1. **Review upstream changelog** — check the release branch on `tetsuo-ai/agenc-core`
+   for any breaking changes before rebuilding.
+
+2. **Update bind mount path** — in `docker-compose.yml`, change `<VERSION>` in both
+   service definitions:
+   ```yaml
+   - ${HOME}/workshop/agencproj/forks/agenc-core/runtime:/root/.agenc/runtime/releases/<VERSION>/linux-x64/node_modules/@tetsuo-ai/runtime:ro
+   ```
+
+3. **Update program ID** — if the program ID changed between versions, update
+   `AGENC_RUNTIME_PROGRAM_ID` in both `docker-compose.yml` service `environment` blocks,
+   and `connection.programId` (and `protocol.programId`) in both config files.
+
+4. **Clear named volumes** — required to prevent the installer hitting the old-version
+   runtime on startup:
+   ```bash
+   cd ~/workshop/agencproj/agenc-local-dev
+   docker compose down -v
+   ```
+
+5. **Rebuild image:**
+   ```bash
+   docker compose build --no-cache
+   ```
+
+6. **Bring containers up:**
+   ```bash
+   docker compose up -d
+   ```
+
+7. **Verify both containers healthy:**
+   ```bash
+   docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+   docker logs agenc-creator --tail 20
+   docker logs agenc-worker --tail 20
+   ```
+   Look for `Daemon started` in logs and `Up` in `docker ps`.
+
+8. **Register agents if program ID changed** — run inside each container:
+   ```bash
+   docker exec agenc-creator node .../agenc.js agent register --config /root/.agenc/config.json
+   docker exec agenc-worker  node .../agenc.js agent register --config /root/.agenc/config.json
+   ```
+   Record new agent PDAs and update `CLAUDE.md`, `LOCAL-FIXES.md` wallet inventory,
+   and Claude memory (`project_wallet_inventory.md`).
+
+9. **Run full lifecycle test (CLI):**
+   ```bash
+   # Create (creator container)
+   docker exec agenc-creator node .../agenc.js market tasks create \
+     --description "upgrade validation" --reward 10000000 --config /root/.agenc/config.json
+   # Claim (worker container)
+   docker exec agenc-worker node .../agenc.js market tasks claim <taskPda> --config /root/.agenc/config.json
+   # Complete (worker container)
+   docker exec agenc-worker node .../agenc.js market tasks complete <taskPda> \
+     --result-data "done" --config /root/.agenc/config.json
+   ```
+
+10. **Verify via chat UI** — open `http://localhost:3100/ui/` and confirm agent can
+    create a task; open `http://localhost:3101/ui/` and confirm worker can claim/complete.
+
+11. **Update VERSION file** in `forks/agenc-core/runtime/dist/VERSION`:
+    ```json
+    { "runtimeVersion": "<NEW_VERSION>" }
+    ```
+
+12. **Update docs** — `CHANGELOG.md`, `RUNBOOK.md` published package versions table,
+    `LOCAL-FIXES.md` wallet inventory if PDAs changed.
+
+---
+
+---
+
+## Shell Interface (agenc shell)
+
+### Overview
+The agenc shell is the primary operator interface as of 0.2.0. It connects
+to a running daemon and provides a line-oriented chat and command surface.
+Replaces the web UI for day-to-day operator use.
+
+### Shell profiles
+- general: concise responses, task-oriented (default)
+- coding: development-focused, same output with coding-specific context
+
+### Creator shell (Grok, cloud)
+```bash
+node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js shell \
+  --config ~/.agenc/config.json
+```
+
+Connects to: daemon pid 18441, port 3100
+Model: grok-4-1-fast-reasoning (displays as grok-3 — known cosmetic bug)
+Note: model display is cosmetic only — API confirmed reasoning model is
+running (reasoning_tokens > 0 in API response)
+
+### Worker2-local shell (Gemma 4, local LM Studio)
+```bash
+node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js shell \
+  --config /Users/letterj/.agenc/worker2-local.json \
+  --pid-path /Users/letterj/.agenc/worker2-local.pid \
+  --port 3102
+```
+
+Connects to: worker2-local daemon, port 3102
+Model: google_gemma-4-26b-a4b-it via LM Studio at http://127.0.0.1:1234/v1
+Prerequisites:
+  - LM Studio running with Gemma 4 26B loaded
+  - Context window set to ≥32768 in LM Studio
+  - Worker2-local daemon started from /tmp (neutral directory)
+  - workspace.hostPath set to /Users/letterj/.agenc/workspace in config
+
+### Starting worker2-local daemon
+```bash
+cd /tmp && node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js start \
+  --foreground \
+  --config /Users/letterj/.agenc/worker2-local.json \
+  --pid-path /Users/letterj/.agenc/worker2-local.pid
+```
+
+### Known issues
+- agenc-watch.js crashes with "Missing required watch surface helper:
+  cockpitFeedFingerprint" — not yet functional after coding-first-shell
+  feature drop (upstream issue, 2026-04-13)
+- grok-3 display in shell — cosmetic only, reasoning model is running
+- Gemma 4 requires ≥32K context window — LM Studio default (4096) is
+  too small for the AgenC system prompt
+
+---
+
 ## Reference Links
 
 | Resource | URL |
@@ -1125,5 +1263,6 @@ Do not commit directly to `main` to "save" uncommitted work — stash it and mov
 | agenc-protocol | https://github.com/tetsuo-ai/agenc-protocol |
 | agenc-plugin-kit | https://github.com/tetsuo-ai/agenc-plugin-kit |
 | agenc-local-dev | https://github.com/letterj/agenc-local-dev |
-| Devnet program (Solscan) | https://solscan.io/account/GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3?cluster=devnet |
+| Devnet program (agenc.tech explorer) | https://devnet.agenc.tech |
+| Devnet program (Solscan) | https://solscan.io/account/2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7?cluster=devnet |
 | ADR-003 | `forks/agenc-core/docs/architecture/adr/adr-003-public-framework-product.md` |
