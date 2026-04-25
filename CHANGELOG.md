@@ -6,6 +6,85 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2026-04-23] — Switched to Colima; local runtime build from master (9cbeda8)
+
+### Changed
+- Docker runtime switched from OrbStack to Colima for sandbox drill compatibility.
+  Colima runs a lightweight Linux VM; OrbStack and Docker Desktop do not reliably
+  support the sandbox fleet drill. Container image cache starts fresh under Colima —
+  named volumes from OrbStack are not migrated. To switch back: `docker context use orbstack`.
+- `docker-compose.yml` bind mount confirmed: `forks/agenc-core/runtime/` is already
+  mounted as `@tetsuo-ai/runtime` inside both containers (introduced 2026-04-12 to prevent
+  `EBUSY` on fresh runtime install). This means containers run the local fork build —
+  no image rebuild needed to pick up runtime changes.
+
+### Built
+- Runtime dist rebuilt from fork master (commit `9cbeda8`,
+  `experiment/local-dev-setup` rebased on Phase 1 closeout):
+  ```
+  cd ~/workshop/agencproj/forks/agenc-core
+  rm -rf runtime/dist/
+  npm install --no-fund
+  AGENC_SKIP_DASHBOARD_BUILD=1 npm run build --workspace=@tetsuo-ai/runtime
+  ```
+  Build time: 18 s. Exit 0. `dist/VERSION` stamped:
+  `0.2.0 @ 9cbeda8378eb (2026-04-24T01:47:28.215Z)`.
+- Confirmed `--allow-remote-job-spec` compiled into `dist/bin/agenc.js` (5 occurrences:
+  help string, parser for `tasks.claim` and `tasks.detail`, two `allowRemoteJobSpecResolution`
+  wiring sites). This flag was introduced in upstream commit `a036e78` (PR #534,
+  "Support published remote task job spec pointers") and is now live in both containers.
+- New binary verified by running `node .../dist/bin/agenc.js --help` inside `agenc-creator`
+  against the existing release `node_modules/` — binary launched clean, full command
+  surface present.
+
+### Upstream Sync
+- agenc-core: 7 new commits — Phase 1 closeout (PR #537 + #536 merged):
+  - `sandbox-fleet-drill.ts` and `compiled-job-phase1-operator-drill.ts` (new scripts)
+  - Phase 1 live drill artifacts under `runtime/artifacts/phase1-closeout/`
+  - `marketplace-cli.ts` updated + `marketplace-cli.skill-detail.test.ts` added
+  - `sandbox-handle.ts` and `daemon-tool-registry.ts` updated
+  - Fork main and `experiment/local-dev-setup` both synced and rebased ✅
+- All other forks (AgenC, agenc-sdk, agenc-protocol, agenc-plugin-kit): no new commits.
+
+### Phase 1 Sandbox Drill
+- Fleet drill passed clean after Colima + master build switch:
+  ```
+  npm run drill:sandbox:fleet -- \
+    --sandboxes 1 --jobs-per-sandbox 1 --waves 1 --timeout-seconds 60
+  ```
+  Result: `overallPassed: true`. Artifact: `runtime/artifacts/phase1-closeout/local-sandbox-check.json`.
+  Drill requires a Linux Docker runtime — Colima confirmed sufficient. OrbStack / Docker Desktop
+  were not reliably passing this drill (motivation for the runtime switch above).
+
+### Agent Registrations (V3 program `2jdBSJ8U…`)
+- Creator (wallet `BP3rDSMH`): PDA `HYZyLSXTpC2g9XNAweud7XeCNAH8PfzMNAX2JKEKzbQY` — already
+  registered; found by daemon at startup, no action needed.
+- Worker (wallet `26d6kxsP`): PDA `BoeSk12JGdLz3KoZDcDNYgNgy5GCf98xsW9rfHUe5TcX` — registered
+  today, tx `2r22H8VQ…`.
+
+### Marketplace Investigation
+- Task `Az8FMim2usUx6sJKXrEGYq84mj9XbVW9K4GU4aRNrXqX` (RAG research order) expired before claim;
+  deadline window closed during the build/swap work above.
+- Four prior test orders confirmed expired — none remain actionable:
+  - `ord_research-report_moa3a948_cgqhgq` — expired
+  - `ord_research-report_moa51ooy_j0i6iv` — expired
+  - `ord_research-report_mobazv7q_bEXnJKfz-3l5TFKr_bx5tQ` — expired
+  - `ord_research-report_mobazv7q_bEXnJKfz-3I5TFKr_bx5tQ` (RAG) — expired
+
+### On-Chain Findings — jobSpec format change
+- Old tasks (yesterday): `jobSpec: null`, 425 bytes, auto-settle settlement path.
+- New tasks (today): `agenc-manual-validation-v2-seed!` embedded at byte offset 144,
+  382 bytes, Public review settlement path.
+- jobSpec URL is **not** stored on-chain — the marketplace API serves it via a
+  content-addressed endpoint. `--allow-remote-job-spec` (now compiled into master)
+  unlocks remote jobSpec resolution at claim time.
+
+### Still Open
+- `tetsuo-ai/agenc-core#454` — fix(gateway): expand tilde in keypairPath config field —
+  open, 2 comments, last updated 2026-04-20.
+
+---
+
 ## [2026-04-22] — Program ID migration to V3
 
 ### Program ID Change
