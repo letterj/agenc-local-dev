@@ -19,6 +19,7 @@ for native arm64 support.
 | `docs/RUNBOOK.md` | Full setup and troubleshooting reference |
 | `skills/agenc-morning-sync/` | Session-start skill: sync repos, check org for new repos, check PRs, start Docker |
 | `skills/agenc-changelog-docs-update/` | Skill: update changelog and docs from git commits |
+| `.claude/commands/` | Project-scoped slash commands (compress, agenc-plan-status, agenc-plan-action) |
 | `scripts/` | Devnet utility scripts — task lifecycle, agent management |
 
 ---
@@ -72,6 +73,21 @@ session by saying "morning sync", "run the changelog skill", etc.
 |---|---|---|
 | `agenc-morning-sync` | "morning sync", "let's get started" | Fetch upstream changes, sync forks, rebuild SDK dist if needed, check org for new repos, check PR status, start Docker |
 | `agenc-changelog-docs-update` | "run the changelog skill" | Update CHANGELOG.md and docs from recent git commits |
+
+---
+
+## Slash Commands
+
+Project-scoped slash commands live under `.claude/commands/`. They are
+loaded by the Claude Code harness when a session is launched from inside
+this repo. To use them from a session started at the workspace root, copy
+the files into `~/workshop/agencproj/.claude/commands/`.
+
+| Command | What it does |
+|---|---|
+| `/compress` | Compresses the current conversation into a terse session briefing for paste-into-new-window continuation. |
+| `/agenc-plan-status` | Read-only summary of `docs/PROJECT-PLAN-V2.md` with stale-item detection and a "to be added" list. Accepts an alternate plan path as an optional first arg. |
+| `/agenc-plan-action` | Builds a structured action plan for a single task, using the in-session output of `/agenc-plan-status` as its source of truth. Does not execute. |
 
 ---
 

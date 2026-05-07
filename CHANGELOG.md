@@ -6,6 +6,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2026-05-07] — Project-scoped slash commands scaffold
+
+### Added
+- `.claude/commands/` directory with three project-scoped slash commands.
+  These run via the Claude Code harness when launched from this repo.
+  - `compress.md` — terse session-briefing compression prompt.
+  - `agenc-plan-status.md` — read-only plan summary against
+    `docs/PROJECT-PLAN-V2.md` with stale-item detection. Defaults
+    plan path to that file; accepts an override as the first positional arg.
+  - `agenc-plan-action.md` — single-task action plan builder; expects
+    `agenc-plan-status` to have been run earlier in the same session and
+    uses the in-context summary as the source of truth (does not re-read
+    the plan file).
+
+### Notes
+- Slash commands are loaded from the working directory Claude Code was
+  launched in, so `/agenc-plan-status` etc. resolve only when the session
+  starts from inside `agenc-local-dev/`. To use the same commands from a
+  session started at the workspace root, copy them to
+  `~/workshop/agencproj/.claude/commands/`.
+
+---
+
 ## [2026-04-23] — Switched to Colima; local runtime build from master (9cbeda8)
 
 ### Changed
