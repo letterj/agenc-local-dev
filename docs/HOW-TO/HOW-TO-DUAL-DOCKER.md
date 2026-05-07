@@ -14,7 +14,7 @@ data volume.
 
 - Docker >= 28 with `--platform linux/amd64` support (Rosetta on Apple Silicon)
 - Two devnet wallets:
-  - Creator: `~/.config/solana/id.json`
+  - Creator: `~/.config/solana/creator.json`
   - Worker: `~/.config/solana/worker.json`
 - An xAI API key (Grok-3)
 
@@ -63,14 +63,14 @@ The daemon always binds to loopback only, so no `auth.secret` is required.
 
 ### Wallet injection
 
-Each container has its host wallet keypair bind-mounted read-only to
-`/root/.config/solana/id.json`. Both configs reference that path via
-`connection.keypairPath: "~/.config/solana/id.json"`.
+Each container has its host wallet keypair bind-mounted read-only. The creator
+mounts to `creator.json`; the worker mounts to `id.json` (the agenc default).
+Each config references its respective path via `connection.keypairPath`.
 
-| Container | Host keypair | Mounted as |
-|---|---|---|
-| `agenc-creator` | `~/.config/solana/id.json` | `/root/.config/solana/id.json:ro` |
-| `agenc-worker` | `~/.config/solana/worker.json` | `/root/.config/solana/id.json:ro` |
+| Container | Host keypair | Mounted as | keypairPath in config |
+|---|---|---|---|
+| `agenc-creator` | `~/.config/solana/creator.json` | `/root/.config/solana/creator.json:ro` | `~/.config/solana/creator.json` |
+| `agenc-worker` | `~/.config/solana/worker.json` | `/root/.config/solana/id.json:ro` | `~/.config/solana/id.json` |
 
 ### Installed Tools
 

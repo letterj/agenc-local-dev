@@ -96,7 +96,7 @@ force the rebase. Let the user decide.
 
 ```bash
 LATEST=$(npm view @tetsuo-ai/agenc dist-tags.latest 2>/dev/null)
-BASELINE="0.1.0"
+BASELINE="0.2.0"
 if [ "$LATEST" = "$BASELINE" ]; then
   echo "agenc npm: $BASELINE (no new release)"
 else
@@ -106,7 +106,7 @@ else
 fi
 ```
 
-Baseline is `0.1.0`, published 2026-03-19. The container image installs `@tetsuo-ai/agenc`
+Baseline is `0.2.0`, published 2026-04-12. The container image installs `@tetsuo-ai/agenc`
 from npm with no pinned version — a rebuild without a new release picks up the same binary.
 If this step reports a new version, rebuild the image:
 
@@ -121,31 +121,23 @@ docker compose up -d
 ## Step 4 — Check open PRs status
 
 ```bash
-# All open PRs from letterj against tetsuo-ai repos
-gh search prs --author letterj \
-  --repo tetsuo-ai/agenc-core \
-  --repo tetsuo-ai/agenc-sdk \
-  --repo tetsuo-ai/agenc-protocol \
-  --repo tetsuo-ai/AgenC \
-  --state open \
-  --json number,title,state,reviewDecision,updatedAt,comments \
-  --jq '.[] | "#\(.number) \(.state) | reviews:\(.reviewDecision // "none") | comments:\(.comments | length) | updated:\(.updatedAt[:10]) | \(.title)"'
-
-# For any known in-flight PRs, get full detail
-# Format: "owner/repo:pr_number"
-# e.g. for pr_spec in "tetsuo-ai/agenc-core:28"; do
-for pr_spec in "tetsuo-ai/agenc-core:43" "tetsuo-ai/agenc-core:144" "tetsuo-ai/agenc-core:145"; do  # add entries as PRs are filed
-  repo="${pr_spec%%:*}"
-  num="${pr_spec##*:}"
-  gh pr view "$num" --repo "$repo" \
-    --json number,title,state,reviewDecision,comments,updatedAt \
-    --jq '"#\(.number) \(.state) | reviews:\(.reviewDecision // "none") | comments:\(.comments | length) | updated:\(.updatedAt[:10]) | \(.title)"' \
-    2>/dev/null || echo "  PR $repo#$num — not found"
-done
+# GitHub Search API — covers all tetsuo-ai repos in one call, including cross-fork PRs
+curl -s "https://api.github.com/search/issues?q=is:pr+is:open+author:letterj+org:tetsuo-ai" \
+  | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+items = data.get('items', [])
+if not items:
+    print('No open PRs from letterj')
+else:
+    for item in items:
+        repo = item['repository_url'].split('/')[-1]
+        print(f\"tetsuo-ai/{repo} #{item['number']} | comments:{item['comments']} | updated:{item['updated_at'][:10]} | {item['title']}\")
+"
 ```
 
-Report: any open PRs with review state, comment count, and last-updated date.
-If the search returns nothing, report "no open PRs".
+Report: any open PRs with comment count and last-updated date.
+If the search returns nothing, report "No open PRs from letterj".
 
 ---
 
@@ -251,8 +243,8 @@ New tetsuo-ai repos:
   or: none since last session
 
 PRs:
-  - tetsuo-ai/agenc-core #NN: open | reviews: REVIEW_DECISION | comments: N | updated: YYYY-MM-DD | title
-  or: no open PRs
+  - tetsuo-ai/agenc-core #NN: open | comments: N | updated: YYYY-MM-DD | title
+  or: No open PRs from letterj
 
 Containers:
   - agenc-creator: running | pid NNN | port 3100
@@ -278,5 +270,5 @@ call it out clearly and stop so the user can decide how to proceed.
 | Working branch | `experiment/local-dev-setup` on all forks |
 | Docker project | `~/workshop/agencproj/agenc-local-dev/` |
 | Container UI | `http://localhost:3100/ui/` |
-| Tracked PRs | agenc-core #43 (ui: wallet-scoped buttons), agenc-core #144 (runtime: named BN import), agenc-core #145 (cli: agent PDA auto-discovery) |
+| Tracked PRs | none currently open — add to TRACKED_PRS array in Step 4 when new PRs filed |
 | agenc-protocol default branch | `feature/bootstrap-wave1` — skill checks out `main` before pulling |

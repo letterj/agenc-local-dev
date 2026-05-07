@@ -41,14 +41,14 @@ Final working state: socat bridge restored, no `auth.secret` required.
 | `agenc-core` | Public | Runtime engine, daemon, MCP, web, mobile, desktop |
 | `agenc-prover` | Public | ZK prover service, admin tools |
 
-### Published Package Versions (2026-03-21)
+### Published Package Versions (updated 2026-04-12)
 
 | Package | Version |
 |---|---|
 | `@tetsuo-ai/sdk` | 1.3.1 |
 | `@tetsuo-ai/protocol` | 0.1.1 |
 | `@tetsuo-ai/plugin-kit` | 0.1.1 |
-| `@tetsuo-ai/agenc` | 0.1.0 |
+| `@tetsuo-ai/agenc` | 0.2.0 |
 
 The `agenc-morning-sync` skill checks `@tetsuo-ai/agenc` against this baseline on
 every session start (Step 3b). When a new version is detected, a rebuild is needed
@@ -75,24 +75,59 @@ ollama    0.17.7 (optional)
 
 **Wallet:** `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT`
 **Balance:** ~33 SOL
-**Program ID (devnet, current):** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2, deployed 2026-03-27)
-**Program ID (devnet, superseded):** `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`
+**Program ID (devnet, current):** `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7` (V3, announced 2026-04-22)
+**Program ID (devnet, superseded):** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+**Program ID (devnet, V1, superseded):** `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`
 
 > ⚠️ Mainnet program ID (`5j9ZbT3...`) is different. Never use mainnet for experiments.
 
-### Active Devnet Agents (V2 Program)
+### Active Devnet Agents (Private Program)
 
-Registered 2026-03-28 against the current program. Use these PDAs in lifecycle scripts.
+Registered 2026-04-10 against the private program. Use these PDAs in lifecycle scripts.
 
-| Role | Wallet | Agent PDA |
-|---|---|---|
-| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` |
-| Worker  | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` |
+| Role | Wallet | Keypair file | Agent PDA |
+|---|---|---|---|
+| Creator  | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `creator.json`  | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` |
+| Worker2  | `SFG7VnuZDg9x1Y5Kz81moJkUTLwDF1xgTZFPD3V3mT1` | `worker2.json`  | `N8C3DLBzupr3Uzddu5g7DBd2pQwPyi3Nnkb774rVNC7`  |
 
-Program: `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (Task Validation V2, deployed 2026-03-27)
+**Worker wallet history:**
+- `worker.json` (`26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q`): stale — 2 agent registrations due to slash-window block. No longer active in container.
+- `worker2.json` (`SFG7VnuZDg9x1Y5Kz81moJkUTLwDF1xgTZFPD3V3mT1`): created 2026-04-10, clean single registration, **active in worker container**.
+- `worker.json` retained on disk but no longer bind-mounted in `docker-compose.yml`.
+- `worker.json` stale agent PDA `4Rz7m7Ff...` still has a stale companion `8FfnjVhy...` (slash window — see below).
+
+Program: `9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc` (private program)
 
 > If the devnet program is redeployed, run `scripts/devnet-register-agents.mjs` to get fresh PDAs
 > and update `scripts/devnet-task-lifecycle-test.mjs`. See `docs/HOW-TO/HOW-TO-FULL-TASK-LIFECYCLE.md`.
+
+**Stale agent deregistration — 2026-04-10**
+
+Old creator PDA `8kGWdXVPkqZk36npStk5JL5CFW2YfPqWAs2SioLju4W5` deregistered ✅ (tx: `3Z38Gq7...`).
+
+Old worker PDA `8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5` **blocked** — `disputes_as_defendant: 1`,
+7-day slash window (`SLASH_WINDOW = 604800s`). Eligible for deregistration after **2026-04-17T20:31:42 UTC**.
+
+The old `worker.json` wallet still has 2 agent accounts on-chain. **This does not affect worker2** —
+`worker2.json` has exactly 1 registration and is used by the worker container. The deregistration
+is only needed to keep the old wallet tidy and is no longer blocking operation.
+
+**Retry command (run on or after 2026-04-17T20:31:42 UTC):**
+
+```bash
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json \
+node scripts/devnet-deregister-agents.mjs
+```
+
+After successful deregistration, commit `scripts/devnet-deregister-agents.mjs` and verify:
+
+```bash
+# Should show exactly 1 match per wallet
+solana account 4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy --url devnet   # active
+solana account 8FfnjVhyJdz5UNaRZhz3WfNv8uMbm2tvhgt9zs6V4FZ5 --url devnet   # should be gone
+```
+
+---
 
 **Creator agent confirmed live — 2026-04-02**
 
@@ -139,7 +174,7 @@ Reward: 0.01 SOL | completedAt: 2026-04-02T23:03:23Z
 
 ### Protocol Config PDA (2026-04-02)
 
-- **Program:** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+- **Program:** `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7` (V3, announced 2026-04-22)
 - **Protocol config PDA (correct):** `GEXnAns2Wq27xjG84a7BnuxJBY3R5Qu9CdFy2HQ7vsiv` (initialized, devnet)
 - **Wrong PDA reported by client:** `9bE5CbHLW8ZAeAkxUTSeUdSwEjbivtr5skWxzjLYfCWi`
 - **Error seen:** `Failed to fetch protocol config: Account does not exist`
@@ -390,8 +425,8 @@ AGENT_NAME=letterj-operator
 `AUTH_SECRET` is no longer used — the socat bridge architecture does not
 require `auth.secret` (daemon binds to loopback only).
 
-`AGENC_RUNTIME_PROGRAM_ID` must be set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`
-for the daemon to use the V2 program. The CLI reads `connection.programId` from config
+`AGENC_RUNTIME_PROGRAM_ID` must be set to `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
+for the daemon to use the V3 program. The CLI reads `connection.programId` from config
 (set in `docker/creator/config.json` and `docker/worker/config.json`) and also accepts
 `AGENC_RUNTIME_PROGRAM_ID` as an environment variable override. If neither is set, the
 runtime defaults to the V1 program (`6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab`)
@@ -621,13 +656,24 @@ docker exec agenc-creator bash -c "
 **Root cause:** npm optional dependencies bug ([npm/cli#4828](https://github.com/npm/cli/issues/4828)) — pre-existing on upstream `main`, not PR-specific.
 **Status:** Confirmed failing on `main` as of 2026-04-02. PRs that pass `pack-smoke` but fail only these two checks are not the cause.
 
+### PR Tracker Correction (2026-04-05)
+
+PRs #144 and #145 are in `tetsuo-ai/agenc-core`, not `tetsuo-ai/agenc-sdk` as previously documented. The agenc-sdk repo tops out at PR #29. Update any references accordingly.
+
+| PR | Repo | Branch | Status |
+|----|------|--------|--------|
+| #43 | tetsuo-ai/agenc-core | fix/task-ownership-ui | Open — awaiting Pavelevich re-review |
+| #144 | tetsuo-ai/agenc-core | fix/bn-import-interop | Open — 3/3 CI passing, rebased 2026-04-04 |
+| #145 | tetsuo-ai/agenc-core | fix/agent-pda-autodiscovery | Open — CI in progress after rebase 2026-04-05 |
+| #1547 | tetsuo-ai/AgenC | docs/concordia-event-stream-shim | Open |
+
 ---
 
-## Known Issues — Pending npm Release
+## Known Issues — npm 0.1.0 era (pre 0.2.0 upgrade)
 
-The following issues affect the `@tetsuo-ai/agenc` npm package at `0.1.0`
-(the version installed in the Docker image). They cannot be fully resolved
-in the running containers without a new npm release and image rebuild.
+The following issues were observed against `@tetsuo-ai/agenc@0.1.0`.
+Containers now run `0.2.0` — verify whether each issue is still present
+before acting on it.
 
 ### Watch console replaces operator console (2026-04-04)
 
@@ -674,7 +720,7 @@ The runtime reads `programId` from `connection.programId` in config — **not**
 — **not** `AGENC_PROGRAM_ID`.
 
 Both `docker/creator/config.json` and `docker/worker/config.json` now have
-`connection.programId` set to `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3`.
+`connection.programId` set to `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`.
 `docker-compose.yml` sets `AGENC_RUNTIME_PROGRAM_ID` in both service definitions.
 Containers must be restarted to pick up the change.
 
@@ -695,6 +741,242 @@ Fix: pass `connection.programId` from config as the second argument to
 
 To take effect in the containers, the fix requires rebuilding the Docker
 image from the fork after a new npm release ships.
+
+**Resolved upstream (2026-04-07):** The Phase 2 refactor (agenc-core PRs
+#174–192, landed 2026-04-07) deleted `tools/agenc/handlers.ts` and moved
+program construction into `runtime/src/tools/agenc/index.ts`, which now
+conditionally passes `context.programId` to both `createProgram` and
+`createReadOnlyProgram`. The root cause no longer exists in upstream main.
+No PR needed — the webchat `handlers.ts` (`channels/webchat/handlers.ts`)
+retains its own `createProgramContext` and is unaffected by this refactor.
+
+---
+
+## Devnet Testing
+
+### Lifecycle Test
+
+Full create → claim → complete lifecycle test against devnet V2 program. Confirmed passing 2026-04-07.
+
+**Script:** `scripts/devnet-task-lifecycle-test.mjs`
+
+**Run:**
+```bash
+cd ~/workshop/agencproj/agenc-local-dev
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json \
+node scripts/devnet-task-lifecycle-test.mjs
+```
+
+**Notes:**
+- Uses `@tetsuo-ai/sdk` and `forks/agenc-sdk/scripts/devnet-helpers.mjs` — no runtime binary dependency, unaffected by npm 0.1.0 blocker
+- IDL must point to `forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json` — `target/idl/` is Anchor build output and not committed
+- Creator agent `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` was registered against V2 program `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` — **re-registration required against V3** `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7`
+- Run this any time to confirm devnet setup is healthy
+- `CREATOR_AGENT_PDA` and `WORKER_AGENT_PDA` default to team program PDAs when not set — override for private program
+
+**Private program run (confirmed passing 2026-04-09):**
+```bash
+cd ~/workshop/agencproj/agenc-local-dev
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc \
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json \
+CREATOR_AGENT_PDA=8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW \
+WORKER_AGENT_PDA=4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy \
+node scripts/devnet-task-lifecycle-test.mjs
+```
+
+---
+
+## Arbiter Wallets
+
+Generated 2026-04-09 for use with `scripts/marketplace-tui-devnet-smoke.ts`.
+
+| Role | Public Key | Keypair Path | Funded | Balance |
+|---|---|---|---|---|
+| arbiter-a | `BKKyRGjggY1dTZMZ51FnK1f83gQLn6fg3xygCbnXBxxi` | `~/.config/solana/arbiter-a.json` | 2026-04-09 | 3 SOL |
+| arbiter-b | `HA4zxn9BWSDnGPU36RPxKaRFq6sotjVQKTj6aaBNug5J` | `~/.config/solana/arbiter-b.json` | 2026-04-09 | 3 SOL |
+| arbiter-c | `YNTnajdxPfuACW1gL8UmFEvyPjMCp5gGRsUifQxZ6MD` | `~/.config/solana/arbiter-c.json` | 2026-04-09 | 3 SOL |
+
+Funded from creator wallet `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` (3 SOL each).
+
+### Protocol Authority Wallet
+
+Generated 2026-04-09 for private program deployment (see PROJECT-PLAN.md — "Own Protocol Authority" task).
+
+| Role | Public Key | Keypair Path | Permissions | Funded | Balance |
+|---|---|---|---|---|---|
+| Protocol Authority | `EEB7R1tYTGxPziNQfB6jdADs4E58d5ZYfLoRN4NyBnhx` | `~/.config/solana/protocol-authority.json` | 600 | 2026-04-09 | 4.94 SOL (topped up 2026-04-10) |
+
+Funded from creator wallet `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` (5 SOL).
+
+> ⚠️ **DO NOT commit this keypair. DO NOT share.** This key has administrative
+> control over any private program deployment — including `initialize_protocol`,
+> dispute resolution, fee configuration, and treasury. Treat as a production wallet.
+> File permissions must remain 600. Never bake into Docker images or `.env` files
+> tracked by git.
+
+### Env vars for marketplace-tui-devnet-smoke.ts
+
+```bash
+CREATOR_WALLET=~/.config/solana/creator.json
+WORKER_WALLET=~/.config/solana/worker.json
+ARBITER_A_WALLET=~/.config/solana/arbiter-a.json
+ARBITER_B_WALLET=~/.config/solana/arbiter-b.json
+ARBITER_C_WALLET=~/.config/solana/arbiter-c.json
+AGENC_PROGRAM_ID=2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7
+# For team's V2 program — PROTOCOL_AUTHORITY_WALLET not available (held by tetsuo-ai team)
+# For private program deployment — use:
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json
+```
+
+Against the team's V2 program (`GN69Co...`), `PROTOCOL_AUTHORITY_WALLET` remains
+a hard blocker — the on-chain authority does not match our local keypair.
+Against the private program below, this keypair IS the authority and the full
+smoke test can run end-to-end.
+
+---
+
+## Private Program Deployment
+
+Deployed 2026-04-10. Self-contained devnet instance for full smoke test and protocol testing.
+
+| Item | Value |
+|---|---|
+| Program ID | `9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc` |
+| Protocol Config PDA | `6rGjoLyG4HicDqoDeweKFYFpxxrV81kWzyYZ8xsvA2Pe` |
+| Bid Marketplace PDA | `EifZXrtSfKJiyexvwJdBHuUQFwdE9ZLnGkJm2sjqxeiN` |
+| ZK Config PDA | `FMZHRR7NpkryTSAvPtqfjtHigjMLuDNvRYtpBys3yHVR` |
+| Protocol Authority | `EEB7R1tYTGxPziNQfB6jdADs4E58d5ZYfLoRN4NyBnhx` |
+| Second Signer | `Dix91kH4T2oyKmYv6YWMgyBWsd66Q9YLsdajdqW5JTam` |
+| Treasury | `7EipN8LdLyXjs2XXAPGtYSZVH7GMP2vXG1spWvmin4Cw` |
+| Deploy date | 2026-04-10 |
+| Source | `forks/agenc-protocol/programs/agenc-coordination` |
+| IDL | `forks/agenc-protocol/target/idl/agenc_coordination.json` |
+| Config profile | `docker/creator/config.private.json` |
+
+### Keypairs used
+
+| Role | Pubkey | Path | Permissions |
+|---|---|---|---|
+| Protocol Authority | `EEB7R1tYTGxPziNQfB6jdADs4E58d5ZYfLoRN4NyBnhx` | `~/.config/solana/protocol-authority.json` | 600 |
+| Second Signer | `Dix91kH4T2oyKmYv6YWMgyBWsd66Q9YLsdajdqW5JTam` | `~/.config/solana/agenc-private-second-signer.json` | 600 |
+| Treasury | `7EipN8LdLyXjs2XXAPGtYSZVH7GMP2vXG1spWvmin4Cw` | `~/.config/solana/agenc-private-treasury.json` | 600 |
+
+### Governance Initialization
+
+Standard `validation-initialize.mjs` does **not** cover `initializeGovernance`.
+A separate script is required — must run after `validation-initialize.mjs` and before
+the marketplace TUI smoke test.
+
+**Script:** `scripts/devnet-init-governance.mjs`
+
+**Run:**
+```bash
+cd ~/workshop/agencproj/agenc-local-dev
+AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/target/idl/agenc_coordination.json \
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc \
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json \
+node scripts/devnet-init-governance.mjs
+```
+
+**PDAs initialized:**
+- Governance Config PDA: `nXZbxo5v9L2Wi7PdhTW5qXALKNAhFFgiLRUEwMfVdWq`
+- Init tx: `5FXgScfnSrSsHryDwBKKYfSJ3Db92rUVzX7LTijQKexDMLGNoY7BTxE4ePyWj8CCTHncVt62UsK8FEzKeCoKxbRL`
+
+**When to run:**
+- Any time you deploy a fresh private program instance
+- Must run before `marketplace-tui-devnet-smoke.ts` governance phase
+- Idempotent — safe to re-run; exits cleanly if already initialized
+
+---
+
+### Env vars for marketplace-tui-devnet-smoke.ts (private program)
+
+```bash
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc
+CREATOR_WALLET=~/.config/solana/creator.json
+WORKER_WALLET=~/.config/solana/worker.json
+ARBITER_A_WALLET=~/.config/solana/arbiter-a.json
+ARBITER_B_WALLET=~/.config/solana/arbiter-b.json
+ARBITER_C_WALLET=~/.config/solana/arbiter-c.json
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json
+```
+
+### Agent Registrations (private program)
+
+Registered 2026-04-10 via `scripts/devnet-register-agents.mjs`.
+
+| Role | Wallet | Agent PDA | Registered |
+|---|---|---|---|
+| Creator | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` | 2026-04-10 |
+| Worker | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` | 2026-04-10 |
+
+Note: PDAs are keyed by random `agentId` (not wallet pubkey) — different from team V2 PDAs
+(`HmZqAsDz...` / `DQ1drYVZ...`). Both confirmed on-chain (566 bytes each).
+
+### Phase 5 — Baseline Lifecycle Test
+
+Date: 2026-04-10 — **✅ PASS**
+
+| Step | Transaction |
+|---|---|
+| create | `4RMD2BKcqoGKQxNQMmyZBWhv4xarkeETZE1BiMFwMiMrYQt7wFzph75DtiZwYLjoNpTLpupLDATS19jMQnqTLCPZ` |
+| claim  | `23wjJPoLQqSWNkHC7SjcqWPRQbRNTMNQUZxpLAttJ3nBcTaGyGFuc4TkUxNRoQQNSAPoMyjjY7UuviAtuGsRS36w` |
+| complete | `2hbem7aykB4WJQmsdL1PRSJNz5DrGyouX7ZpAx6bEqJSx7srHqAHxtgAKkrskTU9cNfFVoPVxJDPf5jywsWxYqFu` |
+
+Notes:
+- First run failed at `complete_task` — treasury had 0 SOL; fee transfer (100,000 lamports) below rent-exempt minimum. Fixed by funding treasury with 0.01 SOL.
+- Treasury must be funded before running smoke test (already done 2026-04-10).
+- `devnet-task-lifecycle-test.mjs` updated to accept `CREATOR_AGENT_PDA` / `WORKER_AGENT_PDA` env vars.
+
+---
+
+### Phase 6 — Full Marketplace TUI Devnet Smoke Test
+
+Date: 2026-04-09 — **✅ PASS (dispute resolution pending)**
+
+Run command:
+```bash
+cd ~/workshop/agencproj/forks/agenc-core
+CREATOR_WALLET=~/.config/solana/creator.json \
+WORKER_WALLET=~/.config/solana/worker.json \
+ARBITER_A_WALLET=~/.config/solana/arbiter-a.json \
+ARBITER_B_WALLET=~/.config/solana/arbiter-b.json \
+ARBITER_C_WALLET=~/.config/solana/arbiter-c.json \
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json \
+AGENC_PROGRAM_ID=9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc \
+AGENC_RPC_URL=https://api.devnet.solana.com \
+npm run smoke:marketplace:tui:devnet
+```
+
+Results:
+| Phase | Result |
+|---|---|
+| reputation (stake + delegate) | ✅ |
+| task cancel flow | ✅ |
+| task completion flow | ✅ |
+| skills | ✅ skill `CNpUC94R5Ys3oKAJXYnDY5LjoyUVQKrd61UVFhr2K1BS` |
+| governance (proposal `DFA1zVuntFVWa47j5PL5dRgZXEvPNUdt4rRVX4mStcaa`) | ✅ |
+| dispute flow (3/3 arbiter votes) | ✅ |
+| dispute resolution | ⏳ pending deadline 2026-04-10T20:30:22Z |
+
+Dispute `EPAXHFWHtGivwG4UNaq7yyiKffAzfAAfCn1FW5WcP913`:
+- arbiter-a: `DPZu7eQrLsCKo4TxJsxjdo49Dea6ijSZovPu2o4bYKRH`
+- arbiter-b: `9J4QCxfbQgMSxK8h8yqXYAs81B9KUSUrpWUzr4DsxvGW`
+- arbiter-c: `2w3REkja6gztagUSi9rikiTtyuYgkHETSGRbiqD9eqiv`
+
+Resume artifact: `/var/folders/pj/_0z603bs42x7dl2fchrgq8jw0000gn/T/agenc-marketplace-tui-smoke/marketplace-tui-devnet-smoke-1775766630926.json`
+
+Resume command (run after 2026-04-10T20:30:22Z):
+```bash
+PROTOCOL_AUTHORITY_WALLET=~/.config/solana/protocol-authority.json \
+npm run smoke:marketplace:tui:devnet -- --resume /var/folders/pj/_0z603bs42x7dl2fchrgq8jw0000gn/T/agenc-marketplace-tui-smoke/marketplace-tui-devnet-smoke-1775766630926.json
+```
+
+Pre-requisites that needed to be set up before Phase 6:
+- `governance_config` PDA not initialized by `validation-initialize.mjs` — required separate init
+  script (`scripts/devnet-init-governance.mjs`). PDA: `nXZbxo5v9L2Wi7PdhTW5qXALKNAhFFgiLRUEwMfVdWq`
+  tx: `5FXgScfnSrSsHryDwBKKYfSJ3Db92rUVzX7LTijQKexDMLGNoY7BTxE4ePyWj8CCTHncVt62UsK8FEzKeCoKxbRL`
+- Arbiter wallets: `~/.config/solana/arbiter-a.json`, `arbiter-b.json`, `arbiter-c.json` (each ~3 SOL)
 
 ---
 
@@ -787,6 +1069,41 @@ submit/create/push. Never auto-submit. This applies to:
 
 ---
 
+## Git Discipline
+
+### Git Discipline — Branch and Rebase Rules
+
+**`main` in all forks must stay clean and track upstream. Never commit directly to it.**
+
+Working changes belong on `experiment/local-dev-setup`. PR branches are cut from `upstream/main` and must never accumulate unrelated commits.
+
+#### Pre-flight checklist before any rebase or force push
+```bash
+git status                      # must be clean — no uncommitted changes
+git branch -vv                  # confirm tracking remote shows origin/..., not upstream/main
+git log upstream/main..HEAD     # review exactly what commits are yours
+```
+
+If `git branch -vv` shows the branch tracking `upstream/main` instead of `origin/<branch>`, push explicitly:
+```bash
+git push origin <branch-name> --force-with-lease
+```
+
+Never use bare `git push --force-with-lease` on a PR branch without first confirming tracking.
+
+#### If working tree is dirty on the wrong branch
+```bash
+git stash
+git checkout <correct-branch>
+git stash pop
+git add .
+git commit -m "chore: <description>"
+```
+
+Do not commit directly to `main` to "save" uncommitted work — stash it and move it.
+
+---
+
 ## Contributions Made
 
 | Repo | PR | Description | Status |
@@ -796,6 +1113,143 @@ submit/create/push. Never auto-submit. This applies to:
 | `agenc-core` | Issue #26 | gateway.bind undocumented | Closed (PR #27) |
 | `agenc-core` | PR #27 | docs(gateway): document gateway.bind config field | Merged (`c99049d`) |
 | `agenc-core` | PR (closes #32) | fix(ui): scope CANCEL/CLAIM task buttons to wallet ownership | Open — `fix/task-ownership-ui` |
+
+---
+
+## Version Upgrade Procedure
+
+Steps required when a new `@tetsuo-ai/agenc` npm release is available.
+
+**Before starting:** check the upstream release branch for breaking changes
+(bind mount paths, program IDs, schema changes). See `LOCAL-FIXES.md` for
+the current bind mount pattern and known issues to recheck after upgrade.
+
+1. **Review upstream changelog** — check the release branch on `tetsuo-ai/agenc-core`
+   for any breaking changes before rebuilding.
+
+2. **Update bind mount path** — in `docker-compose.yml`, change `<VERSION>` in both
+   service definitions:
+   ```yaml
+   - ${HOME}/workshop/agencproj/forks/agenc-core/runtime:/root/.agenc/runtime/releases/<VERSION>/linux-x64/node_modules/@tetsuo-ai/runtime:ro
+   ```
+
+3. **Update program ID** — if the program ID changed between versions, update
+   `AGENC_RUNTIME_PROGRAM_ID` in both `docker-compose.yml` service `environment` blocks,
+   and `connection.programId` (and `protocol.programId`) in both config files.
+
+4. **Clear named volumes** — required to prevent the installer hitting the old-version
+   runtime on startup:
+   ```bash
+   cd ~/workshop/agencproj/agenc-local-dev
+   docker compose down -v
+   ```
+
+5. **Rebuild image:**
+   ```bash
+   docker compose build --no-cache
+   ```
+
+6. **Bring containers up:**
+   ```bash
+   docker compose up -d
+   ```
+
+7. **Verify both containers healthy:**
+   ```bash
+   docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+   docker logs agenc-creator --tail 20
+   docker logs agenc-worker --tail 20
+   ```
+   Look for `Daemon started` in logs and `Up` in `docker ps`.
+
+8. **Register agents if program ID changed** — run inside each container:
+   ```bash
+   docker exec agenc-creator node .../agenc.js agent register --config /root/.agenc/config.json
+   docker exec agenc-worker  node .../agenc.js agent register --config /root/.agenc/config.json
+   ```
+   Record new agent PDAs and update `CLAUDE.md`, `LOCAL-FIXES.md` wallet inventory,
+   and Claude memory (`project_wallet_inventory.md`).
+
+9. **Run full lifecycle test (CLI):**
+   ```bash
+   # Create (creator container)
+   docker exec agenc-creator node .../agenc.js market tasks create \
+     --description "upgrade validation" --reward 10000000 --config /root/.agenc/config.json
+   # Claim (worker container)
+   docker exec agenc-worker node .../agenc.js market tasks claim <taskPda> --config /root/.agenc/config.json
+   # Complete (worker container)
+   docker exec agenc-worker node .../agenc.js market tasks complete <taskPda> \
+     --result-data "done" --config /root/.agenc/config.json
+   ```
+
+10. **Verify via chat UI** — open `http://localhost:3100/ui/` and confirm agent can
+    create a task; open `http://localhost:3101/ui/` and confirm worker can claim/complete.
+
+11. **Update VERSION file** in `forks/agenc-core/runtime/dist/VERSION`:
+    ```json
+    { "runtimeVersion": "<NEW_VERSION>" }
+    ```
+
+12. **Update docs** — `CHANGELOG.md`, `RUNBOOK.md` published package versions table,
+    `LOCAL-FIXES.md` wallet inventory if PDAs changed.
+
+---
+
+---
+
+## Shell Interface (agenc shell)
+
+### Overview
+The agenc shell is the primary operator interface as of 0.2.0. It connects
+to a running daemon and provides a line-oriented chat and command surface.
+Replaces the web UI for day-to-day operator use.
+
+### Shell profiles
+- general: concise responses, task-oriented (default)
+- coding: development-focused, same output with coding-specific context
+
+### Creator shell (Grok, cloud)
+```bash
+node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js shell \
+  --config ~/.agenc/config.json
+```
+
+Connects to: daemon pid 18441, port 3100
+Model: grok-4-1-fast-reasoning (displays as grok-3 — known cosmetic bug)
+Note: model display is cosmetic only — API confirmed reasoning model is
+running (reasoning_tokens > 0 in API response)
+
+### Worker2-local shell (Gemma 4, local LM Studio)
+```bash
+node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js shell \
+  --config /Users/letterj/.agenc/worker2-local.json \
+  --pid-path /Users/letterj/.agenc/worker2-local.pid \
+  --port 3102
+```
+
+Connects to: worker2-local daemon, port 3102
+Model: google_gemma-4-26b-a4b-it via LM Studio at http://127.0.0.1:1234/v1
+Prerequisites:
+  - LM Studio running with Gemma 4 26B loaded
+  - Context window set to ≥32768 in LM Studio
+  - Worker2-local daemon started from /tmp (neutral directory)
+  - workspace.hostPath set to /Users/letterj/.agenc/workspace in config
+
+### Starting worker2-local daemon
+```bash
+cd /tmp && node ~/workshop/agencproj/forks/agenc-core/runtime/dist/bin/agenc.js start \
+  --foreground \
+  --config /Users/letterj/.agenc/worker2-local.json \
+  --pid-path /Users/letterj/.agenc/worker2-local.pid
+```
+
+### Known issues
+- agenc-watch.js crashes with "Missing required watch surface helper:
+  cockpitFeedFingerprint" — not yet functional after coding-first-shell
+  feature drop (upstream issue, 2026-04-13)
+- grok-3 display in shell — cosmetic only, reasoning model is running
+- Gemma 4 requires ≥32K context window — LM Studio default (4096) is
+  too small for the AgenC system prompt
 
 ---
 
@@ -809,5 +1263,6 @@ submit/create/push. Never auto-submit. This applies to:
 | agenc-protocol | https://github.com/tetsuo-ai/agenc-protocol |
 | agenc-plugin-kit | https://github.com/tetsuo-ai/agenc-plugin-kit |
 | agenc-local-dev | https://github.com/letterj/agenc-local-dev |
-| Devnet program (Solscan) | https://solscan.io/account/GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3?cluster=devnet |
+| Devnet program (agenc.tech explorer) | https://devnet.agenc.tech |
+| Devnet program (Solscan) | https://solscan.io/account/2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7?cluster=devnet |
 | ADR-003 | `forks/agenc-core/docs/architecture/adr/adr-003-public-framework-product.md` |

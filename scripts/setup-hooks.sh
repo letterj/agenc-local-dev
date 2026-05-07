@@ -62,7 +62,7 @@ fi
 # Pass 3 — docker config.json guard
 # ---------------------------------------------------------------------------
 echo "Security scan: pass 3 (docker config.json guard)..."
-CONFIG_HITS=$(git diff --cached --name-only 2>/dev/null | grep "^docker/.*/config\.json" || true)
+CONFIG_HITS=$(git diff --cached --name-only 2>/dev/null | grep "^docker/.*/config\.json$" || true)
 if [ -n "$CONFIG_HITS" ]; then
   echo -e "${RED}[BLOCKED] docker config.json staged for commit (should be gitignored):${NC}"
   echo "$CONFIG_HITS"

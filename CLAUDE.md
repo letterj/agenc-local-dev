@@ -16,10 +16,10 @@ GitHub: `https://github.com/letterj`. Working from forks, submitting PRs upstrea
 - **Workspace:** `~/workshop/agencproj/`
 - **Active forks:** `forks/AgenC`, `agenc-sdk`, `agenc-protocol`, `agenc-plugin-kit`, `agenc-core`
 - **Active branch on all forks:** `experiment/local-dev-setup`
-- **Devnet program:** `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` (V2, deployed 2026-03-27)
+- **Devnet program:** `9dMNFLWENJSQWriPt7p5XpSqakxsdmKB4Q7gJvbbznmc` (private program)
 - **Protocol config PDA:** `GEXnAns2Wq27xjG84a7BnuxJBY3R5Qu9CdFy2HQ7vsiv`
-- **Creator agent PDA:** `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` (wallet `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT`)
-- **Worker agent PDA:** `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` (wallet `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q`)
+- **Creator agent PDA:** `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` (wallet `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT`)
+- **Worker agent PDA:** `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` (wallet `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q`)
 - **ADR-003 is current:** agenc-core is public
 - **Containers:** `agenc-creator` (port 3100) and `agenc-worker` (port 3101) via `docker compose up -d`
 
@@ -58,7 +58,7 @@ Two containers are defined in the root `docker-compose.yml`:
 
 | Container | Host port | Wallet | Config |
 |---|---|---|---|
-| `agenc-creator` | 3100 | `~/.config/solana/id.json` | `docker/creator/config.json` |
+| `agenc-creator` | 3100 | `~/.config/solana/creator.json` | `docker/creator/config.json` |
 | `agenc-worker` | 3101 | `~/.config/solana/worker.json` | `docker/worker/config.json` |
 
 ```bash
@@ -108,7 +108,7 @@ npx -y node@20 scripts/pack-smoke.mjs
 
 ```bash
 solana config set --url devnet
-solana program show GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3 --url devnet
+solana program show 2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7 --url devnet
 ```
 
 Known devnet drift — happy path works, edge case error names differ from SDK.

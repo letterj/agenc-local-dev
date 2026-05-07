@@ -19,6 +19,7 @@ for native arm64 support.
 | `docs/RUNBOOK.md` | Full setup and troubleshooting reference |
 | `skills/agenc-morning-sync/` | Session-start skill: sync repos, check org for new repos, check PRs, start Docker |
 | `skills/agenc-changelog-docs-update/` | Skill: update changelog and docs from git commits |
+| `.claude/commands/` | Project-scoped slash commands (compress, agenc-plan-status, agenc-plan-action) |
 | `scripts/` | Devnet utility scripts — task lifecycle, agent management |
 
 ---
@@ -32,7 +33,7 @@ Two independent operator containers — one creator (port 3100) and one worker
 docker/
 ├── docker-compose.yml      ← dual-container orchestration
 ├── creator/
-│   └── config.json         ← creator config (port 3100, id.json)
+│   └── config.json         ← creator config (port 3100, creator.json)
 └── worker/
     └── config.json         ← worker config (port 3101, worker.json)
 ```
@@ -75,6 +76,21 @@ session by saying "morning sync", "run the changelog skill", etc.
 
 ---
 
+## Slash Commands
+
+Project-scoped slash commands live under `.claude/commands/`. They are
+loaded by the Claude Code harness when a session is launched from inside
+this repo. To use them from a session started at the workspace root, copy
+the files into `~/workshop/agencproj/.claude/commands/`.
+
+| Command | What it does |
+|---|---|
+| `/compress` | Compresses the current conversation into a terse session briefing for paste-into-new-window continuation. |
+| `/agenc-plan-status` | Read-only summary of `docs/PROJECT-PLAN-V2.md` with stale-item detection and a "to be added" list. Accepts an alternate plan path as an optional first arg. |
+| `/agenc-plan-action` | Builds a structured action plan for a single task, using the in-session output of `/agenc-plan-status` as its source of truth. Does not execute. |
+
+---
+
 ## Scripts
 
 Devnet utility scripts. Run from the `agenc-local-dev/` directory after
@@ -94,7 +110,7 @@ complete task. Uses separate creator and worker wallets. Prints Solscan
 links for all three transactions.
 
 ```bash
-CREATOR_WALLET=~/.config/solana/id.json \
+CREATOR_WALLET=~/.config/solana/creator.json \
 WORKER_WALLET=~/.config/solana/worker.json \
 AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/artifacts/anchor/idl/agenc_coordination.json \
 node scripts/devnet-task-lifecycle.mjs
@@ -121,7 +137,7 @@ See `docs/HOW-TO-TASK-LIFECYCLE.md` for the full walkthrough.
 
 | Role | Keypair file | Pubkey | Min balance |
 |---|---|---|---|
-| Creator | `~/.config/solana/id.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | reward + 0.02 SOL |
+| Creator | `~/.config/solana/creator.json` | `BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT` | reward + 0.02 SOL |
 | Worker | `~/.config/solana/worker.json` | `26d6kxsPVJ2tQn3AUogfHJjqu77dksX31FcPAYpCup2Q` | 0.005 SOL |
 
 Both wallets must have registered agents on devnet before running lifecycle

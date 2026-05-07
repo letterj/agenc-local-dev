@@ -42,14 +42,16 @@ import {
 // Config
 // ---------------------------------------------------------------------------
 
-const CREATOR_AGENT_PDA = new PublicKey("HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H");
-const WORKER_AGENT_PDA  = new PublicKey("DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv");
+// Agent PDAs: override via env, defaults to private program PDAs
+// Private (9dMNFL...): 8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW / 4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy
+const CREATOR_AGENT_PDA = new PublicKey(process.env.CREATOR_AGENT_PDA ?? "8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW");
+const WORKER_AGENT_PDA  = new PublicKey(process.env.WORKER_AGENT_PDA  ?? "4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy");
 
 const TEST_DESCRIPTION = "Compute the SHA-256 hash of the string: 'This is only a test of the agenc-lifecycle on 2026-03-28'";
 const TEST_PROOF_HEX   = "91a3adb05ed70ededf6ea7cdd14255eaa7f3f93ce60730a408b7ca9ad89bdf60";
 
 const RPC_URL      = process.env.RPC_URL        ?? "https://api.devnet.solana.com";
-const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/id.json`;
+const CREATOR_PATH = process.env.CREATOR_WALLET ?? `${process.env.HOME}/.config/solana/creator.json`;
 const WORKER_PATH  = process.env.WORKER_WALLET  ?? `${process.env.HOME}/.config/solana/worker.json`;
 const IDL_PATH     = process.env.AGENC_IDL_PATH;
 const REWARD       = BigInt(process.env.REWARD_LAMPORTS ?? "10000000"); // 0.01 SOL

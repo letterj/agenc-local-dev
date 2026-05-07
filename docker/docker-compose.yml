@@ -10,7 +10,7 @@ services:
     volumes:
       - agenc-creator-data:/root/.agenc
       - ./creator/config.json:/root/.agenc/config.json:ro
-      - ${HOME}/.config/solana/id.json:/root/.config/solana/id.json:ro
+      - ${HOME}/.config/solana/creator.json:/root/.config/solana/creator.json:ro
     stdin_open: true
     tty: true
 

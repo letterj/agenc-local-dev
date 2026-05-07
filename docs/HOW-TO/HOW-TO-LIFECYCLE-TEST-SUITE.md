@@ -18,9 +18,9 @@ Reward: 0.01 SOL
 - Both Docker containers running (docker compose up -d)
   Creator UI: http://localhost:3100/ui/
   Worker UI:  http://localhost:3101/ui/
-- Creator agent PDA: HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H
-- Worker agent PDA:  DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv
-- Devnet program: GN69... (Task Validation V2, deployed 2026-03-27)
+- Creator agent PDA: 8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW
+- Worker agent PDA:  4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy
+- Devnet program: 9dMNFL... (private program)
 - See HOW-TO-FULL-TASK-LIFECYCLE.md for registration steps if PDAs are stale
 
 ---

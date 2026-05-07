@@ -15,8 +15,9 @@ Validated 2026-03-28 against the Task Validation V2 devnet deployment.
 
 | Program | ID | Status |
 |---|---|---|
-| New (V2, current) | `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` | Active — use this |
-| Old (pre-V2) | `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab` | Superseded — do not use |
+| Current (V3) | `2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7` | Active — use this |
+| Superseded (V2) | `GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3` | Superseded 2026-04-22 — do not use |
+| Superseded (V1) | `6UcJzbTEemBz3aY5wK5qKHGMD7bdRsmR4smND29gB2ab` | Superseded — do not use |
 
 The new program was deployed 2026-03-27. Any agents registered on the old program
 are not usable with the current IDL. Fresh registration is required.
@@ -28,7 +29,7 @@ are not usable with the current IDL. Fresh registration is required.
 - Node.js >= 18, npm >= 10
 - Solana CLI 3.0.13
 - Two funded devnet wallets:
-  - Creator: `~/.config/solana/id.json` — needs reward + ~0.02 SOL buffer
+  - Creator: `~/.config/solana/creator.json` — needs reward + ~0.02 SOL buffer
   - Worker: `~/.config/solana/worker.json` — needs ~0.005 SOL for fees
 - SDK dist current: `cd ~/workshop/agencproj/forks/agenc-sdk && npm run build`
 - IDL from the current protocol fork:
@@ -46,7 +47,7 @@ export AGENC_IDL_PATH=~/workshop/agencproj/forks/agenc-protocol/artifacts/anchor
 ## Step 0 — Verify program and balances
 
 ```bash
-solana program show GN69CoBM1XUt8MJtA6Kwd7WRwLzTNtVqLwf5o3fwWDV3 --url devnet
+solana program show 2jdBSJ8U5ixfwgs1bRLPtRRnpZAPm8Xv1tEdu8yjHJC7 --url devnet
 solana balance BP3rDSMHG4oHkJsB4voh6xiB3pp2Y2MDcT3yHhaPGxWT --url devnet
 solana balance $(solana-keygen pubkey ~/.config/solana/worker.json) --url devnet
 ```
@@ -72,8 +73,8 @@ The script prints both agent PDAs at the end:
 === Registration complete ===
 
 Add these to devnet-task-lifecycle-test.mjs:
-  CREATOR_AGENT_PDA = new PublicKey("HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H")
-  WORKER_AGENT_PDA  = new PublicKey("DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv")
+  CREATOR_AGENT_PDA = new PublicKey("8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW")
+  WORKER_AGENT_PDA  = new PublicKey("4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy")
 ```
 
 Copy the two `PublicKey(...)` lines into `scripts/devnet-task-lifecycle-test.mjs`,
@@ -83,8 +84,8 @@ replacing the `CREATOR_AGENT_PDA` and `WORKER_AGENT_PDA` constants at the top.
 
 | Agent | PDA | Tx |
 |---|---|---|
-| Creator | `HmZqAsDzW1Ew6SwQCcZoBvzYaYRXs2TeXBx31s8xSy7H` | `8729q3R9fHKMkZG9dkmKs6YFHnd1c2FaTzRqCxYetLowBM2PyLFNf5TAF33s9VM3na4aSS9fU8hb9UGBHJtiqce` |
-| Worker  | `DQ1drYVZ9WuHANrnBBLWiaHm9vifZ2p4y7HZ4EFiNDdv` | `339CkbVf2WEQL6wv5uSd4sjrXFPeXKNept5nCKGb8UfykYZ5Nxw3jvbH1bUL8jAwSeo1PkUc8SDthjGqJMQ8GiGx` |
+| Creator | `8dHNT4zrJojCyzVmxPkBP4xnfmEwd6eDXYq2Lp12Z7nW` | `8729q3R9fHKMkZG9dkmKs6YFHnd1c2FaTzRqCxYetLowBM2PyLFNf5TAF33s9VM3na4aSS9fU8hb9UGBHJtiqce` |
+| Worker  | `4Rz7m7FfrHqMNTsDms3r2tRTKEwrx9M8FVGgATwykiqy` | `339CkbVf2WEQL6wv5uSd4sjrXFPeXKNept5nCKGb8UfykYZ5Nxw3jvbH1bUL8jAwSeo1PkUc8SDthjGqJMQ8GiGx` |
 
 ---
 
